@@ -1,0 +1,13 @@
+minecraft_mods                 = [
+    # "https://media.forgecdn.net/files/2902/483/TConstruct-1.12.2-2.13.0.183.jar"
+]
+minecraft_ops                  = ["me"]
+minecraft_users                = [
+    "User1",
+    "User2",
+
+]
+subscription_id                = "00000000-0000-0000-0000-000000000000"
+tenant_id                      = "00000000-0000-0000-0000-000000000000"
+vanity_dns_zone_id             = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shared/providers/Microsoft.Network/dnszones/mydomain.com"
+vanity_hostname_prefix         = "myhostprefix"
