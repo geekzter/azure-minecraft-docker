@@ -62,7 +62,7 @@ resource azurerm_storage_account minecraft {
   tags                         = local.tags
 }
 
-resource azurerm_storage_share minecraft_data {
+resource azurerm_storage_share minecraft_share {
   name                         = "minecraft-aci-data-${local.suffix}"
   storage_account_name         = azurerm_storage_account.minecraft.name
   quota                        = 50
@@ -81,7 +81,7 @@ resource azurerm_management_lock minecraft_data_lock {
   notes                        = "Do not accidentally delete Minecraft (world) data"
 
   depends_on                   = [
-    azurerm_storage_share.minecraft_data,
+    azurerm_storage_share.minecraft_share,
     azurerm_storage_share.minecraft_modpacks,
   ]
 }
@@ -98,6 +98,8 @@ resource azurerm_container_group minecraft_server {
     cpu                        = "1"
     name                       = "minecraft"
     environment_variables = {
+      "ALLOW_NETHER"           = true
+      "ANNOUNCE_PLAYER_ACHIEVEMENTS" = true
       "ENABLE_COMMAND_BLOCK"   = var.minecraft_enable_command_blocks
       "EULA"                   = "true"
       "MAX_PLAYERS"            = var.minecraft_max_players
@@ -123,7 +125,7 @@ resource azurerm_container_group minecraft_server {
       mount_path               = "/data"
       name                     = "azurefile"
       read_only                = false
-      share_name               = azurerm_storage_share.minecraft_data.name
+      share_name               = azurerm_storage_share.minecraft_share.name
       storage_account_name     = azurerm_storage_account.minecraft.name
       storage_account_key      = azurerm_storage_account.minecraft.primary_access_key
     }

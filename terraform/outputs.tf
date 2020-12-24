@@ -16,3 +16,6 @@ output minecraft_server_port {
 output minecraft_users {
   value       = var.minecraft_users
 }
+output minecraft_version {
+  value       = var.minecraft_version
+}
