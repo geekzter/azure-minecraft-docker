@@ -38,8 +38,8 @@ locals {
     )
   )
 
-  # config_directory             = formatdate("YYYYMMDDhhmm",timestamp())
-  config_directory             = "${formatdate("YYYY",timestamp())}/${formatdate("MM",timestamp())}/${formatdate("DD",timestamp())}/${formatdate("YYYYMMDDhhmm",timestamp())}"
+  config_directory             = formatdate("YYYYMMDDhhmm",timestamp())
+  # config_directory             = "${formatdate("YYYY",timestamp())}/${formatdate("MM",timestamp())}/${formatdate("DD",timestamp())}/${formatdate("YYYYMMDDhhmm",timestamp())}"
 
   lifecycle                    = {
     ignore_changes             = ["tags"]
@@ -121,6 +121,16 @@ resource azurerm_storage_blob minecraft_configuration {
   depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
 }
 
+resource azurerm_storage_blob minecraft_environment {
+  name                         = "${local.config_directory}/environment.json"
+  storage_account_name         = azurerm_storage_account.minecraft.name
+  storage_container_name       = azurerm_storage_container.configuration.name
+  type                         = "Block"
+  source_content               = jsonencode(azurerm_container_group.minecraft_server.container.0.environment_variables)
+
+  depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
+}
+
 resource azurerm_storage_blob minecraft_user_configuration {
   name                         = "${local.config_directory}/users.json"
   storage_account_name         = azurerm_storage_account.minecraft.name
@@ -166,8 +176,8 @@ resource azurerm_container_group minecraft_server {
     cpu                        = "1"
     name                       = "minecraft"
     environment_variables = {
-      "ALLOW_NETHER"           = true
-      "ANNOUNCE_PLAYER_ACHIEVEMENTS" = true
+      "ALLOW_NETHER"           = var.minecraft_allow_nether
+      "ANNOUNCE_PLAYER_ACHIEVEMENTS" = var.minecraft_announce_player_achievements
       "ENABLE_COMMAND_BLOCK"   = var.minecraft_enable_command_blocks
       "EULA"                   = "true"
       "MAX_PLAYERS"            = var.minecraft_max_players

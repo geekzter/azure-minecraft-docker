@@ -3,6 +3,16 @@ variable location {
   default      = "westeurope" # Amsterdam
 }
 
+variable minecraft_allow_nether {
+  type         = bool
+  default      = true
+}
+
+variable minecraft_announce_player_achievements {
+  type         = bool
+  default      = true
+}
+
 variable minecraft_enable_command_blocks {
   type         = bool
   default      = true
