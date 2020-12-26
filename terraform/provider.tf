@@ -9,7 +9,7 @@ terraform {
 
 
 # Microsoft Azure Resource Manager Provider
-provider "azurerm" {
+provider azurerm {
   features {
       virtual_machine {
           # Don't do this in production

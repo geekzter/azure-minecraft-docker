@@ -1,3 +1,5 @@
+data azurerm_client_config current {}
+
 
 # Random resource suffix, this will prevent name collisions when creating resources in parallel
 resource random_string suffix {
@@ -17,10 +19,26 @@ locals {
       "application",             "Minecraft",
       "environment",             local.environment,
       "provisioner",             "terraform",
+      "repository" ,             "azure-minecraft-docker",
       "suffix",                  local.suffix,
       "workspace",               terraform.workspace,
     )
   )
+
+  config                       = merge(
+    local.tags,
+    map(
+      "minecraft_enable_command_blocks", tostring(var.minecraft_enable_command_blocks),
+      "minecraft_ops",           var.minecraft_ops[0],
+      "minecraft_type",          var.minecraft_type,
+      # "minecraft_users",         var.minecraft_users,
+      "minecraft_version",       var.minecraft_version,
+      "vanity_dns_zone_id",      var.vanity_dns_zone_id,
+      "vanity_hostname_prefix",  var.vanity_hostname_prefix,
+    )
+  )
+
+  config_directory             = formatdate("YYYYMMDDhhmm",timestamp())
 
   lifecycle                    = {
     ignore_changes             = ["tags"]
@@ -36,7 +54,6 @@ resource azurerm_resource_group minecraft {
 
 # Requires Terraform owner access to resource group, in order to be able to perform access management
 resource azurerm_role_assignment contributor {
-# name                         = uuid() # Optional
   scope                        = azurerm_resource_group.minecraft.id
   role_definition_name         = "Contributor"
   principal_id                 = each.value
@@ -44,7 +61,6 @@ resource azurerm_role_assignment contributor {
   for_each                     = toset(var.resource_group_contributors)
 }
 resource azurerm_role_assignment readers {
-# name                         = uuid() # Optional
   scope                        = azurerm_resource_group.minecraft.id
   role_definition_name         = "Reader"
   principal_id                 = each.value
@@ -72,6 +88,51 @@ resource azurerm_storage_share minecraft_modpacks {
   name                         = "minecraft-aci-modpacks-${local.suffix}"
   storage_account_name         = azurerm_storage_account.minecraft.name
   quota                        = 50
+}
+
+resource azurerm_storage_container configuration {
+  name                         = "configuration"
+  storage_account_name         = azurerm_storage_account.minecraft.name
+  container_access_type        = "private"
+}
+
+resource azurerm_role_assignment terraform_storage_owner {
+  scope                        = azurerm_storage_account.minecraft.id
+  role_definition_name         = "Storage Blob Data Contributor"
+  principal_id                 = each.value
+
+  for_each                     = toset(var.resource_group_contributors)
+}
+
+resource azurerm_storage_blob minecraft_configuration {
+  name                         = "${local.config_directory}/config.json"
+  storage_account_name         = azurerm_storage_account.minecraft.name
+  storage_container_name       = azurerm_storage_container.configuration.name
+  type                         = "Block"
+  source_content               = jsonencode(local.config)
+
+  depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
+}
+
+resource azurerm_storage_blob minecraft_user_configuration {
+  name                         = "${local.config_directory}/users.json"
+  storage_account_name         = azurerm_storage_account.minecraft.name
+  storage_container_name       = azurerm_storage_container.configuration.name
+  type                         = "Block"
+  source_content               = jsonencode(var.minecraft_users)
+
+  depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
+}
+
+resource azurerm_storage_blob minecraft_auto_vars_configuration {
+  name                         = "${local.config_directory}/config.auto.tfvars"
+  storage_account_name         = azurerm_storage_account.minecraft.name
+  storage_container_name       = azurerm_storage_container.configuration.name
+  type                         = "Block"
+  source                       = "${path.root}/config.auto.tfvars"
+
+  count                        = fileexists("${path.root}/config.auto.tfvars") ? 1 : 0
+  depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
 }
 
 resource azurerm_management_lock minecraft_data_lock {

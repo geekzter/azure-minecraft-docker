@@ -1,6 +1,9 @@
 output container_group_id {
   value       = azurerm_container_group.minecraft_server.id  
 }
+output container_log_command {
+  value       = "az container logs --ids ${azurerm_container_group.minecraft_server.id} --follow"
+}
 output minecraft_server_fqdn {
   value       = var.vanity_dns_zone_id != "" ? replace(try(azurerm_dns_cname_record.vanity_hostname.0.fqdn,""),"/\\W*$/","") : azurerm_container_group.minecraft_server.fqdn
 }
