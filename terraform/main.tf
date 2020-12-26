@@ -38,7 +38,8 @@ locals {
     )
   )
 
-  config_directory             = formatdate("YYYYMMDDhhmm",timestamp())
+  # config_directory             = formatdate("YYYYMMDDhhmm",timestamp())
+  config_directory             = "${formatdate("YYYY",timestamp())}/${formatdate("MM",timestamp())}/${formatdate("DD",timestamp())}/${formatdate("YYYYMMDDhhmm",timestamp())}"
 
   lifecycle                    = {
     ignore_changes             = ["tags"]
@@ -74,6 +75,12 @@ resource azurerm_storage_account minecraft {
   location                     = azurerm_resource_group.minecraft.location
   account_tier                 = "Standard"
   account_replication_type     = "LRS"
+
+  blob_properties {
+    delete_retention_policy {
+      days                     = 365
+    }
+  }
 
   tags                         = local.tags
 }
