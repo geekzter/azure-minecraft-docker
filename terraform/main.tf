@@ -43,8 +43,8 @@ locals {
     )
   )
 
-  config_directory             = formatdate("YYYYMMDDhhmm",timestamp())
-  # config_directory             = "${formatdate("YYYY",timestamp())}/${formatdate("MM",timestamp())}/${formatdate("DD",timestamp())}/${formatdate("YYYYMMDDhhmm",timestamp())}"
+  # config_directory             = formatdate("YYYYMMDDhhmm",timestamp())
+  config_directory             = "${formatdate("YYYY",timestamp())}/${formatdate("MM",timestamp())}/${formatdate("DD",timestamp())}/${formatdate("hhmm",timestamp())}"
 
   lifecycle                    = {
     ignore_changes             = ["tags"]
