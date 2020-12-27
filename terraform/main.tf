@@ -12,6 +12,8 @@ resource random_string suffix {
 
 locals {
   environment                  = replace(replace(terraform.workspace,"default","dev"),"prod","")
+  # https://github.com/itzg/docker-minecraft-server
+  container_image              = "itzg/minecraft-server"
   minecraft_server_port        = 25565
   suffix                       = random_string.suffix.result
   tags                         = merge(
@@ -28,10 +30,13 @@ locals {
   config                       = merge(
     local.tags,
     map(
+      "container_group_id",      azurerm_container_group.minecraft_server.id,
+      "container_image_digest",  data.docker_registry_image.minecraft.sha256_digest,
+      "minecraft_allow_nether",  tostring(var.minecraft_allow_nether),
+      "minecraft_announce_player_achievements", tostring(var.minecraft_announce_player_achievements),
       "minecraft_enable_command_blocks", tostring(var.minecraft_enable_command_blocks),
       "minecraft_ops",           var.minecraft_ops[0],
       "minecraft_type",          var.minecraft_type,
-      # "minecraft_users",         var.minecraft_users,
       "minecraft_version",       var.minecraft_version,
       "vanity_dns_zone_id",      var.vanity_dns_zone_id,
       "vanity_hostname_prefix",  var.vanity_hostname_prefix,
@@ -189,7 +194,7 @@ resource azurerm_container_group minecraft_server {
       "VERSION"                = var.minecraft_version
       "WHITELIST"              = join(",",var.minecraft_users)
     }
-    image                      = "itzg/minecraft-server" # https://github.com/itzg/docker-minecraft-server
+    image                      = local.container_image
     memory                     = "2"
     ports {
       port                     = 80
@@ -218,6 +223,10 @@ resource azurerm_container_group minecraft_server {
   }
 
   tags                         = local.tags
+}
+
+data docker_registry_image minecraft {
+  name                         = azurerm_container_group.minecraft_server.container.0.image
 }
 
 resource null_resource minecraft_server_log {
