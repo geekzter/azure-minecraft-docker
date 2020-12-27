@@ -52,7 +52,7 @@ variable minecraft_users {
 }
 variable minecraft_version {
   type         = string
-  default      = "1.16.4"
+  default      = "LATEST"
 }
 variable resource_group_contributors {
   type         = list
