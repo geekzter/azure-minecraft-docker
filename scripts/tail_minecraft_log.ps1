@@ -1,4 +1,3 @@
-
 #!/usr/bin/env pwsh
 <# 
 .SYNOPSIS 
@@ -14,7 +13,7 @@ param (
 
 # Gather data from Terraform
 try {
-    $tfdirectory = $(Join-Path (Get-Item (Split-Path -parent -Path $MyInvocation.MyCommand.Path)).Parent.FullName "terraform")
+    $tfdirectory = $(Join-Path (Get-Item $PSScriptRoot).Parent.FullName "terraform")
     Push-Location $tfdirectory
     
     Invoke-Command -ScriptBlock {
