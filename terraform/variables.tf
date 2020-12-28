@@ -1,3 +1,7 @@
+variable container_image_tag {
+  type         = string
+  default      = ""
+}
 variable location {
   type         = string
   default      = "westeurope" # Amsterdam
@@ -16,12 +20,13 @@ variable minecraft_announce_player_achievements {
   type         = bool
   default      = true
 }
-
+variable minecraft_difficulty {
+  default      = "easy"
+}
 variable minecraft_enable_command_blocks {
   type         = bool
   default      = true
 }
-
 variable minecraft_ftb_mod {
   type         = string
   default      = ""
@@ -45,6 +50,14 @@ variable minecraft_motd {
 variable minecraft_ops {
   type         = list
   default      = []
+}
+variable minecraft_snooper_enabled {
+  type         = bool
+  default      = false
+}
+variable minecraft_timezone {
+  type         = string
+  default      = "Europe/Amsterdam"
 }
 variable minecraft_type {
   type         = string

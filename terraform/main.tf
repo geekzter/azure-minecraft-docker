@@ -13,7 +13,7 @@ resource random_string suffix {
 locals {
   environment                  = replace(replace(terraform.workspace,"default","dev"),"prod","")
   # https://github.com/itzg/docker-minecraft-server
-  container_image              = "itzg/minecraft-server"
+  container_image              = var.container_image_tag != null && var.container_image_tag != "" ? "itzg/minecraft-server:${var.container_image_tag}" : "itzg/minecraft-server"
   minecraft_server_port        = 25565
   suffix                       = random_string.suffix.result
   tags                         = merge(
@@ -87,6 +87,7 @@ resource azurerm_container_group minecraft_server {
     environment_variables = {
       "ALLOW_NETHER"           = var.minecraft_allow_nether
       "ANNOUNCE_PLAYER_ACHIEVEMENTS" = var.minecraft_announce_player_achievements
+      "DIFFICULTY"             = var.minecraft_difficulty
       "ENABLE_COMMAND_BLOCK"   = var.minecraft_enable_command_blocks
       "EULA"                   = "true"
       "MAX_PLAYERS"            = var.minecraft_max_players
@@ -94,7 +95,9 @@ resource azurerm_container_group minecraft_server {
       "MODE"                   = var.minecraft_mode
       "MOTD"                   = var.minecraft_motd
       "OPS"                    = join(",",var.minecraft_ops)
+      "SNOOPER_ENABLED"        = var.minecraft_snooper_enabled
       "TYPE"                   = var.minecraft_type
+      "TZ"                     = var.minecraft_timezone
       "VERSION"                = var.minecraft_version
       "WHITELIST"              = join(",",var.minecraft_users)
     }
@@ -138,7 +141,7 @@ resource null_resource minecraft_server_log {
     always                     = timestamp()
   }
 
-  provisioner "local-exec" {
+  provisioner local-exec {
     command                    = "az container logs --ids ${azurerm_container_group.minecraft_server.id}"
   }
 }

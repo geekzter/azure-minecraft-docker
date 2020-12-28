@@ -81,6 +81,17 @@ resource azurerm_storage_blob minecraft_auto_vars_configuration {
   depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
 }
 
+resource azurerm_storage_blob minecraft_workspace_vars_configuration {
+  name                         = "${local.config_directory}/${terraform.workspace}.tfvars"
+  storage_account_name         = azurerm_storage_account.minecraft.name
+  storage_container_name       = azurerm_storage_container.configuration.name
+  type                         = "Block"
+  source                       = "${path.root}/${terraform.workspace}.tfvars"
+
+  count                        = fileexists("${path.root}/${terraform.workspace}.tfvars") ? 1 : 0
+  depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
+}
+
 resource azurerm_management_lock minecraft_data_lock {
   name                         = "${azurerm_storage_account.minecraft.name}-lock"
   scope                        = azurerm_storage_account.minecraft.id

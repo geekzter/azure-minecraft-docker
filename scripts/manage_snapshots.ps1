@@ -29,7 +29,7 @@ try {
         }
         az storage share list --include-snapshots --account-name $storageAccount --account-key $storageKey -o table
     } else {
-        Write-Host "Storage Fiile Share has not been created, nothing to do" -ForeGroundColor Yellow
+        Write-Warning "Storage Fiile Share has not been created, nothing to do"
         exit 
     } 
 } finally {

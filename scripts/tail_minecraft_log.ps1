@@ -23,7 +23,7 @@ try {
     if (![string]::IsNullOrEmpty($ContainerGroupID)) {
         az container logs --ids $ContainerGroupID --follow
     } else {
-        Write-Host "Container Instance has not been created, nothing to do" -ForeGroundColor Yellow
+        Write-Warning "Container Instance has not been created, nothing to do"
         exit 
     } 
 } finally {
