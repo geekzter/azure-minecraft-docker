@@ -5,22 +5,19 @@
 #> 
 #Requires -Version 7
 
-### Arguments
-param ( 
-) 
-
-. (Join-Path (Split-Path $MyInvocation.MyCommand.Path -Parent) functions.ps1)
+. (Join-Path $PSScriptRoot functions.ps1)
 
 # Gather data from Terraform
 try {
+    AzLogin
+
     $tfdirectory = $(Join-Path (Get-Item $PSScriptRoot).Parent.FullName "terraform")
     Push-Location $tfdirectory
     
     Invoke-Command -ScriptBlock {
         $Private:ErrorActionPreference = "Continue"
 
-        # Set only if null
-        $script:ContainerGroupID = (GetTerraformOutput "container_group_id")
+        $script:ContainerGroupID = (Get-TerraformOutput "container_group_id")
     }
 
     if (![string]::IsNullOrEmpty($ContainerGroupID)) {

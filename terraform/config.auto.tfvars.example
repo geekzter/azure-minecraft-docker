@@ -9,7 +9,7 @@ minecraft_users                = [
     "User2",
 
 ]
-minecraft_version              = "1.12.2"
+minecraft_version              = "1.16.4"
 subscription_id                = "00000000-0000-0000-0000-000000000000"
 tenant_id                      = "00000000-0000-0000-0000-000000000000"
 vanity_dns_zone_id             = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shared/providers/Microsoft.Network/dnszones/mydomain.com"

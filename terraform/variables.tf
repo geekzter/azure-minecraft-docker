@@ -3,6 +3,10 @@ variable location {
   default      = "westeurope" # Amsterdam
 }
 
+variable enable_backup {
+  type         = bool
+  default      = false
+}
 variable minecraft_allow_nether {
   type         = bool
   default      = true

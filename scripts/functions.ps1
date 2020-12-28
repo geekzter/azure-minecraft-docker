@@ -71,13 +71,13 @@ function AzLogin (
     }
 }
 
-function GetTerraformOutput (
+function Get-TerraformOutput (
     [parameter(Mandatory=$true)][string]$OutputVariable
 ) {
     Invoke-Command -ScriptBlock {
         $Private:ErrorActionPreference    = "SilentlyContinue"
         Write-Verbose "terraform output ${OutputVariable}: evaluating..."
-        $result = $(terraform output $OutputVariable 2>$null)
+        $result = $(terraform output -raw $OutputVariable 2>$null)
         if ($result -match "\[\d+m") {
             # Terraform warning, return null for missing output
             Write-Verbose "terraform output ${OutputVariable}: `$null (${result})"

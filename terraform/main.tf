@@ -43,7 +43,6 @@ locals {
     )
   )
 
-  # config_directory             = formatdate("YYYYMMDDhhmm",timestamp())
   config_directory             = "${formatdate("YYYY",timestamp())}/${formatdate("MM",timestamp())}/${formatdate("DD",timestamp())}/${formatdate("hhmm",timestamp())}"
 
   lifecycle                    = {
@@ -74,103 +73,8 @@ resource azurerm_role_assignment readers {
   for_each                     = toset(var.resource_group_readers)
 }
 
-resource azurerm_storage_account minecraft {
-  name                         = "minecraftstor${local.suffix}"
-  resource_group_name          = azurerm_resource_group.minecraft.name
-  location                     = azurerm_resource_group.minecraft.location
-  account_tier                 = "Standard"
-  account_replication_type     = "LRS"
-
-  blob_properties {
-    delete_retention_policy {
-      days                     = 365
-    }
-  }
-
-  tags                         = local.tags
-}
-
-resource azurerm_storage_share minecraft_share {
-  name                         = "minecraft-aci-data-${local.suffix}"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  quota                        = 50
-}
-
-resource azurerm_storage_share minecraft_modpacks {
-  name                         = "minecraft-aci-modpacks-${local.suffix}"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  quota                        = 50
-}
-
-resource azurerm_storage_container configuration {
-  name                         = "configuration"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  container_access_type        = "private"
-}
-
-resource azurerm_role_assignment terraform_storage_owner {
-  scope                        = azurerm_storage_account.minecraft.id
-  role_definition_name         = "Storage Blob Data Contributor"
-  principal_id                 = each.value
-
-  for_each                     = toset(var.resource_group_contributors)
-}
-
-resource azurerm_storage_blob minecraft_configuration {
-  name                         = "${local.config_directory}/config.json"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  storage_container_name       = azurerm_storage_container.configuration.name
-  type                         = "Block"
-  source_content               = jsonencode(local.config)
-
-  depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
-}
-
-resource azurerm_storage_blob minecraft_environment {
-  name                         = "${local.config_directory}/environment.json"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  storage_container_name       = azurerm_storage_container.configuration.name
-  type                         = "Block"
-  source_content               = jsonencode(azurerm_container_group.minecraft_server.container.0.environment_variables)
-
-  depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
-}
-
-resource azurerm_storage_blob minecraft_user_configuration {
-  name                         = "${local.config_directory}/users.json"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  storage_container_name       = azurerm_storage_container.configuration.name
-  type                         = "Block"
-  source_content               = jsonencode(var.minecraft_users)
-
-  depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
-}
-
-resource azurerm_storage_blob minecraft_auto_vars_configuration {
-  name                         = "${local.config_directory}/config.auto.tfvars"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  storage_container_name       = azurerm_storage_container.configuration.name
-  type                         = "Block"
-  source                       = "${path.root}/config.auto.tfvars"
-
-  count                        = fileexists("${path.root}/config.auto.tfvars") ? 1 : 0
-  depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
-}
-
-resource azurerm_management_lock minecraft_data_lock {
-  name                         = "${azurerm_storage_account.minecraft.name}-lock"
-  scope                        = azurerm_storage_account.minecraft.id
-  lock_level                   = "CanNotDelete"
-  notes                        = "Do not accidentally delete Minecraft (world) data"
-
-  depends_on                   = [
-    azurerm_storage_share.minecraft_share,
-    azurerm_storage_share.minecraft_modpacks,
-  ]
-}
-
 resource azurerm_container_group minecraft_server {
-  name                         = "minecraft-${local.suffix}"
+  name                         = "Minecraft-${local.suffix}"
   resource_group_name          = azurerm_resource_group.minecraft.name
   location                     = azurerm_resource_group.minecraft.location
   ip_address_type              = "public"
@@ -252,7 +156,6 @@ resource azurerm_dns_cname_record vanity_hostname {
   resource_group_name          = data.azurerm_dns_zone.vanity_domain.0.resource_group_name
   ttl                          = 300
   record                       = azurerm_container_group.minecraft_server.fqdn
-  # target_resource_id           = azurerm_container_group.minecraft_server.id
 
   tags                         = local.tags
   count                        = var.vanity_dns_zone_id != "" ? 1 : 0
