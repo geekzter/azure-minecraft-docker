@@ -1,0 +1,2 @@
+ContainerInstanceLog_CL
+| where Message contains "warn"

@@ -1,6 +1,5 @@
 data azurerm_client_config current {}
 
-
 # Random resource suffix, this will prevent name collisions when creating resources in parallel
 resource random_string suffix {
   length                       = 4
@@ -42,8 +41,6 @@ locals {
       "vanity_hostname_prefix",  var.vanity_hostname_prefix,
     )
   )
-
-  config_directory             = "${formatdate("YYYY",timestamp())}/${formatdate("MM",timestamp())}/${formatdate("DD",timestamp())}/${formatdate("hhmm",timestamp())}"
 
   lifecycle                    = {
     ignore_changes             = ["tags"]
@@ -129,7 +126,18 @@ resource azurerm_container_group minecraft_server {
     }
   }
 
+  diagnostics {
+    log_analytics {
+      workspace_id             = azurerm_log_analytics_workspace.monitor.workspace_id
+      workspace_key            = azurerm_log_analytics_workspace.monitor.primary_shared_key
+    }
+  }
+
   tags                         = local.tags
+
+  depends_on                   = [
+    azurerm_log_analytics_solution.log_analytics_solution
+  ]
 }
 
 data docker_registry_image minecraft {

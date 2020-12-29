@@ -1,3 +1,7 @@
+locals {
+  config_directory             = "${formatdate("YYYY",timestamp())}/${formatdate("MM",timestamp())}/${formatdate("DD",timestamp())}/${formatdate("hhmm",timestamp())}"
+}
+
 resource azurerm_storage_account minecraft {
   name                         = "minecraftstor${local.suffix}"
   resource_group_name          = azurerm_resource_group.minecraft.name
