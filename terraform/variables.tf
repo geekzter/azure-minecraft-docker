@@ -83,9 +83,11 @@ variable resource_group_readers {
 }
 variable subscription_id {
   type         = string
+  default      = ""
 }
 variable tenant_id {
   type         = string
+  default      = ""
 }
 variable vanity_dns_zone_id {
   type         = string

@@ -163,9 +163,10 @@ try {
             }
         }
 
-        # # Check whether azurerm_container_group is tainted
+        # Check whether azurerm_container_group is tainted
+        # BUG: https://github.com/Azure/azure-cli/issues/8687
+        # rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused "exec: \"rcon-cli say hi\": executable file not found in $PATH"
         # if ($containerGroupReplaced) {
-        #     # BUG: rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused "exec: \"rcon-cli say hi\": executable file not found in $PATH"
         #     Send-MinecraftMessage -Message "The server will go down for maintenance in ${GracePeriodSeconds} seconds!!!" -SleepSeconds $GracePeriodSeconds
         # }       
 

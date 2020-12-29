@@ -35,7 +35,7 @@ locals {
       "minecraft_allow_nether",  tostring(var.minecraft_allow_nether),
       "minecraft_announce_player_achievements", tostring(var.minecraft_announce_player_achievements),
       "minecraft_enable_command_blocks", tostring(var.minecraft_enable_command_blocks),
-      "minecraft_ops",           var.minecraft_ops[0],
+      "minecraft_ops",           join(",",var.minecraft_ops),
       "minecraft_type",          var.minecraft_type,
       "minecraft_version",       var.minecraft_version,
       "vanity_dns_zone_id",      var.vanity_dns_zone_id,
