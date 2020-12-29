@@ -108,7 +108,7 @@ try {
     
     # Prepare common arguments
     if ($Force) {
-        $ForceArgs = "-auto-approve"
+        $forceArgs = "-auto-approve"
     }
 
     if (!(Get-ChildItem Env:TF_VAR_* -Exclude TF_VAR_backend_*) -and (Test-Path $varsFile)) {
@@ -148,6 +148,8 @@ try {
 
         if ($containerGroupReplaced) {
             Write-Warning "You're about to replace the container instance group in workspace '${workspace}'! Inform users so they can bail out."
+            Write-Host "Opening rcon-cli to send any last commands and messages (e.g. list, save-all, say):"
+            Execute-MinecraftCommand
         }
 
         if (!$Force -or $containerGroupReplaced -or $minecraftDataReplaced) {
@@ -161,12 +163,13 @@ try {
             }
         }
 
-        # Check whether azurerm_container_group is tainted
-        if ($containerGroupReplaced) {
-            Send-MinecraftMessage -Message "The server will go down for maintenance in ${GracePeriodSeconds} seconds!!!" -SleepSeconds $GracePeriodSeconds
-        }       
+        # # Check whether azurerm_container_group is tainted
+        # if ($containerGroupReplaced) {
+        #     # BUG: rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused "exec: \"rcon-cli say hi\": executable file not found in $PATH"
+        #     Send-MinecraftMessage -Message "The server will go down for maintenance in ${GracePeriodSeconds} seconds!!!" -SleepSeconds $GracePeriodSeconds
+        # }       
 
-        Invoke "terraform apply $ForceArgs '$planFile'"
+        Invoke "terraform apply $forceArgs '$planFile'"
     }
 
     if ($Output) {
@@ -179,13 +182,16 @@ try {
             exit 
         }
 
-        # Send notice 
-        Send-MinecraftMessage -Message "The server will die in ${GracePeriodSeconds} seconds!!!" -SleepSeconds $GracePeriodSeconds
-
+        # Send notice (broken)
+        # Send-MinecraftMessage -Message "The server will die in ${GracePeriodSeconds} seconds!!!" -SleepSeconds $GracePeriodSeconds
+        Write-Warning "You are about to destroy the Minecraft Server in workspace '${workspace}'!"
+        Write-Host "Opening rcon-cli to send any last commands and messages (e.g. list, say):"
+        Execute-MinecraftCommand
+        
         # Punch hole in PaaS Firewalls (placeholder)
 
         # Now let Terraform do it's work
-        Invoke "terraform destroy $ForceArgs"
+        Invoke "terraform destroy $varArgs $forceArgs"
     }
 } finally {
     Pop-Location

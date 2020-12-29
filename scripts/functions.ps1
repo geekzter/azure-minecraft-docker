@@ -72,7 +72,9 @@ function AzLogin (
 }
 
 function Execute-MinecraftCommand (
-    [parameter(Mandatory=$true)][string]$Command
+    [parameter(Mandatory=$false)][string]$Command,
+    [parameter(mandatory=$false)][switch]$HideLog,
+    [parameter(mandatory=$false)][int]$SleepSeconds=0
 ) {
     try {
         AzLogin
@@ -83,12 +85,23 @@ function Execute-MinecraftCommand (
         $containerGroupID = (Get-TerraformOutput "container_group_id")
         $serverFQDN       = (Get-TerraformOutput "minecraft_server_fqdn")
     
-        if (![string]::IsNullOrEmpty($containerGroupID )) {
-            Write-Host "Sending command '${Command}' to server ${serverFQDN}..."
-            az container exec --ids $containerGroupID --exec-command "rcon-cli ${Command}"
+        if (![string]::IsNullOrEmpty($containerGroupID)) {
+            $containerCommand = [string]::IsNullOrEmpty($Command) ? "rcon-cli" : "rcon-cli ${Command}"
+            Write-Host "Sending command '${containerCommand}' to server ${serverFQDN}..."
+            az container exec --ids $containerGroupID --exec-command "${containerCommand}"
+            if (!$HideLog) {
+                az container logs --ids $containerGroupID
+            }
+            if ($SleepSeconds -gt 0) {
+                Write-Host "Sleeping $SleepSeconds seconds..."
+                Start-Sleep -Seconds $SleepSeconds 
+                if (!$HideLog) {
+                    az container logs --ids $containerGroupID
+                }
+            }
         } else {
             Write-Warning "Container Instance has not been created, nothing to do"
-            exit 
+            return 
         } 
     } finally {
         Pop-Location
@@ -144,7 +157,7 @@ function Invoke (
     $exitCode = $LASTEXITCODE
     if ($exitCode -ne 0) {
         Write-Warning "'$cmd' exited with status $exitCode"
-        exit $exitCode
+        return $exitCode
     }
 }
 
@@ -162,7 +175,7 @@ function Send-MinecraftMessage (
         $containerGroupID = (Get-TerraformOutput "container_group_id")
         $serverFQDN       = (Get-TerraformOutput "minecraft_server_fqdn")
         
-        if (![string]::IsNullOrEmpty($containerGroupID )) {
+        if (![string]::IsNullOrEmpty($containerGroupID)) {
             Write-Host "Sending message '${Message}' to server ${serverFQDN}..."
             az container exec --ids $containerGroupID --exec-command "rcon-cli say ${Message}"
             if (!$HideLog) {
@@ -177,7 +190,7 @@ function Send-MinecraftMessage (
             }
         } else {
             Write-Warning "Container Instance has not been created, nothing to do"
-            exit 
+            return 
         } 
     } finally {
         Pop-Location
