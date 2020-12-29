@@ -8,6 +8,21 @@ output container_log_command {
   value       = "az container logs --ids ${azurerm_container_group.minecraft_server.id} --follow"
 }
 
+output dashboard_id {
+  value       = azurerm_dashboard.minecraft_dashboard.id
+}
+
+# output dashboard_json {
+#   sensitive   = true # Too much information
+#   value       = templatefile("dashboard.tpl",
+#     {
+#       subscription_id          = data.azurerm_subscription.primary.id
+#       subscription_guid        = data.azurerm_subscription.primary.subscription_id
+#       suffix                   = local.suffix
+#       workspace                = terraform.workspace
+#   })
+# }
+
 output minecraft_server_fqdn {
   value       = var.vanity_dns_zone_id != "" ? replace(try(azurerm_dns_cname_record.vanity_hostname.0.fqdn,""),"/\\W*$/","") : azurerm_container_group.minecraft_server.fqdn
 }
@@ -30,6 +45,19 @@ output minecraft_version {
 output resource_group {
   value       = azurerm_resource_group.minecraft.name
 }
+output resource_group_id {
+  value       = azurerm_resource_group.minecraft.id
+}
+output resource_suffix {
+  value       = local.suffix
+}
+output subscription_guid {
+  value       = data.azurerm_subscription.primary.subscription_id
+}
+
+output subscription_id {
+  value       = data.azurerm_subscription.primary.id
+}
 
 output storage_account {
   value       = azurerm_storage_account.minecraft.name
@@ -40,4 +68,7 @@ output storage_data_share {
 output storage_key {
   sensitive   = true
   value       = azurerm_storage_account.minecraft.primary_access_key
+}
+output workspace {
+  value       = terraform.workspace
 }

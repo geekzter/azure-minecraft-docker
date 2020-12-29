@@ -14,6 +14,7 @@ locals {
   # https://github.com/itzg/docker-minecraft-server
   container_image              = var.container_image_tag != null && var.container_image_tag != "" ? "itzg/minecraft-server:${var.container_image_tag}" : "itzg/minecraft-server"
   minecraft_server_port        = 25565
+  # subscription_guid            = split("/",azurerm_resource_group.minecraft.id)[1]
   suffix                       = random_string.suffix.result
   tags                         = merge(
     map(

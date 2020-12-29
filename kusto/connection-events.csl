@@ -1,3 +1,4 @@
 ContainerInstanceLog_CL 
+| where Message contains "connect" or Message contains "[/" 
 | project TimeGenerated, Message
 | order by TimeGenerated desc

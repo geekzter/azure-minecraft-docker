@@ -1,1 +1,3 @@
-ContainerEvent_CL | limit 50
+ContainerEvent_CL 
+| project TimeGenerated, Message
+| order by TimeGenerated desc

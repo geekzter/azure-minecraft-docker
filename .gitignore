@@ -33,3 +33,6 @@ override.tf.json
 backend.tf
 *.tfvars
 *.tfvars_
+
+# Ignore temporary files
+*.*_

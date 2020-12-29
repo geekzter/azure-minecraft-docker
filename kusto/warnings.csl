@@ -1,2 +1,4 @@
 ContainerInstanceLog_CL
 | where Message contains "warn"
+| project TimeGenerated, Message
+| order by TimeGenerated desc

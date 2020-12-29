@@ -20,3 +20,25 @@ resource azurerm_log_analytics_solution log_analytics_solution {
     product                    = "OMSGallery/ContainerInsights"
   }
 } 
+
+resource azurerm_dashboard minecraft_dashboard {
+  name                         = "${azurerm_resource_group.minecraft.name}-dashboard"
+  resource_group_name          = azurerm_resource_group.minecraft.name
+  location                     = azurerm_resource_group.minecraft.location
+  # dashboard_properties         = file("dashboard.tpl")
+  dashboard_properties         = templatefile("dashboard.tpl",
+    {
+      resource_group_id        = azurerm_resource_group.minecraft.id
+      subscription_id          = data.azurerm_subscription.primary.id
+      subscription_guid        = data.azurerm_subscription.primary.subscription_id
+      suffix                   = local.suffix
+      workspace                = terraform.workspace
+  })
+
+  tags                         = merge(
+    local.tags,
+    map(
+      "hidden-title",           "Minecraft (${replace(terraform.workspace,"default","dev")})",
+    )
+  )
+}
