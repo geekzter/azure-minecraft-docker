@@ -10,9 +10,10 @@ resource random_string suffix {
 }
 
 locals {
-  environment                  = replace(replace(terraform.workspace,"default","dev"),"prod","")
+  environment                  = replace(terraform.workspace,"default","dev")
   # https://github.com/itzg/docker-minecraft-server
   container_image              = var.container_image_tag != null && var.container_image_tag != "" ? "itzg/minecraft-server:${var.container_image_tag}" : "itzg/minecraft-server"
+  minecraft_server_fqdn        = var.vanity_dns_zone_id != "" ? replace(try(azurerm_dns_cname_record.vanity_hostname.0.fqdn,""),"/\\W*$/","") : azurerm_container_group.minecraft_server.fqdn
   minecraft_server_port        = 25565
   # subscription_guid            = split("/",azurerm_resource_group.minecraft.id)[1]
   suffix                       = random_string.suffix.result
@@ -163,7 +164,7 @@ data azurerm_dns_zone vanity_domain {
 }
 
 resource azurerm_dns_cname_record vanity_hostname {
-  name                         = "${var.vanity_hostname_prefix}${local.environment}"
+  name                         = "${var.vanity_hostname_prefix}${replace(local.environment,"prod","")}"
   zone_name                    = data.azurerm_dns_zone.vanity_domain.0.name
   resource_group_name          = data.azurerm_dns_zone.vanity_domain.0.resource_group_name
   ttl                          = 300

@@ -39,6 +39,9 @@ try {
     Push-Location $tfdirectory
 
     $dashboardID      = (Get-TerraformOutput "dashboard_id")
+    $environment      = (Get-TerraformOutput "environment")
+    $location         = (Get-TerraformOutput "location")
+    $minecraftFQDN    = (Get-TerraformOutput "minecraft_server_fqdn")
     $resourceGroupID  = (Get-TerraformOutput "resource_group_id")
     $suffix           = (Get-TerraformOutput "resource_suffix")
     $subscriptionGUID = (Get-TerraformOutput "subscription_guid")
@@ -60,16 +63,25 @@ if ($InputFile) {
     $template = $($template | jq '.properties') # Use jq, ConvertFrom-Json does not parse properly
 } else {
     Write-Host "Retrieving resource $dashboardID..." -ForegroundColor Green
-    # $template = (az resource show --ids $dashboardID --query "properties" -o json)
-    $template = (az portal dashboard show -n $dashboardName -g $resourceGroupName -o json)
+    # $template = (az resource show --ids $dashboardID --query "properties" -o json --subscription $subscr)
+    $template = (az portal dashboard show -n $dashboardName -g $resourceGroupName -o json --subscription $subscriptionGUID)
 }
 
 if ($resourceGroupID) {
     $template = $template -Replace "${resourceGroupID}", "`$`{resource_group_id`}"
 }
+if ($resourceGroupName) {
+    $template = $template -Replace "${resourceGroupName}", "`$`{resource_group`}"
+}
 $template = $template -Replace "/subscriptions/........-....-....-................./", "`$`{subscription_id`}/"
 if ($subscriptionGUID) {
     $template = $template -Replace "${subscriptionGUID}", "`$`{subscription_guid`}"
+}
+if ($location) {
+    $template = $template -Replace "${location}", "`$`{location`}"
+}
+if ($minecraftFQDN) {
+    $template = $template -Replace "${minecraftFQDN}", "`$`{minecraft_server_fqdn`}"
 }
 if ($suffix) {
     $template = $template -Replace "-${suffix}", "-`$`{suffix`}"
@@ -84,36 +96,46 @@ if ($workspace) {
 if ($workspace -and $suffix) {
     $template = $template -Replace "${workspace}${suffix}", "`$`{workspace`}`$`{suffix`}"
 }
+if ($environment) {
+    $template = $template -Replace "-${environment}-", "-`$`{environment`}-"
+    $template = $template -Replace "\`"${environment}\`"", "`"`$`{environment`}`""
+    $template = $template -Replace "\(${environment}\)", "({environment`})"
+}
 
 $template = $template -Replace "[\w]*\.portal.azure.com", "portal.azure.com"
-$template = $template -Replace "@microsoft.onmicrosoft.com", "@"
+$template = $template -Replace "@\w+.onmicrosoft.com", "@"
 
 # Check for remnants of tokens that should've been caught
-$workspaceMatches = $template -match $workspace
-$subscriptionGUIDMatches = $template -match $subscriptionGUID
-$suffixMatches = $template -match $suffix
-if ($workspaceMatches) {
-    Write-Host "Deployment name value '$workspace' found in output:" -ForegroundColor Red
-    $workspaceMatches
+$environmentMatches = $template -match $environment
+if ($environmentMatches) {
+    Write-Warning "Deployment name value '$environment' found in output:"
+    $environmentMatches
 }
+$subscriptionGUIDMatches = $template -match $subscriptionGUID
 if ($subscriptionGUIDMatches) {
-    Write-Host "Subscription GUID '$subscriptionGUID' found in output:" -ForegroundColor Red
+    Write-Warning "Subscription GUID '$subscriptionGUID' found in output:"
     $subscriptionGUIDMatches
 }
+$suffixMatches = $template -match $suffix
 if ($suffixMatches) {
-    Write-Host "Suffix value '$suffix' found in output:" -ForegroundColor Red
+    Write-Warning "Suffix value '$suffix' found in output:"
     $suffixMatches
 }
-# if ($workspaceMatches -or $subscriptionGUIDMatches -or $suffixMatches) {
-#     Write-Host "Aborting" -ForegroundColor Red
-#     exit 1
-# }
+$workspaceMatches = $template -match $workspace
+if ($workspaceMatches) {
+    Write-Warning "Deployment name value '$workspace' found in output:"
+    $workspaceMatches
+}
+if ($environmentMatches -or $subscriptionGUIDMatches -or $suffixMatches -or $workspaceMatches) {
+    Write-Host "Aborting" -ForegroundColor Red
+    exit 1
+}
 
 if (!$DontWrite) {
     $template | Out-File $outputFilePath
     Write-Host "Saved template to $outputFilePath"
 } else {
-    Write-Host "Skipped writing template" -ForegroundColor Yellow
+    Write-Warning "Skipped writing template" -ForegroundColor Yellow
 }
 if ($ShowTemplate) {
     Write-Host $template

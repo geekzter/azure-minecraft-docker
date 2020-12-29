@@ -11,20 +11,20 @@ output container_log_command {
 output dashboard_id {
   value       = azurerm_dashboard.minecraft_dashboard.id
 }
+output dashboard_url {
+  value       = "https://portal.azure.com/#@/dashboard/arm${azurerm_dashboard.minecraft_dashboard.id}"
+}
 
-# output dashboard_json {
-#   sensitive   = true # Too much information
-#   value       = templatefile("dashboard.tpl",
-#     {
-#       subscription_id          = data.azurerm_subscription.primary.id
-#       subscription_guid        = data.azurerm_subscription.primary.subscription_id
-#       suffix                   = local.suffix
-#       workspace                = terraform.workspace
-#   })
-# }
+output environment {
+  value       = local.environment
+}
+
+output location {
+  value       = azurerm_resource_group.minecraft.location
+}
 
 output minecraft_server_fqdn {
-  value       = var.vanity_dns_zone_id != "" ? replace(try(azurerm_dns_cname_record.vanity_hostname.0.fqdn,""),"/\\W*$/","") : azurerm_container_group.minecraft_server.fqdn
+  value       = local.minecraft_server_fqdn
 }
 output minecraft_server_ip {
   value       = azurerm_container_group.minecraft_server.ip_address

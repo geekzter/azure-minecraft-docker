@@ -11,11 +11,15 @@ variable enable_backup {
   type         = bool
   default      = false
 }
+
+variable log_analytics_tier {
+  default      = "Free"
+}
+
 variable minecraft_allow_nether {
   type         = bool
   default      = true
 }
-
 variable minecraft_announce_player_achievements {
   type         = bool
   default      = true
