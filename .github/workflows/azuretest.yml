@@ -30,6 +30,7 @@ jobs:
           Write-Host $env:AZURE_CREDENTIALS
 
           get-location
+          get-childitem 
           ./scripts/deploy.ps1 -plan
         azPSVersion: latest
         errorActionPreference: Stop
