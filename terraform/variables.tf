@@ -12,10 +12,6 @@ variable enable_backup {
   default      = false
 }
 
-variable log_analytics_tier {
-  default      = "Free"
-}
-
 variable minecraft_allow_nether {
   type         = bool
   default      = true

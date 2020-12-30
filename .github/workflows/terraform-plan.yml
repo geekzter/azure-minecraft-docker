@@ -111,5 +111,9 @@ jobs:
 
           Write-Host "Removing resource group identified by `"$tagQuery`"..."
           $resourceGroupIDs = $(az group list --query "$tagQuery" -o tsv)
-          Write-Host "az resource delete --ids $resourceGroupIDs"
+          if ($resourceGroupIDs) {
+            Write-Host "az resource delete --ids ${resourceGroupIDs}..."
+            az resource delete --ids $resourceGroupIDs"
+          }
+          
         azPSVersion: latest
