@@ -18,11 +18,13 @@ jobs:
       with:
         azcliversion: 2.0.72
         inlineScript: |
-            az account show
-            az storage -h
+          az account show
+          az storage -h
 
     - name: Azure PowerShell Action
       uses: Azure/powershell@v1
       with:
-        inlineScript: Get-AzSubscription
+        inlineScript: | 
+          Get-AzSubscription
+          az account show
         azPSVersion: 3.1.0
