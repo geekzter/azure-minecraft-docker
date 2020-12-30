@@ -13,18 +13,14 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
         enable-AzPSSession: true
 
-    - name: Azure CLI script
-      uses: azure/CLI@v1
-      with:
-        azcliversion: 2.0.72
-        inlineScript: |
-          az account show
-          az storage -h
-
     - name: Azure PowerShell Action
       uses: Azure/powershell@v1
+      env:
+        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       with:
         inlineScript: | 
-          Get-AzSubscription
           az account show
-        azPSVersion: 3.1.0
+          Write-Host $env:AZURE_CREDENTIALS
+        azPSVersion: latest
+        errorActionPreference: Stop
+        failOnStandardError: false
