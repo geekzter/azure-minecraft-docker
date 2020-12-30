@@ -4,9 +4,9 @@ name: AzureLoginSample
 
 jobs:
   build-and-deploy:
-    defaults:
-      run:
-        working-directory: ${{ env.tf_actions_working_dir }}
+    # defaults:
+    #   run:
+    #     working-directory: ${{ env.tf_actions_working_dir }}
     # runs-on: ${{ matrix.os }}
     # strategy:
     #     matrix:
