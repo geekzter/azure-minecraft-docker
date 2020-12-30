@@ -115,5 +115,5 @@ jobs:
             Write-Host "az resource delete --ids ${resourceGroupIDs}..."
             az resource delete --ids $resourceGroupIDs
           }
-          
         azPSVersion: latest
+        failOnStandardError: true
