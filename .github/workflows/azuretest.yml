@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - name: Checkout
+    - name: Checkout source
       uses: actions/checkout@v2
     - name: Get Terraform
       uses: hashicorp/setup-terraform@v1
@@ -51,9 +51,9 @@ jobs:
           #az account show
           Write-Host $env:AZURE_CREDENTIALS
 
-          get-location
-          Get-ChildItem -Path .. -Recurse -Directory -Force
-          #./scripts/deploy.ps1 -plan
+          Get-Location
+          #Get-ChildItem -Path .. -Recurse -Directory -Force
+          $env:GITHUB_WORKSPACE/scripts/deploy.ps1 -plan
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: false
