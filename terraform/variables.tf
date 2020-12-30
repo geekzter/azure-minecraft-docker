@@ -85,6 +85,11 @@ variable resource_group_readers {
   default      = []
   description  = "Object ID's of security principals that are designated Readers"
 }
+
+variable run_id {
+  type         = string
+  default      = ""
+}
 variable subscription_id {
   type         = string
   default      = ""

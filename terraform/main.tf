@@ -23,6 +23,7 @@ locals {
       "environment",             local.environment,
       "provisioner",             "terraform",
       "repository" ,             "azure-minecraft-docker",
+      "run-id",                  var.run_id,
       "suffix",                  local.suffix,
       "workspace",               terraform.workspace,
     )

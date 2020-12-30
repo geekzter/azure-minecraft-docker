@@ -13,6 +13,7 @@ env:
   TF_VAR_backend_storage_container: ${{ secrets.TF_VAR_backend_storage_container }}
   TF_VAR_backend_storage_account: ${{ secrets.TF_VAR_backend_storage_account }}
   TF_VAR_backend_resource_group: ${{ secrets.TF_VAR_backend_resource_group }}
+  # TF_VAR_run_id:
   TF_IN_AUTOMATION: true
   TF_WORKSPACE: ci
 
@@ -52,7 +53,8 @@ jobs:
       with:
         terraform_version: ${{ steps.terraform-version-check.outputs.TERRAFORM_VERSION }}
 
-    - name: Terraform Plan
+
+    - name: Terraform Init
       uses: Azure/powershell@v1
       env:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
@@ -70,12 +72,27 @@ jobs:
           
           # List environment variables
           Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
-          #az account show
-          Write-Host $env:AZURE_CREDENTIALS
+          # Save environment variable setup for subsequent steps
+          Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object { Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
 
-          Get-Location
-          #Get-ChildItem -Path .. -Recurse -Directory -Force
-          ./scripts/deploy.ps1 -init -plan
+          ./scripts/deploy.ps1 -init -nobackend
+        azPSVersion: latest
+        errorActionPreference: Stop
+        failOnStandardError: true
+
+    - name: Terraform Plan
+      uses: Azure/powershell@v1
+      env:
+        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+        # TF_VAR_backend_storage_container: ${{ secrets.TF_VAR_backend_storage_container }}
+        # TF_VAR_backend_storage_account: ${{ secrets.TF_VAR_backend_storage_account }}
+        # TF_VAR_backend_resource_group: ${{ secrets.TF_VAR_backend_resource_group }}
+      with:
+        inlineScript: | 
+          # List environment variables
+          Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
+
+          ./scripts/deploy.ps1 -plan
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true
