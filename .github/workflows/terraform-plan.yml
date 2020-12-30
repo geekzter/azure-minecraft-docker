@@ -13,7 +13,6 @@ env:
   TF_VAR_backend_storage_container: ${{ secrets.TF_VAR_backend_storage_container }}
   TF_VAR_backend_storage_account: ${{ secrets.TF_VAR_backend_storage_account }}
   TF_VAR_backend_resource_group: ${{ secrets.TF_VAR_backend_resource_group }}
-  # TF_VAR_run_id:
   TF_IN_AUTOMATION: true
   TF_WORKSPACE: ci
 
@@ -69,11 +68,13 @@ jobs:
           $env:ARM_CLIENT_SECRET = $servicePrincipal.clientSecret
           $env:ARM_SUBSCRIPTION_ID = $servicePrincipal.subscriptionId
           $env:ARM_TENANT_ID = $servicePrincipal.tenantId
+
+          $env:TF_VAR_run_id=$env:GITHUB_RUN_ID
           
           # List environment variables
           Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
           # Save environment variable setup for subsequent steps
-          Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object { Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
+          Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
 
           ./scripts/deploy.ps1 -init -nobackend
         azPSVersion: latest
@@ -96,3 +97,29 @@ jobs:
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true
+
+
+    - name: Clean Up
+      uses: Azure/powershell@v1
+      with:
+        # azcliversion: 2.0.72
+        inlineScript: |
+          $repository = ($env:GITHUB_REPOSITORY).Split("/")[-1]
+          $runID = $env:GITHUB_RUN_ID
+          $tagQuery = "[?tags.repository == '${repository}' && tags.run-id == '${runID}' && properties.provisioningState != 'Deleting'].id"
+
+          Write-Host "Removing resource group..."
+          $resourceGroupIDs = $(az group list --query "$tagQuery" -o tsv)
+          Write-Host "az resource delete --ids $resourceGroupIDs"
+
+          Write-Host "Removing records from shared DNS zone..."
+          $metadataQuery = ($tagQuery -replace "tags\.","metadata.")
+          $dnsZones = $(az network dns zone list -o json | ConvertFrom-Json)
+          foreach ($dnsZone in $dnsZones) {
+              Write-Verbose "Processing zone '$($dnsZone.name)'..."
+              $dnsResourceIDs = $(az network dns record-set list -g $dnsZone.resourceGroup -z $dnsZone.name --query "$metadataQuery" -o tsv)
+              if ($dnsResourceIDs) {
+                  Write-Host "Removing DNS records from zone '$($dnsZone.name)'..."
+                  Write-Host "az resource delete --ids $dnsResourceIDs -o none"
+              }
+          }
