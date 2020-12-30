@@ -98,7 +98,6 @@ jobs:
         errorActionPreference: Stop
         failOnStandardError: true
 
-
     - name: Clean Up
       uses: Azure/powershell@v1
       with:
@@ -107,7 +106,7 @@ jobs:
           # Build JMESPath expression
           $repository = ($env:GITHUB_REPOSITORY).Split("/")[-1]
           $runID = $env:GITHUB_RUN_ID
-          $tagQuery = "[?tags.repository == '${repository}' && tags.run-id == '${runID}' && properties.provisioningState != 'Deleting'].id"
+          $tagQuery = "[?tags.repository == '${repository}' && tags.runid == '${runID}' && properties.provisioningState != 'Deleting'].id"
 
           Write-Host "Removing resource group identified by `"$tagQuery`"..."
           $resourceGroupIDs = $(az group list --query "$tagQuery" -o tsv)
