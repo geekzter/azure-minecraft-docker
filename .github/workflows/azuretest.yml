@@ -19,7 +19,14 @@ jobs:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       with:
         inlineScript: | 
-          az account show
+          $servicePrincipal = (Get-Content $env:AZURE_CREDENTIALS | ConvertFrom-Json)
+          $env:ARM_CLIENT_ID = $servicePrincipal.clientId
+          $env:ARM_CLIENT_SECRET = $servicePrincipal.clientSecret
+          $env:ARM_SUBSCRIPTION_ID = $servicePrincipal.subscriptionId
+          $env:ARM_TENANT_ID = $servicePrincipal.tenantId
+          # List environment variables
+          Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,TF_* | Sort-Object -Property Name
+          #az account show
           Write-Host $env:AZURE_CREDENTIALS
         azPSVersion: latest
         errorActionPreference: Stop
