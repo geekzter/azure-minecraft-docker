@@ -5,6 +5,7 @@ provider "registry.terraform.io/hashicorp/azurerm" {
   version     = "2.41.0"
   constraints = "~> 2.41"
   hashes = [
+    "h1:SA1rST5+Y+gFn1xbJ4V2rWgvJlvrLog9p7H/fHsTWHc=",
     "h1:dx1cMQk26YyuFOaCVG0aMrozcdG/+018hLz9BOAhpOg=",
     "zh:0b9b76d58601b51f79592d2c07dbb5f5805060feb0605561074e4e899d4c7b9d",
     "zh:3b70983bc741c0f639671b08d3bbb2eb8984c007a32c08094fc6b77f547f6c6b",
@@ -24,6 +25,7 @@ provider "registry.terraform.io/hashicorp/null" {
   constraints = "~> 3.0.0"
   hashes = [
     "h1:V1tzrSG6t3e7zWvUwRbGbhsWU2Jd/anrJpOl9XM+R/8=",
+    "h1:ysHGBhBNkIiJLEpthB/IVCLpA1Qoncp3KbCTFGFZTO0=",
     "zh:05fb7eab469324c97e9b73a61d2ece6f91de4e9b493e573bfeda0f2077bc3a4c",
     "zh:1688aa91885a395c4ae67636d411475d0b831e422e005dcf02eedacaafac3bb4",
     "zh:24a0b1292e3a474f57c483a7a4512d797e041bc9c2fbaac42fe12e86a7fb5a3c",
@@ -41,6 +43,7 @@ provider "registry.terraform.io/hashicorp/random" {
   version     = "3.0.0"
   constraints = "~> 3.0.0"
   hashes = [
+    "h1:grDzxfnOdFXi90FRIIwP/ZrCzirJ/SfsGBe6cE0Shg4=",
     "h1:yhHJpb4IfQQfuio7qjUXuUFTU/s+ensuEpm23A+VWz0=",
     "zh:0fcb00ff8b87dcac1b0ee10831e47e0203a6c46aafd76cb140ba2bab81f02c6b",
     "zh:123c984c0e04bad910c421028d18aa2ca4af25a153264aef747521f4e7c36a17",
@@ -59,6 +62,7 @@ provider "registry.terraform.io/kreuzwerker/docker" {
   version     = "2.9.0"
   constraints = "~> 2.9.0"
   hashes = [
+    "h1:/ExDekgras0xRF+xxPxCAujM9QKC2VHTNO39jc/pNdA=",
     "h1:hLdNlAuV1nit/oNJ16cViiB19YeRXBHh1dYn2n7bnhM=",
     "zh:1473e168b36cf63111f5133af2e794dfe43400fe88cd533d19acd94a4c8728f9",
     "zh:58d79e47cca2142058ed2eb7f46dd8edef5c360fc918cbc28d5c18df40d711b3",

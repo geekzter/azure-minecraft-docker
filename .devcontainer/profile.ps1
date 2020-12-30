@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 
 # Find repo directories (may be different when not using main branch)
-$repoDirectory = (Split-Path $PSScriptRoot -Parent)
+$repoDirectory = (Get-ChildItem createorupdate.ps1 -Path ~ -Recurse -Force).Directory.Parent.FullName
 $scriptDirectory = (Join-Path $repoDirectory "scripts")
 
 # Manage PATH environment variable
