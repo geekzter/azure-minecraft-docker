@@ -29,7 +29,8 @@ jobs:
           #az account show
           Write-Host $env:AZURE_CREDENTIALS
 
-          scripts/deploy.ps1 -plan
+          get-location
+          ./scripts/deploy.ps1 -plan
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: false
