@@ -104,22 +104,12 @@ jobs:
       with:
         # azcliversion: 2.0.72
         inlineScript: |
+          # Build JMESPath expression
           $repository = ($env:GITHUB_REPOSITORY).Split("/")[-1]
           $runID = $env:GITHUB_RUN_ID
           $tagQuery = "[?tags.repository == '${repository}' && tags.run-id == '${runID}' && properties.provisioningState != 'Deleting'].id"
 
-          Write-Host "Removing resource group..."
+          Write-Host "Removing resource group identified by `"$tagQuery`"..."
           $resourceGroupIDs = $(az group list --query "$tagQuery" -o tsv)
           Write-Host "az resource delete --ids $resourceGroupIDs"
-
-          Write-Host "Removing records from shared DNS zone..."
-          $metadataQuery = ($tagQuery -replace "tags\.","metadata.")
-          $dnsZones = $(az network dns zone list -o json | ConvertFrom-Json)
-          foreach ($dnsZone in $dnsZones) {
-              Write-Verbose "Processing zone '$($dnsZone.name)'..."
-              $dnsResourceIDs = $(az network dns record-set list -g $dnsZone.resourceGroup -z $dnsZone.name --query "$metadataQuery" -o tsv)
-              if ($dnsResourceIDs) {
-                  Write-Host "Removing DNS records from zone '$($dnsZone.name)'..."
-                  Write-Host "az resource delete --ids $dnsResourceIDs -o none"
-              }
-          }
+        azPSVersion: latest
