@@ -6,14 +6,14 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-
-    - name: Log in with Azure
+    - uses: hashicorp/setup-terraform@v1
+    - name: Azure Setup
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-        enable-AzPSSession: true
+        enable-AzPSSession: false
 
-    - name: Azure PowerShell Action
+    - name: Terraform Plan
       uses: Azure/powershell@v1
       env:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
@@ -28,6 +28,8 @@ jobs:
           Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,TF_* | Sort-Object -Property Name
           #az account show
           Write-Host $env:AZURE_CREDENTIALS
+
+          scripts/deploy.ps1 -plan
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: false
