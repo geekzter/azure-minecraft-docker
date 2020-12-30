@@ -53,7 +53,7 @@ jobs:
 
           Get-Location
           #Get-ChildItem -Path .. -Recurse -Directory -Force
-          $env:GITHUB_WORKSPACE/scripts/deploy.ps1 -plan
+          ./scripts/deploy.ps1 -plan
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: false
