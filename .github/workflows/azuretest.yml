@@ -4,10 +4,18 @@ name: AzureLoginSample
 
 jobs:
   build-and-deploy:
+    defaults:
+      run:
+        working-directory: ${{ env.tf_actions_working_dir }}
+    # runs-on: ${{ matrix.os }}
+    # strategy:
+    #     matrix:
+    #       os: [windows-latest, ubuntu-latest, macos-latest]
     runs-on: ubuntu-latest
     steps:
-    - uses: hashicorp/setup-terraform@v1
-    - name: Azure Setup
+    - name: Get Terraform
+      uses: hashicorp/setup-terraform@v1
+    - name: Get Azure CLI
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -30,8 +38,8 @@ jobs:
           Write-Host $env:AZURE_CREDENTIALS
 
           get-location
-          get-childitem 
-          ./scripts/deploy.ps1 -plan
+          Get-ChildItem -Path .. -Recurse -Directory -Force
+          #./scripts/deploy.ps1 -plan
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: false
