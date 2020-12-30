@@ -113,7 +113,7 @@ jobs:
           $resourceGroupIDs = $(az group list --query "$tagQuery" -o tsv)
           if ($resourceGroupIDs) {
             Write-Host "az resource delete --ids ${resourceGroupIDs}..."
-            az resource delete --ids $resourceGroupIDs"
+            az resource delete --ids $resourceGroupIDs
           }
           
         azPSVersion: latest
