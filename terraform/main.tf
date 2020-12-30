@@ -1,6 +1,5 @@
 data azurerm_client_config current {}
 
-
 # Random resource suffix, this will prevent name collisions when creating resources in parallel
 resource random_string suffix {
   length                       = 4
@@ -11,8 +10,12 @@ resource random_string suffix {
 }
 
 locals {
-  environment                  = replace(replace(terraform.workspace,"default","dev"),"prod","")
+  environment                  = replace(terraform.workspace,"default","dev")
+  # https://github.com/itzg/docker-minecraft-server
+  container_image              = var.container_image_tag != null && var.container_image_tag != "" ? "itzg/minecraft-server:${var.container_image_tag}" : "itzg/minecraft-server"
+  minecraft_server_fqdn        = var.vanity_dns_zone_id != "" ? replace(try(azurerm_dns_cname_record.vanity_hostname.0.fqdn,""),"/\\W*$/","") : azurerm_container_group.minecraft_server.fqdn
   minecraft_server_port        = 25565
+  # subscription_guid            = split("/",azurerm_resource_group.minecraft.id)[1]
   suffix                       = random_string.suffix.result
   tags                         = merge(
     map(
@@ -28,17 +31,18 @@ locals {
   config                       = merge(
     local.tags,
     map(
+      "container_group_id",      azurerm_container_group.minecraft_server.id,
+      "container_image_digest",  data.docker_registry_image.minecraft.sha256_digest,
+      "minecraft_allow_nether",  tostring(var.minecraft_allow_nether),
+      "minecraft_announce_player_achievements", tostring(var.minecraft_announce_player_achievements),
       "minecraft_enable_command_blocks", tostring(var.minecraft_enable_command_blocks),
-      "minecraft_ops",           var.minecraft_ops[0],
+      "minecraft_ops",           join(",",var.minecraft_ops),
       "minecraft_type",          var.minecraft_type,
-      # "minecraft_users",         var.minecraft_users,
       "minecraft_version",       var.minecraft_version,
       "vanity_dns_zone_id",      var.vanity_dns_zone_id,
       "vanity_hostname_prefix",  var.vanity_hostname_prefix,
     )
   )
-
-  config_directory             = formatdate("YYYYMMDDhhmm",timestamp())
 
   lifecycle                    = {
     ignore_changes             = ["tags"]
@@ -68,87 +72,8 @@ resource azurerm_role_assignment readers {
   for_each                     = toset(var.resource_group_readers)
 }
 
-resource azurerm_storage_account minecraft {
-  name                         = "minecraftstor${local.suffix}"
-  resource_group_name          = azurerm_resource_group.minecraft.name
-  location                     = azurerm_resource_group.minecraft.location
-  account_tier                 = "Standard"
-  account_replication_type     = "LRS"
-
-  tags                         = local.tags
-}
-
-resource azurerm_storage_share minecraft_share {
-  name                         = "minecraft-aci-data-${local.suffix}"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  quota                        = 50
-}
-
-resource azurerm_storage_share minecraft_modpacks {
-  name                         = "minecraft-aci-modpacks-${local.suffix}"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  quota                        = 50
-}
-
-resource azurerm_storage_container configuration {
-  name                         = "configuration"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  container_access_type        = "private"
-}
-
-resource azurerm_role_assignment terraform_storage_owner {
-  scope                        = azurerm_storage_account.minecraft.id
-  role_definition_name         = "Storage Blob Data Contributor"
-  principal_id                 = each.value
-
-  for_each                     = toset(var.resource_group_contributors)
-}
-
-resource azurerm_storage_blob minecraft_configuration {
-  name                         = "${local.config_directory}/config.json"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  storage_container_name       = azurerm_storage_container.configuration.name
-  type                         = "Block"
-  source_content               = jsonencode(local.config)
-
-  depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
-}
-
-resource azurerm_storage_blob minecraft_user_configuration {
-  name                         = "${local.config_directory}/users.json"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  storage_container_name       = azurerm_storage_container.configuration.name
-  type                         = "Block"
-  source_content               = jsonencode(var.minecraft_users)
-
-  depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
-}
-
-resource azurerm_storage_blob minecraft_auto_vars_configuration {
-  name                         = "${local.config_directory}/config.auto.tfvars"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  storage_container_name       = azurerm_storage_container.configuration.name
-  type                         = "Block"
-  source                       = "${path.root}/config.auto.tfvars"
-
-  count                        = fileexists("${path.root}/config.auto.tfvars") ? 1 : 0
-  depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
-}
-
-resource azurerm_management_lock minecraft_data_lock {
-  name                         = "${azurerm_storage_account.minecraft.name}-lock"
-  scope                        = azurerm_storage_account.minecraft.id
-  lock_level                   = "CanNotDelete"
-  notes                        = "Do not accidentally delete Minecraft (world) data"
-
-  depends_on                   = [
-    azurerm_storage_share.minecraft_share,
-    azurerm_storage_share.minecraft_modpacks,
-  ]
-}
-
 resource azurerm_container_group minecraft_server {
-  name                         = "minecraft-${local.suffix}"
+  name                         = "Minecraft-${local.suffix}"
   resource_group_name          = azurerm_resource_group.minecraft.name
   location                     = azurerm_resource_group.minecraft.location
   ip_address_type              = "public"
@@ -159,8 +84,9 @@ resource azurerm_container_group minecraft_server {
     cpu                        = "1"
     name                       = "minecraft"
     environment_variables = {
-      "ALLOW_NETHER"           = true
-      "ANNOUNCE_PLAYER_ACHIEVEMENTS" = true
+      "ALLOW_NETHER"           = var.minecraft_allow_nether
+      "ANNOUNCE_PLAYER_ACHIEVEMENTS" = var.minecraft_announce_player_achievements
+      "DIFFICULTY"             = var.minecraft_difficulty
       "ENABLE_COMMAND_BLOCK"   = var.minecraft_enable_command_blocks
       "EULA"                   = "true"
       "MAX_PLAYERS"            = var.minecraft_max_players
@@ -168,11 +94,13 @@ resource azurerm_container_group minecraft_server {
       "MODE"                   = var.minecraft_mode
       "MOTD"                   = var.minecraft_motd
       "OPS"                    = join(",",var.minecraft_ops)
+      "SNOOPER_ENABLED"        = var.minecraft_snooper_enabled
       "TYPE"                   = var.minecraft_type
+      "TZ"                     = var.minecraft_timezone
       "VERSION"                = var.minecraft_version
       "WHITELIST"              = join(",",var.minecraft_users)
     }
-    image                      = "itzg/minecraft-server" # https://github.com/itzg/docker-minecraft-server
+    image                      = local.container_image
     memory                     = "2"
     ports {
       port                     = 80
@@ -200,7 +128,22 @@ resource azurerm_container_group minecraft_server {
     }
   }
 
+  diagnostics {
+    log_analytics {
+      workspace_id             = azurerm_log_analytics_workspace.monitor.workspace_id
+      workspace_key            = azurerm_log_analytics_workspace.monitor.primary_shared_key
+    }
+  }
+
   tags                         = local.tags
+
+  depends_on                   = [
+    azurerm_log_analytics_solution.log_analytics_solution
+  ]
+}
+
+data docker_registry_image minecraft {
+  name                         = azurerm_container_group.minecraft_server.container.0.image
 }
 
 resource null_resource minecraft_server_log {
@@ -208,7 +151,7 @@ resource null_resource minecraft_server_log {
     always                     = timestamp()
   }
 
-  provisioner "local-exec" {
+  provisioner local-exec {
     command                    = "az container logs --ids ${azurerm_container_group.minecraft_server.id}"
   }
 }
@@ -221,12 +164,11 @@ data azurerm_dns_zone vanity_domain {
 }
 
 resource azurerm_dns_cname_record vanity_hostname {
-  name                         = "${var.vanity_hostname_prefix}${local.environment}"
+  name                         = "${var.vanity_hostname_prefix}${replace(local.environment,"prod","")}"
   zone_name                    = data.azurerm_dns_zone.vanity_domain.0.name
   resource_group_name          = data.azurerm_dns_zone.vanity_domain.0.resource_group_name
   ttl                          = 300
   record                       = azurerm_container_group.minecraft_server.fqdn
-  # target_resource_id           = azurerm_container_group.minecraft_server.id
 
   tags                         = local.tags
   count                        = var.vanity_dns_zone_id != "" ? 1 : 0

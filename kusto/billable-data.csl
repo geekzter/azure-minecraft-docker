@@ -1,0 +1,8 @@
+// Container Insight solution billable data 
+// See total billable data from Container Insights solution. 
+//This includes billable data for all solutions in the workspace, see for Container Insights solution
+Usage
+| where TimeGenerated > startofday(ago(30d))
+| where IsBillable == true
+| summarize TotalVolumeGB = sum(Quantity) / 1000 by bin(TimeGenerated, 1d), Solution
+| render barchart

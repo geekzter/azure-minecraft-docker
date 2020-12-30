@@ -1,4 +1,3 @@
-
 #!/usr/bin/env pwsh
 <# 
 .SYNOPSIS 
@@ -6,28 +5,25 @@
 #> 
 #Requires -Version 7
 
-### Arguments
-param ( 
-) 
-
-. (Join-Path (Split-Path $MyInvocation.MyCommand.Path -Parent) functions.ps1)
+. (Join-Path $PSScriptRoot functions.ps1)
 
 # Gather data from Terraform
 try {
-    $tfdirectory = $(Join-Path (Get-Item (Split-Path -parent -Path $MyInvocation.MyCommand.Path)).Parent.FullName "terraform")
+    AzLogin
+
+    $tfdirectory = $(Join-Path (Get-Item $PSScriptRoot).Parent.FullName "terraform")
     Push-Location $tfdirectory
     
     Invoke-Command -ScriptBlock {
         $Private:ErrorActionPreference = "Continue"
 
-        # Set only if null
-        $script:ContainerGroupID = (GetTerraformOutput "container_group_id")
+        $script:ContainerGroupID = (Get-TerraformOutput "container_group_id")
     }
 
     if (![string]::IsNullOrEmpty($ContainerGroupID)) {
         az container logs --ids $ContainerGroupID --follow
     } else {
-        Write-Host "Container Instance has not been created, nothing to do" -ForeGroundColor Yellow
+        Write-Warning "Container Instance has not been created, nothing to do"
         exit 
     } 
 } finally {

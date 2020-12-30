@@ -1,0 +1,3 @@
+ContainerInstanceLog_CL 
+| project TimeGenerated, Message
+| order by TimeGenerated desc

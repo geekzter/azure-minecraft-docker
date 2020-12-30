@@ -71,13 +71,56 @@ function AzLogin (
     }
 }
 
-function GetTerraformOutput (
+function Execute-MinecraftCommand (
+    [parameter(Mandatory=$false)][string]$Command,
+    [parameter(mandatory=$false)][switch]$HideLog,
+    [parameter(mandatory=$false)][int]$SleepSeconds=0
+) {
+    try {
+        AzLogin
+        
+        $tfdirectory = $(Join-Path (Get-Item $PSScriptRoot).Parent.FullName "terraform")
+        Push-Location $tfdirectory
+        
+        $containerGroupID = (Get-TerraformOutput "container_group_id")
+        $serverFQDN       = (Get-TerraformOutput "minecraft_server_fqdn")
+    
+        if (![string]::IsNullOrEmpty($containerGroupID)) {
+            $containerCommand = [string]::IsNullOrEmpty($Command) ? "rcon-cli" : "rcon-cli ${Command}"
+            Write-Host "Sending command '${containerCommand}' to server ${serverFQDN}..."
+            az container exec --ids $containerGroupID --exec-command "${containerCommand}"
+            if (!$HideLog) {
+                az container logs --ids $containerGroupID
+            }
+            if ($SleepSeconds -gt 0) {
+                Write-Host "Sleeping $SleepSeconds seconds..."
+                Start-Sleep -Seconds $SleepSeconds 
+                if (!$HideLog) {
+                    az container logs --ids $containerGroupID
+                }
+            }
+        } else {
+            Write-Warning "Container Instance has not been created, nothing to do"
+            return 
+        } 
+    } finally {
+        Pop-Location
+    }
+}
+
+function Get-TerraformDirectory() {
+    $tfDirectory = (Join-Path (Get-Item $PSScriptRoot).Parent.FullName "terraform")
+    Write-Debug "Get-TerraformDirectory: $tfDirectory"
+    return $tfDirectory
+}
+
+function Get-TerraformOutput (
     [parameter(Mandatory=$true)][string]$OutputVariable
 ) {
     Invoke-Command -ScriptBlock {
         $Private:ErrorActionPreference    = "SilentlyContinue"
         Write-Verbose "terraform output ${OutputVariable}: evaluating..."
-        $result = $(terraform output $OutputVariable 2>$null)
+        $result = $(terraform output -raw $OutputVariable 2>$null)
         if ($result -match "\[\d+m") {
             # Terraform warning, return null for missing output
             Write-Verbose "terraform output ${OutputVariable}: `$null (${result})"
@@ -89,3 +132,67 @@ function GetTerraformOutput (
     }
 }
 
+function Get-TerraformWorkspace() {
+    if ($env:TF_WORKSPACE) {
+        Write-Debug "Get-TerraformWorkspace: $($env:TF_WORKSPACE)"
+        return $env:TF_WORKSPACE
+    }
+
+    try {
+        Push-Location (Get-TerraformDirectory)
+        $workspace = $(terraform workspace show)
+    } finally {
+        Pop-Location
+    }
+
+    Write-Debug "Get-TerraformWorkspace: $workspace"
+    return $workspace
+}
+
+function Invoke (
+    [string]$cmd
+) {
+    Write-Host "`n$cmd" -ForegroundColor Green 
+    Invoke-Expression $cmd
+    $exitCode = $LASTEXITCODE
+    if ($exitCode -ne 0) {
+        Write-Warning "'$cmd' exited with status $exitCode"
+        return $exitCode
+    }
+}
+
+function Send-MinecraftMessage ( 
+    [parameter(mandatory=$true,position=0)][string]$Message,
+    [parameter(mandatory=$false)][switch]$HideLog,
+    [parameter(mandatory=$false)][int]$SleepSeconds=0
+) {
+    try {
+        AzLogin
+        
+        $tfdirectory = $(Join-Path (Get-Item $PSScriptRoot).Parent.FullName "terraform")
+        Push-Location $tfdirectory
+        
+        $containerGroupID = (Get-TerraformOutput "container_group_id")
+        $serverFQDN       = (Get-TerraformOutput "minecraft_server_fqdn")
+        
+        if (![string]::IsNullOrEmpty($containerGroupID)) {
+            Write-Host "Sending message '${Message}' to server ${serverFQDN}..."
+            az container exec --ids $containerGroupID --exec-command "rcon-cli say ${Message}"
+            if (!$HideLog) {
+                az container logs --ids $containerGroupID
+            }
+            if ($SleepSeconds -gt 0) {
+                Write-Host "Sleeping $SleepSeconds seconds..."
+                Start-Sleep -Seconds $SleepSeconds 
+                if (!$HideLog) {
+                    az container logs --ids $containerGroupID
+                }
+            }
+        } else {
+            Write-Warning "Container Instance has not been created, nothing to do"
+            return 
+        } 
+    } finally {
+        Pop-Location
+    }
+}
