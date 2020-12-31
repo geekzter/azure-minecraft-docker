@@ -21,9 +21,9 @@ name: TerraformPlan
 jobs:
   terraform:
     name: Provision solution and tear it down again
-    # defaults:
-    #   run:
-    #     working-directory: ${{ env.tf_actions_working_dir }}
+    defaults:
+      run:
+        working-directory: terraform
     # runs-on: ${{ matrix.os }}
     # strategy:
     #     matrix:
@@ -71,7 +71,8 @@ jobs:
           # Save environment variable setup for subsequent steps
           Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
 
-          ./scripts/deploy.ps1 -init -nobackend
+          # ./scripts/deploy.ps1 -init -nobackend
+          terraform init
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true
@@ -85,7 +86,8 @@ jobs:
           # List environment variables
           Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
 
-          ./scripts/deploy.ps1 -plan
+          # ./scripts/deploy.ps1 -plan
+          terraform plan -out='ci.tfplan'
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true
@@ -100,7 +102,8 @@ jobs:
           # List environment variables
           Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
 
-          ./scripts/deploy.ps1 -apply -force
+          # ./scripts/deploy.ps1 -apply -force
+          terraform apply -auto-approve 'ci.tfplan'
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true
@@ -115,7 +118,8 @@ jobs:
           # List environment variables
           Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
 
-          ./scripts/deploy.ps1 -destroy -force
+          # ./scripts/deploy.ps1 -destroy -force
+          terraform destroy -auto-approve
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true
