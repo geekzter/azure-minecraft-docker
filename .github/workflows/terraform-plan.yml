@@ -43,7 +43,7 @@ jobs:
     - name: Detect desired Terraform version
       id: terraform-version-check
       run: | 
-        $terraformVersion = (Get-Content ./terraform/.terraform-version)
+        $terraformVersion = (Get-Content .terraform-version)
         Write-Output '::set-output name=TERRAFORM_VERSION::${terraformVersion}'
       shell: pwsh
     - name: Get Terraform
