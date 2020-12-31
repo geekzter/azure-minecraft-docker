@@ -113,15 +113,6 @@ jobs:
         errorActionPreference: Stop
         failOnStandardError: true
 
-    - name: Test connection to Minecraft Server (CLI)
-      uses: Azure/CLI@v1
-      env:
-        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-      with:
-        inlineScript: | 
-          printenv | sort
-          az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "rcon-cli say hello from ci"
-
     - name: Test connection to Minecraft Server
       uses: Azure/powershell@v1
       env:
@@ -136,6 +127,16 @@ jobs:
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true
+
+    - name: Test connection to Minecraft Server (CLI)
+      uses: Azure/CLI@v1
+      env:
+        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      with:
+        inlineScript: | 
+          printenv | sort
+          echo "az container exec --ids $TF_OUT_container_group_id"
+          az container exec --ids $TF_OUT_container_group_id --exec-command "rcon-cli say hello from ci"
 
     - name: Terraform Destroy
       if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' }}
