@@ -115,16 +115,16 @@ jobs:
         errorActionPreference: Stop
         failOnStandardError: true
 
-    # - name: Terraform Destroy
-    #   if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' }}
-    #   uses: Azure/powershell@v1
-    #   with:
-    #     inlineScript: | 
-    #       Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
-    #       terraform destroy -auto-approve
-    #     azPSVersion: latest
-    #     errorActionPreference: Stop
-    #     failOnStandardError: true
+    - name: Terraform Destroy
+      if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' }}
+      uses: Azure/powershell@v1
+      with:
+        inlineScript: | 
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
+          terraform destroy -auto-approve
+        azPSVersion: latest
+        errorActionPreference: Stop
+        failOnStandardError: true
 
     - name: Clean Up
       if: ${{ always() }}
@@ -158,4 +158,3 @@ jobs:
         azPSVersion: latest
         errorActionPreference: Continue
         failOnStandardError: true
-        continue-on-error: false
