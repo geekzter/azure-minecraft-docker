@@ -47,6 +47,7 @@ $script:ErrorActionPreference = "Stop"
 $workspace = Get-TerraformWorkspace
 $planFile  = "${workspace}.tfplan".ToLower()
 $varsFile  = "${workspace}.tfvars".ToLower()
+$inAutomation = ($env:TF_IN_AUTOMATION -ieq "true")
 
 try {
     $tfdirectory = (Get-TerraformDirectory)
@@ -146,29 +147,29 @@ try {
             Write-Warning "You're about to delete Minecraft world data in workspace '${workspace}'!!!"
         }
 
-        if ($containerGroupReplaced) {
-            Write-Warning "You're about to replace the container instance group in workspace '${workspace}'! Inform users so they can bail out."
-            Write-Host "Opening rcon-cli to send any last commands and messages (e.g. list, save-all, say):"
-            Execute-MinecraftCommand
-        }
+        if (!$inAutomation) {
+            if ($containerGroupReplaced) {
+                Write-Warning "You're about to replace the container instance group in workspace '${workspace}'! Inform users so they can bail out."
+                
+                Write-Host "Opening rcon-cli to send any last commands and messages (e.g. list, save-all, say):"
+                Execute-MinecraftCommand
 
-        if (!$Force -or $containerGroupReplaced -or $minecraftDataReplaced) {
-            # Prompt to continue
-            Write-Host "If you wish to proceed executing Terraform plan $planFile in workspace $workspace, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
-            $proceedanswer = Read-Host 
+                # BUG: https://github.com/Azure/azure-cli/issues/8687
+                # rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused "exec: \"rcon-cli say hi\": executable file not found in $PATH"
+                Send-MinecraftMessage -Message "The server will go down for maintenance in ${GracePeriodSeconds} seconds!!!" -SleepSeconds $GracePeriodSeconds
+            }
 
-            if ($proceedanswer -ne "yes") {
-                Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
-                Exit
+            if (!$Force -or $containerGroupReplaced -or $minecraftDataReplaced) {
+                # Prompt to continue
+                Write-Host "If you wish to proceed executing Terraform plan $planFile in workspace $workspace, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
+                $proceedanswer = Read-Host 
+
+                if ($proceedanswer -ne "yes") {
+                    Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
+                    Exit
+                }
             }
         }
-
-        # Check whether azurerm_container_group is tainted
-        # BUG: https://github.com/Azure/azure-cli/issues/8687
-        # rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused "exec: \"rcon-cli say hi\": executable file not found in $PATH"
-        # if ($containerGroupReplaced) {
-        #     Send-MinecraftMessage -Message "The server will go down for maintenance in ${GracePeriodSeconds} seconds!!!" -SleepSeconds $GracePeriodSeconds
-        # }       
 
         Invoke "terraform apply $forceArgs '$planFile'"
     }

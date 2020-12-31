@@ -1,9 +1,6 @@
 output container_group_id {
   value       = azurerm_container_group.minecraft_server.id  
 }
-output container_image_digest {
-  value       = data.docker_registry_image.minecraft.sha256_digest
-}
 output container_log_command {
   value       = "az container logs --ids ${azurerm_container_group.minecraft_server.id} --follow"
 }
