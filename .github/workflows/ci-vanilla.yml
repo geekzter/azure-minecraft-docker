@@ -53,6 +53,7 @@ jobs:
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: ${{ steps.terraform-version-check.outputs.TERRAFORM_VERSION }}
+        terraform_wrapper: false
 
     - name: Terraform Init
       uses: Azure/powershell@v1
@@ -157,3 +158,4 @@ jobs:
         azPSVersion: latest
         errorActionPreference: Continue
         failOnStandardError: true
+        continue-on-error: false
