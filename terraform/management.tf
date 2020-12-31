@@ -2,9 +2,8 @@ resource azurerm_log_analytics_workspace monitor {
   name                         = "${azurerm_resource_group.minecraft.name}-loganalytics"
   resource_group_name          = azurerm_resource_group.minecraft.name
   location                     = azurerm_resource_group.minecraft.location
-  sku                          = var.log_analytics_tier
-  retention_in_days            = var.log_analytics_tier == "Free" || var.log_analytics_tier == "free" ? 7 : 30
-  # daily_quota_gb               = var.log_analytics_tier == "Free" || var.log_analytics_tier == "free" ? 0.5 : -1
+  sku                          = "PerGB2018"
+  retention_in_days            = 30
 
   tags                         = local.tags
 }

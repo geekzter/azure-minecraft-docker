@@ -23,6 +23,7 @@ locals {
       "environment",             local.environment,
       "provisioner",             "terraform",
       "repository" ,             "azure-minecraft-docker",
+      "runid",                   var.run_id,
       "suffix",                  local.suffix,
       "workspace",               terraform.workspace,
     )
@@ -32,7 +33,6 @@ locals {
     local.tags,
     map(
       "container_group_id",      azurerm_container_group.minecraft_server.id,
-      "container_image_digest",  data.docker_registry_image.minecraft.sha256_digest,
       "minecraft_allow_nether",  tostring(var.minecraft_allow_nether),
       "minecraft_announce_player_achievements", tostring(var.minecraft_announce_player_achievements),
       "minecraft_enable_command_blocks", tostring(var.minecraft_enable_command_blocks),
@@ -140,20 +140,6 @@ resource azurerm_container_group minecraft_server {
   depends_on                   = [
     azurerm_log_analytics_solution.log_analytics_solution
   ]
-}
-
-data docker_registry_image minecraft {
-  name                         = azurerm_container_group.minecraft_server.container.0.image
-}
-
-resource null_resource minecraft_server_log {
-  triggers = {
-    always                     = timestamp()
-  }
-
-  provisioner local-exec {
-    command                    = "az container logs --ids ${azurerm_container_group.minecraft_server.id}"
-  }
 }
 
 data azurerm_dns_zone vanity_domain {

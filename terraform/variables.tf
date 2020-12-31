@@ -12,10 +12,6 @@ variable enable_backup {
   default      = false
 }
 
-variable log_analytics_tier {
-  default      = "Free"
-}
-
 variable minecraft_allow_nether {
   type         = bool
   default      = true
@@ -84,6 +80,11 @@ variable resource_group_readers {
   type         = list
   default      = []
   description  = "Object ID's of security principals that are designated Readers"
+}
+
+variable run_id {
+  type         = string
+  default      = ""
 }
 variable subscription_id {
   type         = string

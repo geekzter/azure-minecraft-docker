@@ -24,6 +24,7 @@ param (
     [parameter(Mandatory=$false,HelpMessage="Grace period before server will be shut down for replacement")][int]$GracePeriodSeconds=30,
     [parameter(Mandatory=$false,HelpMessage="Don't show prompts unless something get's deleted that should not be")][switch]$Force=$false,
     [parameter(Mandatory=$false,HelpMessage="Initialize Terraform backend, upgrade modules & provider")][switch]$Upgrade=$false,
+    [parameter(mandatory=$false,HelpMessage="Follow Minecraft log that will be displayed after apply")][switch]$Follow,
     [parameter(Mandatory=$false,HelpMessage="Don't try to set up a Terraform backend if it does not exist")][switch]$NoBackend=$false
 ) 
 
@@ -47,6 +48,7 @@ $script:ErrorActionPreference = "Stop"
 $workspace = Get-TerraformWorkspace
 $planFile  = "${workspace}.tfplan".ToLower()
 $varsFile  = "${workspace}.tfvars".ToLower()
+$inAutomation = ($env:TF_IN_AUTOMATION -ieq "true")
 
 try {
     $tfdirectory = (Get-TerraformDirectory)
@@ -146,31 +148,36 @@ try {
             Write-Warning "You're about to delete Minecraft world data in workspace '${workspace}'!!!"
         }
 
-        if ($containerGroupReplaced) {
-            Write-Warning "You're about to replace the container instance group in workspace '${workspace}'! Inform users so they can bail out."
-            Write-Host "Opening rcon-cli to send any last commands and messages (e.g. list, save-all, say):"
-            Execute-MinecraftCommand
-        }
+        if (!$inAutomation) {
+            if ($containerGroupReplaced) {
+                Write-Warning "You're about to replace the container instance group in workspace '${workspace}'! Inform users so they can bail out."
+                
+                Write-Host "Opening rcon-cli to send any last commands and messages (e.g. list, save-all, say):"
+                Execute-MinecraftCommand
 
-        if (!$Force -or $containerGroupReplaced -or $minecraftDataReplaced) {
-            # Prompt to continue
-            Write-Host "If you wish to proceed executing Terraform plan $planFile in workspace $workspace, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
-            $proceedanswer = Read-Host 
+                # BUG: https://github.com/Azure/azure-cli/issues/8687
+                # rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused "exec: \"rcon-cli say hi\": executable file not found in $PATH"
+                Send-MinecraftMessage -Message "The server will go down for maintenance in ${GracePeriodSeconds} seconds!!!" -SleepSeconds $GracePeriodSeconds
+            }
 
-            if ($proceedanswer -ne "yes") {
-                Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
-                Exit
+            if (!$Force -or $containerGroupReplaced -or $minecraftDataReplaced) {
+                # Prompt to continue
+                Write-Host "If you wish to proceed executing Terraform plan $planFile in workspace $workspace, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
+                $proceedanswer = Read-Host 
+
+                if ($proceedanswer -ne "yes") {
+                    Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
+                    Exit
+                }
             }
         }
 
-        # Check whether azurerm_container_group is tainted
-        # BUG: https://github.com/Azure/azure-cli/issues/8687
-        # rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused "exec: \"rcon-cli say hi\": executable file not found in $PATH"
-        # if ($containerGroupReplaced) {
-        #     Send-MinecraftMessage -Message "The server will go down for maintenance in ${GracePeriodSeconds} seconds!!!" -SleepSeconds $GracePeriodSeconds
-        # }       
-
         Invoke "terraform apply $forceArgs '$planFile'"
+        WaitFor-MinecraftServer -Timeout 120
+        if ($Follow) {
+            # Wait for Minecraft to boot up
+            Show-MinecraftLog -Tail
+        }
     }
 
     if ($Output) {
