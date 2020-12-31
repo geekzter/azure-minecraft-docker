@@ -103,6 +103,18 @@ jobs:
         errorActionPreference: Stop
         failOnStandardError: true
 
+    - name: Test connection to Minecraft Server (CLI)
+      uses: Azure/CLI@v1
+      env:
+        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      with:
+        inlineScript: | 
+          cd terraform # Task does not support 'working-directory' property
+          az container exec --ids $(terraform output container_group_id) --exec-command "rcon-cli say hello from ci"
+        azPSVersion: latest
+        errorActionPreference: Stop
+        failOnStandardError: true
+        
     - name: Test connection to Minecraft Server
       uses: Azure/powershell@v1
       env:
