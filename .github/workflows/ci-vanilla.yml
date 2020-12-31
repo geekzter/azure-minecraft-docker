@@ -34,7 +34,6 @@ jobs:
     #       terraform-versions: [0.11.14, latest]
     runs-on: ubuntu-latest
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - name: Checkout source
       uses: actions/checkout@v2
 
@@ -118,12 +117,10 @@ jobs:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       with:
         inlineScript: | 
-          # List environment variables
-          Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
-
           # Wait for Minecraft to boot up
           do {
             Start-Sleep -Seconds 10
+            Write-Host "Pinging ${env:TF_OUT_minecraft_server_fqdn} on port ${env:TF_OUT_minecraft_server_port}..."
             $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($env:TF_OUT_minecraft_server_fqdn, $env:TF_OUT_minecraft_server_port)
           } while (!$mineCraftConnection.Connected)
           
@@ -133,7 +130,7 @@ jobs:
           # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "rcon-cli say hello from ci"
         azPSVersion: latest
         errorActionPreference: Stop
-        failOnStandardError: true # BUG: setting not honored
+        failOnStandardError: true # BUG: setting not honored!
 
     - name: Test connection to Minecraft Server (bash)
       uses: Azure/CLI@v1
@@ -141,13 +138,13 @@ jobs:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       with:
         inlineScript: | 
-          printenv | sort
           # Wait for Minecraft to boot up
           while ! echo exit | nc $TF_OUT_minecraft_server_fqdn $TF_OUT_minecraft_server_port; do sleep 10; done
           az container show --ids ${{ steps.terraform-apply.outputs.container_group_id }} --query instanceView
           az container logs --ids ${{ steps.terraform-apply.outputs.container_group_id }}
           # BUG: no tty
           # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "rcon-cli say ping"
+
     - name: Terraform Destroy
       if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' }}
       uses: Azure/powershell@v1

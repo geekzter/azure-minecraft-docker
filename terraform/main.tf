@@ -142,16 +142,6 @@ resource azurerm_container_group minecraft_server {
   ]
 }
 
-resource null_resource minecraft_server_log {
-  triggers = {
-    always                     = timestamp()
-  }
-
-  provisioner local-exec {
-    command                    = "az container logs --ids ${azurerm_container_group.minecraft_server.id}"
-  }
-}
-
 data azurerm_dns_zone vanity_domain {
   name                         = element(split("/",var.vanity_dns_zone_id),length(split("/",var.vanity_dns_zone_id))-1)
   resource_group_name          = element(split("/",var.vanity_dns_zone_id),length(split("/",var.vanity_dns_zone_id))-5)

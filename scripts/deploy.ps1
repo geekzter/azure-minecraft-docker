@@ -24,6 +24,7 @@ param (
     [parameter(Mandatory=$false,HelpMessage="Grace period before server will be shut down for replacement")][int]$GracePeriodSeconds=30,
     [parameter(Mandatory=$false,HelpMessage="Don't show prompts unless something get's deleted that should not be")][switch]$Force=$false,
     [parameter(Mandatory=$false,HelpMessage="Initialize Terraform backend, upgrade modules & provider")][switch]$Upgrade=$false,
+    [parameter(mandatory=$false,HelpMessage="Follow Minecraft log that will be displayed after apply")][switch]$Follow,
     [parameter(Mandatory=$false,HelpMessage="Don't try to set up a Terraform backend if it does not exist")][switch]$NoBackend=$false
 ) 
 
@@ -172,6 +173,11 @@ try {
         }
 
         Invoke "terraform apply $forceArgs '$planFile'"
+        WaitFor-MinecraftServer -Timeout 120
+        if ($Follow) {
+            # Wait for Minecraft to boot up
+            Show-MinecraftLog -Tail
+        }
     }
 
     if ($Output) {

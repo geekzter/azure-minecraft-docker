@@ -118,16 +118,21 @@ function Get-TerraformOutput (
     [parameter(Mandatory=$true)][string]$OutputVariable
 ) {
     Invoke-Command -ScriptBlock {
-        $Private:ErrorActionPreference    = "SilentlyContinue"
-        Write-Verbose "terraform output ${OutputVariable}: evaluating..."
-        $result = $(terraform output -raw $OutputVariable 2>$null)
-        if ($result -match "\[\d+m") {
-            # Terraform warning, return null for missing output
-            Write-Verbose "terraform output ${OutputVariable}: `$null (${result})"
-            return $null
-        } else {
-            Write-Verbose "terraform output ${OutputVariable}: ${result}"
-            return $result
+        try {
+            Push-Location (Get-TerraformDirectory)
+                $Private:ErrorActionPreference    = "SilentlyContinue"
+                Write-Verbose "terraform output ${OutputVariable}: evaluating..."
+                $result = $(terraform output -raw $OutputVariable 2>$null)
+                if ($result -match "\[\d+m") {
+                    # Terraform warning, return null for missing output
+                    Write-Verbose "terraform output ${OutputVariable}: `$null (${result})"
+                    return $null
+                } else {
+                    Write-Verbose "terraform output ${OutputVariable}: ${result}"
+                    return $result
+                }
+            } finally {
+            Pop-Location
         }
     }
 }
@@ -190,6 +195,57 @@ function Send-MinecraftMessage (
             }
         } else {
             Write-Warning "Container Instance has not been created, nothing to do"
+            return 
+        } 
+    } finally {
+        Pop-Location
+    }
+}
+
+function Show-MinecraftLog (
+    [parameter(mandatory=$false)][switch]$Tail
+) {
+    $containerGroupID = (Get-TerraformOutput "container_group_id")
+    $followExpression = $Tail ? "--follow" : ""
+
+    if (![string]::IsNullOrEmpty($containerGroupID)) {
+        az container logs --ids $ContainerGroupID $followExpression
+    } else {
+        Write-Warning "Container Instance has not been created, nothing to do"
+        return 
+    } 
+}
+
+function WaitFor-MinecraftServer (
+    [parameter(mandatory=$false)][int]$Timeout=120
+) {
+    try {
+        AzLogin
+        
+        $tfdirectory = $(Join-Path (Get-Item $PSScriptRoot).Parent.FullName "terraform")
+        Push-Location $tfdirectory
+        
+        $serverFQDN       = (Get-TerraformOutput "minecraft_server_fqdn")
+        $serverPort       = (Get-TerraformOutput "minecraft_server_port")
+    
+        if (![string]::IsNullOrEmpty($serverFQDN)) {
+          $timer  = [system.diagnostics.stopwatch]::StartNew()
+          
+          do {
+            $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($serverFQDN, $serverPort)
+            if (!$mineCraftConnection.Connected) {
+                Write-Host "Pinging ${serverFQDN} on port ${serverPort}..."
+                Start-Sleep -Seconds 10
+            }
+          } while (!$mineCraftConnection.Connected -and ($timer.Elapsed.TotalSeconds -lt $Timeout))
+          if ($mineCraftConnection.Connected) {
+            Write-Host "Connected to ${serverFQDN}:${serverPort} in $($timer.Elapsed.TotalSeconds) seconds"
+          } else {
+            Write-Host "Could not connect to ${serverFQDN}:${serverPort}"
+          }
+
+        } else {
+            Write-Warning "Server has not been created, nothing to do"
             return 
         } 
     } finally {
