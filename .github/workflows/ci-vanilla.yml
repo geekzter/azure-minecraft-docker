@@ -47,7 +47,7 @@ jobs:
       id: terraform-version-check
       run: | 
         $terraformVersion = (Get-Content .terraform-version)
-        Write-Output '::set-output name=TERRAFORM_VERSION::${terraformVersion}'
+        Write-Output "::set-output name=TERRAFORM_VERSION::${terraformVersion}"
       shell: pwsh
     - name: Get Terraform
       uses: hashicorp/setup-terraform@v1
@@ -105,8 +105,7 @@ jobs:
           $terraformOutput = (terraform output -json | ConvertFrom-Json -AsHashtable)     
           foreach ($key in $terraformOutput.Keys) {
             $outputVariableValue = $terraformOutput[$key].value
-            Write-Host "Exporting ${key}=${outputVariableValue}"
-            Write-Output '::set-output name=${key}::${outputVariableValue}'
+            Write-Output "::set-output name=${key}::${outputVariableValue}"
             Write-Output "TF_OUT_${key}=${outputVariableValue}" >> $env:GITHUB_ENV
           } 
         azPSVersion: latest
@@ -122,11 +121,11 @@ jobs:
           # List environment variables
           Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
 
-          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
-          az container exec --ids $(terraform output container_group_id) --exec-command "rcon-cli say hello from ci"
+          # Start-Sleep -Seconds 120 # Wait for Minecraft to boot up
+          az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }}--exec-command "rcon-cli say hello from ci"
         azPSVersion: latest
         errorActionPreference: Stop
-        failOnStandardError: true
+        failOnStandardError: true # BUG: setting not honored
 
     - name: Test connection to Minecraft Server (CLI)
       uses: Azure/CLI@v1
@@ -135,6 +134,7 @@ jobs:
       with:
         inlineScript: | 
           printenv | sort
+          sleep 120 # Wait for Minecraft to boot up
           echo "az container exec --ids $TF_OUT_container_group_id"
           az container exec --ids $TF_OUT_container_group_id --exec-command "rcon-cli say hello from ci"
 
