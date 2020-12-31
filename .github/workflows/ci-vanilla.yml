@@ -94,11 +94,19 @@ jobs:
 
     - name: Terraform Apply
       if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' }}
+      id: terraform-apply
       uses: Azure/powershell@v1
       with:
         inlineScript: | 
           Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
           terraform apply -auto-approve 'ci.tfplan'
+
+          # Export Terraform output as step output
+          $terraformOutput = (terraform output -json | Convertfrom-Json -AsHashtable)     
+          foreach ($key in $terraformOutput.Keys) {
+            Write-Output '::set-output name=${key}::$($terraformOutput[$key].value)'
+            Write-Output "TF_OUT_${key}=$($terraformOutput[$key].value)" >> $env:GITHUB_ENV
+          } 
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true
@@ -109,12 +117,10 @@ jobs:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       with:
         inlineScript: | 
-          cd terraform # Task does not support 'working-directory' property
-          az container exec --ids $(terraform output container_group_id) --exec-command "rcon-cli say hello from ci"
-        azPSVersion: latest
+          az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "rcon-cli say hello from ci"
         errorActionPreference: Stop
         failOnStandardError: true
-        
+
     - name: Test connection to Minecraft Server
       uses: Azure/powershell@v1
       env:
