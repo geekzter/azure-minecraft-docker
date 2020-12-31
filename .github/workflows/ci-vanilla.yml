@@ -74,7 +74,7 @@ jobs:
           # Save environment variable setup for subsequent steps
           Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
 
-          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform)
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
           Get-Location
           terraform init
         azPSVersion: latest
@@ -85,8 +85,19 @@ jobs:
       uses: Azure/powershell@v1
       with:
         inlineScript: | 
-          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform)
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
           terraform plan -out='ci.tfplan'
+        azPSVersion: latest
+        errorActionPreference: Stop
+        failOnStandardError: true
+
+    - name: Terraform Apply
+      if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' }}
+      uses: Azure/powershell@v1
+      with:
+        inlineScript: | 
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
+          terraform apply -auto-approve 'ci.tfplan'
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true
@@ -97,19 +108,8 @@ jobs:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       with:
         inlineScript: | 
-          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform)
-          az container exec --ids $(terraform output container_group_id) --exec-command "rcon-cli hello from ci"
-        azPSVersion: latest
-        errorActionPreference: Stop
-        failOnStandardError: true
-
-    - name: Terraform Apply
-      if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' }}
-      uses: Azure/powershell@v1
-      with:
-        inlineScript: | 
-          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform)
-          terraform apply -auto-approve 'ci.tfplan'
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
+          az container exec --ids $(terraform output container_group_id) --exec-command "rcon-cli say hello from ci"
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true
@@ -119,7 +119,7 @@ jobs:
       uses: Azure/powershell@v1
       with:
         inlineScript: | 
-          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform)
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
           terraform destroy -auto-approve
         azPSVersion: latest
         errorActionPreference: Stop
