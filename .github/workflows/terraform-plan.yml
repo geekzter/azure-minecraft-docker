@@ -24,12 +24,12 @@ jobs:
     # defaults:
     #   run:
     #     working-directory: ${{ env.tf_actions_working_dir }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-        matrix:
-          os: [windows-latest, ubuntu-latest, macos-latest]
+    # runs-on: ${{ matrix.os }}
+    # strategy:
+    #     matrix:
+    #       os: [windows-latest, ubuntu-latest, macos-latest]
     #       terraform-versions: [0.11.14, latest]
-    # runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - name: Checkout source
