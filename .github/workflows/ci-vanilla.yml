@@ -102,10 +102,12 @@ jobs:
           terraform apply -auto-approve 'ci.tfplan'
 
           # Export Terraform output as step output
-          $terraformOutput = (terraform output -json | Convertfrom-Json -AsHashtable)     
+          $terraformOutput = (terraform output -json | ConvertFrom-Json -AsHashtable)     
           foreach ($key in $terraformOutput.Keys) {
-            Write-Output '::set-output name=${key}::$($terraformOutput[$key].value)'
-            Write-Output "TF_OUT_${key}=$($terraformOutput[$key].value)" >> $env:GITHUB_ENV
+            $outputVariableValue = $terraformOutput[$key].value
+            Write-Host "Exporting ${key}=${outputVariableValue}"
+            Write-Output '::set-output name=${key}::${outputVariableValue}'
+            Write-Output "TF_OUT_${key}=${outputVariableValue}" >> $env:GITHUB_ENV
           } 
         azPSVersion: latest
         errorActionPreference: Stop
@@ -117,9 +119,8 @@ jobs:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       with:
         inlineScript: | 
+          printenv | sort
           az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "rcon-cli say hello from ci"
-        errorActionPreference: Stop
-        failOnStandardError: true
 
     - name: Test connection to Minecraft Server
       uses: Azure/powershell@v1
@@ -127,6 +128,9 @@ jobs:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       with:
         inlineScript: | 
+          # List environment variables
+          Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
+
           Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
           az container exec --ids $(terraform output container_group_id) --exec-command "rcon-cli say hello from ci"
         azPSVersion: latest
