@@ -72,6 +72,7 @@ jobs:
           Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
 
           # ./scripts/deploy.ps1 -init -nobackend
+          Get-Location
           terraform init
         azPSVersion: latest
         errorActionPreference: Stop
