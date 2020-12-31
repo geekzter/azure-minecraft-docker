@@ -16,7 +16,7 @@ env:
   TF_IN_AUTOMATION: true
   TF_WORKSPACE: ci
 
-name: TerraformPlan
+name: ci
 
 jobs:
   terraform:
@@ -72,12 +72,12 @@ jobs:
           Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
 
           # ./scripts/deploy.ps1 -init -nobackend
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform)
           Get-Location
           terraform init
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true
-        working-directory: terraform
 
     - name: Terraform Plan
       uses: Azure/powershell@v1
@@ -89,11 +89,11 @@ jobs:
           Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
 
           # ./scripts/deploy.ps1 -plan
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform)
           terraform plan -out='ci.tfplan'
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true
-        working-directory: terraform
 
     - name: Terraform Apply
       if: ${{ github.event_name == 'pull_request' }}
@@ -106,11 +106,11 @@ jobs:
           Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
 
           # ./scripts/deploy.ps1 -apply -force
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform)
           terraform apply -auto-approve 'ci.tfplan'
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true
-        working-directory: terraform
 
     - name: Terraform Destroy
       if: ${{ github.event_name == 'pull_request' }}
@@ -123,11 +123,11 @@ jobs:
           Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
 
           # ./scripts/deploy.ps1 -destroy -force
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform)
           terraform destroy -auto-approve
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true
-        working-directory: terraform
 
     - name: Clean Up
       if: ${{ always() }}
@@ -150,4 +150,3 @@ jobs:
         azPSVersion: latest
         errorActionPreference: Continue
         failOnStandardError: true
-        working-directory: terraform
