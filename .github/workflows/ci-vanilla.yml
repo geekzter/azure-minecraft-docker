@@ -131,6 +131,17 @@ jobs:
       with:
         # azcliversion: 2.0.72
         inlineScript: |
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
+
+          # Remove resource locks first
+          $storageAccountID = $(terraform output storage_account_id)
+          if ($storageAccountID) {
+            $storageLockID = $(az resource lock list --resource $storageAccountID --query [].id -o tsv)
+          }
+          if ($storageLockID) {
+            az resource lock delete --ids $storageLockID
+          }
+
           # Build JMESPath expression
           $repository = ($env:GITHUB_REPOSITORY).Split("/")[-1]
           $tagQuery = "[?tags.repository == '${repository}' && tags.workspace == '${env:TF_WORKSPACE}' && tags.runid == '${env:GITHUB_RUN_ID}' && properties.provisioningState != 'Deleting'].id"
@@ -139,7 +150,7 @@ jobs:
           $resourceGroupIDs = $(az group list --query "$tagQuery" -o tsv)
           if ($resourceGroupIDs) {
             Write-Host "az resource delete --ids ${resourceGroupIDs}..."
-            az resource delete --ids $resourceGroupIDs
+            az resource delete --ids $resourceGroupIDs --verbose
           } else {
             Write-Host "Nothing to remove"
           }

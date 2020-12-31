@@ -59,6 +59,9 @@ output subscription_id {
 output storage_account {
   value       = azurerm_storage_account.minecraft.name
 }
+output storage_account_id {
+  value       = azurerm_storage_account.minecraft.id
+}
 output storage_data_share {
   value       = azurerm_storage_share.minecraft_share.name
 }
