@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main ]
 
+  schedule:
+  - cron:  '0 3 * * *'
+
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -16,7 +19,7 @@ env:
   TF_IN_AUTOMATION: true
   TF_WORKSPACE: ci
 
-name: ci
+name: ci-vanilla
 
 jobs:
   terraform:
@@ -96,7 +99,7 @@ jobs:
         failOnStandardError: true
 
     - name: Terraform Apply
-      if: ${{ github.event_name == 'pull_request' }}
+      if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' }}
       uses: Azure/powershell@v1
       env:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
@@ -113,7 +116,7 @@ jobs:
         failOnStandardError: true
 
     - name: Terraform Destroy
-      if: ${{ github.event_name == 'pull_request' }}
+      if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' }}
       uses: Azure/powershell@v1
       env:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
