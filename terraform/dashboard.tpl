@@ -59,6 +59,149 @@
             "y": 0
           }
         },
+        "10": {
+          "metadata": {
+            "deepLink": "#@/resource${resource_group_id}/overview",
+            "inputs": [
+              {
+                "isOptional": true,
+                "name": "resourceGroup"
+              },
+              {
+                "isOptional": true,
+                "name": "id",
+                "value": "${resource_group_id}"
+              }
+            ],
+            "type": "Extension/HubsExtension/PartType/ResourceGroupMapPinnedPart"
+          },
+          "position": {
+            "colSpan": 6,
+            "metadata": null,
+            "rowSpan": 3,
+            "x": 0,
+            "y": 9
+          }
+        },
+        "11": {
+          "metadata": {
+            "filters": {
+              "MsPortalFx_TimeRange": {
+                "model": {
+                  "format": "local",
+                  "granularity": "auto",
+                  "relative": "1440m"
+                }
+              }
+            },
+            "inputs": [
+              {
+                "isOptional": true,
+                "name": "options",
+                "value": {
+                  "chart": {
+                    "metrics": [
+                      {
+                        "aggregationType": 4,
+                        "metricVisualization": {
+                          "displayName": "Used capacity"
+                        },
+                        "name": "UsedCapacity",
+                        "namespace": "microsoft.storage/storageaccounts",
+                        "resourceMetadata": {
+                          "id": "${resource_group_id}/providers/Microsoft.Storage/storageAccounts/minecraftstor${suffix}",
+                          "resourceGroup": "${resource_group}"
+                        }
+                      }
+                    ],
+                    "timespan": {
+                      "grain": 1,
+                      "relative": {
+                        "duration": 86400000
+                      },
+                      "showUTCTime": false
+                    },
+                    "title": "Avg Used capacity for minecraftstor${suffix}",
+                    "titleKind": 1,
+                    "visualization": {
+                      "axisVisualization": {
+                        "x": {
+                          "axisType": 2,
+                          "isVisible": true
+                        },
+                        "y": {
+                          "axisType": 1,
+                          "isVisible": true
+                        }
+                      },
+                      "chartType": 2,
+                      "legendVisualization": {
+                        "hideSubtitle": false,
+                        "isVisible": true,
+                        "position": 2
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "isOptional": true,
+                "name": "sharedTimeRange"
+              }
+            ],
+            "settings": {
+              "content": {
+                "options": {
+                  "chart": {
+                    "metrics": [
+                      {
+                        "aggregationType": 4,
+                        "metricVisualization": {
+                          "displayName": "Used capacity"
+                        },
+                        "name": "UsedCapacity",
+                        "namespace": "microsoft.storage/storageaccounts",
+                        "resourceMetadata": {
+                          "id": "${resource_group_id}/providers/Microsoft.Storage/storageAccounts/minecraftstor${suffix}",
+                          "resourceGroup": "${resource_group}"
+                        }
+                      }
+                    ],
+                    "title": "Avg Used capacity for minecraftstor${suffix}",
+                    "titleKind": 1,
+                    "visualization": {
+                      "axisVisualization": {
+                        "x": {
+                          "axisType": 2,
+                          "isVisible": true
+                        },
+                        "y": {
+                          "axisType": 1,
+                          "isVisible": true
+                        }
+                      },
+                      "chartType": 2,
+                      "disablePinning": true,
+                      "legendVisualization": {
+                        "hideSubtitle": false,
+                        "isVisible": true,
+                        "position": 2
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "type": "Extension/HubsExtension/PartType/MonitorChartPart"
+          },
+          "position": {
+            "colSpan": 6,
+            "metadata": null,
+            "rowSpan": 4,
+            "x": 12,
+            "y": 12
+          }
+        },
         "2": {
           "metadata": {
             "deepLink": "#@/resource${resource_group_id}/providers/Microsoft.Storage/storageAccounts/minecraftstor${suffix}/fileList",
@@ -162,7 +305,7 @@
           "position": {
             "colSpan": 6,
             "metadata": null,
-            "rowSpan": 4,
+            "rowSpan": 5,
             "x": 6,
             "y": 0
           }
@@ -261,7 +404,7 @@
             "settings": {
               "content": {
                 "settings": {
-                  "content": "<img width='10' src='https://portal.azure.com/favicon.ico'/>\n<br/>\nServer running at <a href='minecraft://${minecraft_server_fqdn}' target='_blank'>${minecraft_server_fqdn}</a>\n<br/>\n<a href='https://github.com/geekzter/azure-minecraft-docker' target='_blank'>GitHub</a>",
+                  "content": "Minecraft Server running at <a href='minecraft://${minecraft_server_fqdn}' target='_blank'>${minecraft_server_fqdn}</a> on <img width='10' src='https://portal.azure.com/favicon.ico'/>&nbsp;<a href='https://azure.microsoft.com/en-us/services/container-instances/' target='_blank'>Container&nbsp;Instance</a> and <img width='10' src='https://portal.azure.com/favicon.ico'/> <a href='https://azure.microsoft.com/en-us/services/storage/files/' target='_blank'>File Shares</a>\n\nAll from GitHub:\n<ul>\n<li><a href='https://github.com/PaperMC' target='_blank'>Paper Minecraft</a>\n<li>Minecraft Docker image: <a href='https://github.com/itzg/docker-minecraft-server' target='_blank'>itzg/docker-minecraft-server</a>\n<li>Repo that deployed this infrastructure:<a href='https://github.com/geekzter/azure-minecraft-docker' target='_blank'>\ngeekzter/azure-minecraft-docker </a>\n<li>GitHub Actions <a href='https://github.com/geekzter/azure-minecraft-docker/actions?query=workflow%3Aci-vanilla' target='_blank'>\nCI</a> (<a href='https://github.com/geekzter/azure-minecraft-docker/tree/main/.github/workflows' target='_blank'>source</a>)\n<li><a href='https://github.com/features/codespaces' target='_blank'>\nCodespace</a> (<a href='https://github.com/geekzter/azure-minecraft-docker/tree/main/.devcontainer' target='_blank'>definition</a>)\n<li><a href='https://github.com/PowerShell/PowerShell' target='_blank'>Powershell</a>\n<li><a href='https://github.com/hashicorp/terraform' target='_blank'>Terraform</a>\n<li>Terraform <a href='https://github.com/terraform-providers/terraform-provider-azurerm' target='_blank'>azurerm provider</a>\n<li>Terraform <a href='https://github.com/Azure/azure-cli' target='_blank'>Azure CLI</a>\n</ul>",
                   "markdownSource": 1,
                   "subtitle": "Powered by Docker & Azure Container Instance",
                   "title": "Minecraft Server "
@@ -273,12 +416,100 @@
           "position": {
             "colSpan": 6,
             "metadata": null,
-            "rowSpan": 3,
+            "rowSpan": 4,
             "x": 0,
             "y": 1
           }
         },
         "6": {
+          "metadata": {
+            "filters": {
+              "MsPortalFx_TimeRange": {
+                "model": {
+                  "format": "local",
+                  "granularity": "auto",
+                  "relative": "60m"
+                }
+              }
+            },
+            "inputs": [
+              {
+                "isOptional": true,
+                "name": "options",
+                "value": {
+                  "chart": {
+                    "metrics": [
+                      {
+                        "aggregationType": 4,
+                        "metricVisualization": {
+                          "displayName": "Memory Usage",
+                          "resourceDisplayName": "minecraft-${suffix}"
+                        },
+                        "name": "MemoryUsage",
+                        "resourceMetadata": {
+                          "id": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}",
+                          "resourceGroup": "${resource_group}"
+                        }
+                      }
+                    ],
+                    "openBladeOnClick": {
+                      "openBlade": true
+                    },
+                    "title": "Memory",
+                    "titleKind": 2,
+                    "visualization": {
+                      "chartType": 2
+                    }
+                  }
+                }
+              },
+              {
+                "isOptional": true,
+                "name": "sharedTimeRange"
+              }
+            ],
+            "settings": {
+              "content": {
+                "options": {
+                  "chart": {
+                    "metrics": [
+                      {
+                        "aggregationType": 4,
+                        "metricVisualization": {
+                          "displayName": "Memory Usage",
+                          "resourceDisplayName": "minecraft-${suffix}"
+                        },
+                        "name": "MemoryUsage",
+                        "resourceMetadata": {
+                          "id": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}",
+                          "resourceGroup": "${resource_group}"
+                        }
+                      }
+                    ],
+                    "openBladeOnClick": {
+                      "openBlade": true
+                    },
+                    "title": "Memory",
+                    "titleKind": 2,
+                    "visualization": {
+                      "chartType": 2,
+                      "disablePinning": true
+                    }
+                  }
+                }
+              }
+            },
+            "type": "Extension/HubsExtension/PartType/MonitorChartPart"
+          },
+          "position": {
+            "colSpan": 6,
+            "metadata": null,
+            "rowSpan": 4,
+            "x": 12,
+            "y": 4
+          }
+        },
+        "7": {
           "metadata": {
             "deepLink": "#blade/Microsoft_Azure_CostManagement/Menu/costanalysis",
             "inputs": [
@@ -377,10 +608,10 @@
             "metadata": null,
             "rowSpan": 4,
             "x": 0,
-            "y": 4
+            "y": 5
           }
         },
-        "7": {
+        "8": {
           "metadata": {
             "inputs": [
               {
@@ -464,97 +695,9 @@
           "position": {
             "colSpan": 6,
             "metadata": null,
-            "rowSpan": 4,
+            "rowSpan": 7,
             "x": 6,
-            "y": 4
-          }
-        },
-        "8": {
-          "metadata": {
-            "filters": {
-              "MsPortalFx_TimeRange": {
-                "model": {
-                  "format": "local",
-                  "granularity": "auto",
-                  "relative": "60m"
-                }
-              }
-            },
-            "inputs": [
-              {
-                "isOptional": true,
-                "name": "options",
-                "value": {
-                  "chart": {
-                    "metrics": [
-                      {
-                        "aggregationType": 4,
-                        "metricVisualization": {
-                          "displayName": "Memory Usage",
-                          "resourceDisplayName": "minecraft-${suffix}"
-                        },
-                        "name": "MemoryUsage",
-                        "resourceMetadata": {
-                          "id": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}",
-                          "resourceGroup": "${resource_group}"
-                        }
-                      }
-                    ],
-                    "openBladeOnClick": {
-                      "openBlade": true
-                    },
-                    "title": "Memory",
-                    "titleKind": 2,
-                    "visualization": {
-                      "chartType": 2
-                    }
-                  }
-                }
-              },
-              {
-                "isOptional": true,
-                "name": "sharedTimeRange"
-              }
-            ],
-            "settings": {
-              "content": {
-                "options": {
-                  "chart": {
-                    "metrics": [
-                      {
-                        "aggregationType": 4,
-                        "metricVisualization": {
-                          "displayName": "Memory Usage",
-                          "resourceDisplayName": "minecraft-${suffix}"
-                        },
-                        "name": "MemoryUsage",
-                        "resourceMetadata": {
-                          "id": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}",
-                          "resourceGroup": "${resource_group}"
-                        }
-                      }
-                    ],
-                    "openBladeOnClick": {
-                      "openBlade": true
-                    },
-                    "title": "Memory",
-                    "titleKind": 2,
-                    "visualization": {
-                      "chartType": 2,
-                      "disablePinning": true
-                    }
-                  }
-                }
-              }
-            },
-            "type": "Extension/HubsExtension/PartType/MonitorChartPart"
-          },
-          "position": {
-            "colSpan": 6,
-            "metadata": null,
-            "rowSpan": 4,
-            "x": 12,
-            "y": 4
+            "y": 5
           }
         },
         "9": {
@@ -662,11 +805,12 @@
               "value": "Past 24 hours"
             },
             "filteredPartIds": [
-              "StartboardPart-LogsDashboardPart-729c4f2f-d2e6-494b-840e-25a2a6f2a00d",
-              "StartboardPart-MonitorChartPart-729c4f2f-d2e6-494b-840e-25a2a6f2a00f",
-              "StartboardPart-LogsDashboardPart-729c4f2f-d2e6-494b-840e-25a2a6f2a015",
-              "StartboardPart-MonitorChartPart-729c4f2f-d2e6-494b-840e-25a2a6f2a017",
-              "StartboardPart-MonitorChartPart-729c4f2f-d2e6-494b-840e-25a2a6f2a019"
+              "StartboardPart-LogsDashboardPart-42de4876-4f34-46a1-a933-f68c06cbb4b3",
+              "StartboardPart-MonitorChartPart-42de4876-4f34-46a1-a933-f68c06cbb4b5",
+              "StartboardPart-MonitorChartPart-42de4876-4f34-46a1-a933-f68c06cbb4b9",
+              "StartboardPart-LogsDashboardPart-42de4876-4f34-46a1-a933-f68c06cbb4bd",
+              "StartboardPart-MonitorChartPart-42de4876-4f34-46a1-a933-f68c06cbb4bf",
+              "StartboardPart-MonitorChartPart-42de4876-4f34-46a1-a933-f68c06cbb4c3"
             ],
             "model": {
               "format": "utc",
@@ -695,6 +839,7 @@
     "hidden-title": "Minecraft ({environment})",
     "provisioner": "terraform",
     "repository": "azure-minecraft-docker",
+    "runid": "",
     "suffix": "${suffix}",
     "workspace": "${workspace}"
   },

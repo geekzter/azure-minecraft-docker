@@ -106,7 +106,7 @@ $template = $template -Replace "[\w]*\.portal.azure.com", "portal.azure.com"
 $template = $template -Replace "@\w+.onmicrosoft.com", "@"
 
 # Check for remnants of tokens that should've been caught
-$environmentMatches = $template -match $environment
+$environmentMatches = $template -match "${environment}[^(container)]" # Don't match 'devcontainer'
 if ($environmentMatches) {
     Write-Warning "Deployment name value '$environment' found in output:"
     $environmentMatches
