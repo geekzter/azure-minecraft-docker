@@ -35,6 +35,7 @@ variable minecraft_max_players {
   type         = number
   default      = 10
 }
+# https://minecraft.gamepedia.com/Gameplay#Game_modes
 variable minecraft_mode {
   type         = string
   default      = "survival"

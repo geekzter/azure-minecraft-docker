@@ -94,6 +94,7 @@ resource azurerm_container_group minecraft_server {
       "MODE"                   = var.minecraft_mode
       "MOTD"                   = var.minecraft_motd
       "OPS"                    = join(",",var.minecraft_ops)
+      "OVERRIDE_SERVER_PROPERTIES" = "true" # Use these settings over server.roperties every time the container starts
       "SNOOPER_ENABLED"        = var.minecraft_snooper_enabled
       "TYPE"                   = var.minecraft_type
       "TZ"                     = var.minecraft_timezone
