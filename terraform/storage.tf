@@ -115,6 +115,80 @@ resource azurerm_recovery_services_vault backup {
   sku                          = "Standard"
   soft_delete_enabled          = true
 
+  tags                         = local.tags
+
+  count                        = var.enable_backup ? 1 : 0
+}
+
+resource azurerm_monitor_diagnostic_setting backup_vault {
+  name                         = "${azurerm_recovery_services_vault.backup.0.name}-logs"
+  target_resource_id           = azurerm_recovery_services_vault.backup.0.id
+  log_analytics_workspace_id   = azurerm_log_analytics_workspace.monitor.id
+
+  log {
+    category                   = "AddonAzureBackupAlerts"
+    enabled                    = true
+
+    retention_policy {
+      enabled                  = true
+      days                     = 30
+    }
+  }
+  log {
+    category                   = "AddonAzureBackupJobs"
+    enabled                    = true
+
+    retention_policy {
+      enabled                  = true
+      days                     = 30
+    }
+  }
+  log {
+    category                   = "AddonAzureBackupPolicy"
+    enabled                    = true
+
+    retention_policy {
+      enabled                  = true
+      days                     = 30
+    }
+  }
+  log {
+    category                   = "AddonAzureBackupProtectedInstance"
+    enabled                    = true
+
+    retention_policy {
+      enabled                  = true
+      days                     = 30
+    }
+  }
+  log {
+    category                   = "AddonAzureBackupStorage"
+    enabled                    = true
+
+    retention_policy {
+      enabled                  = true
+      days                     = 30
+    }
+  }
+  log {
+    category                   = "AzureBackupReport"
+    enabled                    = true
+
+    retention_policy {
+      enabled                  = true
+      days                     = 30
+    }
+  }
+  log {
+    category                   = "CoreAzureBackup"
+    enabled                    = true
+
+    retention_policy {
+      enabled                  = true
+      days                     = 30
+    }
+  }
+
   count                        = var.enable_backup ? 1 : 0
 }
 
