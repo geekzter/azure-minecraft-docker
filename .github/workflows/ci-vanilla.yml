@@ -127,7 +127,7 @@ jobs:
           az container show --ids ${{ steps.terraform-apply.outputs.container_group_id }} --query instanceView
           az container logs --ids ${{ steps.terraform-apply.outputs.container_group_id }}
           # BUG: no tty
-          # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "rcon-cli say hello from ci"
+          # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "rcon-cli say hello from ci" --container-name minecraft
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true # BUG: setting not honored!
@@ -143,7 +143,7 @@ jobs:
           az container show --ids ${{ steps.terraform-apply.outputs.container_group_id }} --query instanceView
           az container logs --ids ${{ steps.terraform-apply.outputs.container_group_id }}
           # BUG: no tty
-          # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "rcon-cli say ping"
+          # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "rcon-cli say ping" --container-name minecraft
 
     - name: Terraform Destroy
       if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' }}

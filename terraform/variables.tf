@@ -2,6 +2,14 @@ variable container_image_tag {
   type         = string
   default      = ""
 }
+variable backup_interval {
+  type         = string
+  default      = "24h"
+}
+variable backup_prune_days {
+  type         = number
+  default      = 7
+}
 variable location {
   type         = string
   default      = "westeurope" # Amsterdam

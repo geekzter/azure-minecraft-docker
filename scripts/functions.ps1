@@ -88,7 +88,7 @@ function Execute-MinecraftCommand (
         if (![string]::IsNullOrEmpty($containerGroupID)) {
             $containerCommand = [string]::IsNullOrEmpty($Command) ? "rcon-cli" : "rcon-cli ${Command}"
             Write-Host "Sending command '${containerCommand}' to server ${serverFQDN}..."
-            az container exec --ids $containerGroupID --exec-command "${containerCommand}"
+            az container exec --ids $containerGroupID --exec-command "${containerCommand}" --container-name minecraft
             if (!$HideLog) {
                 az container logs --ids $containerGroupID
             }
@@ -182,7 +182,7 @@ function Send-MinecraftMessage (
         
         if (![string]::IsNullOrEmpty($containerGroupID)) {
             Write-Host "Sending message '${Message}' to server ${serverFQDN}..."
-            az container exec --ids $containerGroupID --exec-command "rcon-cli say ${Message}"
+            az container exec --ids $containerGroupID --exec-command "rcon-cli say ${Message}" --container-name minecraft
             if (!$HideLog) {
                 az container logs --ids $containerGroupID
             }
