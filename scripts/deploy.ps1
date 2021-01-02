@@ -133,11 +133,21 @@ try {
         if (Get-Command jq -ErrorAction SilentlyContinue) {
             $containerGroupActions  = $planJSON | jq '.resource_changes[] | select(.address == \"azurerm_container_group.minecraft_server\") | .change.actions' | ConvertFrom-Json
             $containerGroupReplaced = $containerGroupActions.Contains("delete")
+            $serverFQDNActions      = $planJSON | jq '.resource_changes[] | select(.address == \"azurerm_dns_cname_record.vanity_hostname[0]\") | .change.actions'    | ConvertFrom-Json
+            $serverFQDNReplaced     = ($serverFQDNActions -and $serverFQDNActions.Contains("delete"))
             $minecraftDataActions   = $planJSON | jq '.resource_changes[] | select(.address == \"azurerm_storage_share.minecraft_share\") | .change.actions'    | ConvertFrom-Json
             $minecraftDataReplaced  = $minecraftDataActions.Contains("delete")
         } else {
             Write-Warning "jq not found, plan validation skipped. Look at the plan carefully before approving"
             $Force = $false
+        }
+
+        if ($serverFQDNReplaced) {
+            if ($workspace -ieq "prod") {
+                Write-Error "You're about to change the Minecraft Server hostname in workspace 'prod'!!! Please figure out another way of doing so, exiting..."
+                exit 
+            }
+            Write-Warning "You're about to change the Minecraft Server hostname in workspace '${workspace}'!!!"
         }
 
         if ($minecraftDataReplaced) {
