@@ -112,6 +112,7 @@ jobs:
         failOnStandardError: true
 
     - name: Test connection to Minecraft Server (pwsh)
+      if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' }}
       uses: Azure/powershell@v1
       env:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
@@ -139,6 +140,7 @@ jobs:
         failOnStandardError: true # BUG: setting not honored!
 
     - name: Test connection to Minecraft Server (bash)
+      if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' }}
       uses: Azure/CLI@v1
       env:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
@@ -166,7 +168,6 @@ jobs:
       if: ${{ always() }}
       uses: Azure/powershell@v1
       with:
-        # azcliversion: 2.0.72
         inlineScript: |
           Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
 

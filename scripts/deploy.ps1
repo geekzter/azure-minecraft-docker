@@ -177,7 +177,7 @@ try {
 
                 if ($proceedanswer -ne "yes") {
                     Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
-                    Exit
+                    exit
                 }
             }
         }

@@ -128,34 +128,6 @@ resource azurerm_container_group minecraft_server {
       storage_account_key      = azurerm_storage_account.minecraft.primary_access_key
     }
   }
-
-  # Backup sidecar container
-  container {
-    cpu                        = "1"
-    name                       = "backup"
-    environment_variables = {
-      "BACKUP_INTERVAL"        = var.backup_interval
-      "PRUNE_BACKUPS_DAYS"     = var.backup_prune_days
-    }
-    image                      = "itzg/mc-backup"
-    memory                     = "1"
-    volume {
-      mount_path               = "/backup"
-      name                     = "backup"
-      read_only                = false
-      share_name               = azurerm_storage_share.minecraft_backup.name
-      storage_account_name     = azurerm_storage_account.minecraft.name
-      storage_account_key      = azurerm_storage_account.minecraft.primary_access_key
-    }
-    volume {
-      mount_path               = "/data"
-      name                     = "data"
-      read_only                = true
-      share_name               = azurerm_storage_share.minecraft_share.name
-      storage_account_name     = azurerm_storage_account.minecraft.name
-      storage_account_key      = azurerm_storage_account.minecraft.primary_access_key
-    }
-  }
   
   diagnostics {
     log_analytics {

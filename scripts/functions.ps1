@@ -162,7 +162,7 @@ function Invoke (
     $exitCode = $LASTEXITCODE
     if ($exitCode -ne 0) {
         Write-Warning "'$cmd' exited with status $exitCode"
-        return $exitCode
+        exit $exitCode
     }
 }
 
@@ -233,7 +233,7 @@ function WaitFor-MinecraftServer (
           $timer  = [system.diagnostics.stopwatch]::StartNew()
           
           do {
-            $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($serverFQDN, $serverPort)
+            $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($serverFQDN, $serverPort) -ErrorAction SilentlyContinue
             if (!$mineCraftConnection.Connected) {
                 Write-Host "Pinging ${serverFQDN} on port ${serverPort}..."
                 Start-Sleep -Seconds $Interval

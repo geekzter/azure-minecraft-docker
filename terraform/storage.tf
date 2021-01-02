@@ -24,12 +24,6 @@ resource azurerm_storage_share minecraft_share {
   quota                        = 50
 }
 
-resource azurerm_storage_share minecraft_backup {
-  name                         = "minecraft-aci-backup-${local.suffix}"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  quota                        = 50
-}
-
 resource azurerm_storage_share minecraft_modpacks {
   name                         = "minecraft-aci-modpacks-${local.suffix}"
   storage_account_name         = azurerm_storage_account.minecraft.name
@@ -166,27 +160,29 @@ resource azurerm_backup_container_storage_account minecraft {
 }
 
 # BUG: https://github.com/terraform-providers/terraform-provider-azurerm/issues/9452
-resource azurerm_backup_protected_file_share minecraft_data {
-  resource_group_name          = azurerm_resource_group.minecraft.name
-  recovery_vault_name          = azurerm_recovery_services_vault.backup.0.name
-  source_storage_account_id    = azurerm_storage_account.minecraft.id
-  source_file_share_name       = azurerm_storage_share.minecraft_share.name
-  backup_policy_id             = azurerm_backup_policy_file_share.nightly.0.id
+# resource azurerm_backup_protected_file_share minecraft_data {
+#   resource_group_name          = azurerm_resource_group.minecraft.name
+#   recovery_vault_name          = azurerm_recovery_services_vault.backup.0.name
+#   source_storage_account_id    = azurerm_storage_account.minecraft.id
+#   source_file_share_name       = azurerm_storage_share.minecraft_share.name
+#   backup_policy_id             = azurerm_backup_policy_file_share.nightly.0.id
 
-  depends_on                   = [azurerm_backup_container_storage_account.minecraft]
-
-  count                        = var.enable_backup ? 1 : 0
-}
-# HACK: Use Azure CLI instead
-# BUG: az backup protection enable-for-azurefileshare --ids /subscriptions/84c1a2c7-585a-4753-ad28-97f69618cf12/resourceGroups/Minecraft-default-mmbm/providers/Microsoft.RecoveryServices/vaults/Minecraft-default-mmbm-backup --policy-name Minecraft-default-mmbm-backup-nightly --storage-account minecraftstormmbm --azure-file-share minecraft-aci-data-mmbm -o table
-# resource null_resource mineecraft_data_backup {
-#   provisioner local-exec {
-#     command                    = "az backup protection enable-for-azurefileshare --ids ${azurerm_recovery_services_vault.backup.0.id} --policy-name ${azurerm_backup_policy_file_share.nightly.0.name} --storage-account ${azurerm_storage_account.minecraft.name} --azure-file-share ${azurerm_storage_share.minecraft_share.name} -o table"
-#   }
+#   depends_on                   = [azurerm_backup_container_storage_account.minecraft]
 
 #   count                        = var.enable_backup ? 1 : 0
-
-#   depends_on                   = [
-#     azurerm_backup_container_storage_account.minecraft
-#   ]
 # }
+# HACK: Use Azure CLI instead
+resource null_resource mineecraft_data_backup {
+  provisioner local-exec {
+    # BUG: ResourceNotFoundError: Azure File Share item not found. Please provide a valid azure_file_share.
+    # command                    = "az backup protection enable-for-azurefileshare --ids ${azurerm_recovery_services_vault.backup.0.id} --policy-name ${azurerm_backup_policy_file_share.nightly.0.name} --storage-account ${azurerm_storage_account.minecraft.name} --azure-file-share ${azurerm_storage_share.minecraft_share.name} -o table"
+    # command                    = "az backup protection enable-for-azurefileshare -v ${azurerm_recovery_services_vault.backup.0.name} -g ${azurerm_recovery_services_vault.backup.0.resource_group_name} --policy-name ${azurerm_backup_policy_file_share.nightly.0.name} --storage-account ${azurerm_storage_account.minecraft.name} --azure-file-share ${azurerm_storage_share.minecraft_share.name} -o table --subscription ${data.azurerm_subscription.primary.subscription_id}"
+    command                    = "echo 'Manually enable backup of fileshare ${azurerm_storage_share.minecraft_share.name} to vault ${azurerm_recovery_services_vault.backup.0.name}'"
+  }
+
+  count                        = var.enable_backup ? 1 : 0
+
+  depends_on                   = [
+    azurerm_backup_container_storage_account.minecraft
+  ]
+}
