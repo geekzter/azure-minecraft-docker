@@ -217,7 +217,8 @@ function Show-MinecraftLog (
 }
 
 function WaitFor-MinecraftServer (
-    [parameter(mandatory=$false)][int]$Timeout=120
+    [parameter(mandatory=$false)][int]$Timeout=120,
+    [parameter(mandatory=$false)][int]$Interval=10
 ) {
     try {
         AzLogin
@@ -235,7 +236,7 @@ function WaitFor-MinecraftServer (
             $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($serverFQDN, $serverPort)
             if (!$mineCraftConnection.Connected) {
                 Write-Host "Pinging ${serverFQDN} on port ${serverPort}..."
-                Start-Sleep -Seconds 10
+                Start-Sleep -Seconds $Interval
             }
           } while (!$mineCraftConnection.Connected -and ($timer.Elapsed.TotalSeconds -lt $Timeout))
           if ($mineCraftConnection.Connected) {
