@@ -3,6 +3,8 @@ This project deploys [itzg/minecraft-server](https://hub.docker.com/r/itzg/minec
 
 ![ci-vanilla](https://github.com/geekzter/azure-minecraft-docker/workflows/ci-vanilla/badge.svg)
 
+![alt text](diagram.png "Diagram")
+
 ## Pre-requisites
 - [Azure CLI](http://aka.ms/azure-cli)
 - [Terraform](https://www.terraform.io/)
