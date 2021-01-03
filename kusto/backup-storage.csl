@@ -1,0 +1,15 @@
+// Cloud Storage Consumed per Backup Item 
+// View the total Cloud Storage consumed by each Backup Item. 
+// To create an alert for this query, click '+ New alert rule'
+CoreAzureBackup
+//Get all Backup Items
+| where OperationName == "BackupItem"
+//Get distinct Backup Items
+| distinct BackupItemUniqueId, BackupItemFriendlyName, _ResourceId
+| join kind=leftouter(AddonAzureBackupStorage
+| where OperationName == "StorageAssociation"
+//Get latest record for each Backup Item
+| summarize arg_max(TimeGenerated, *) by BackupItemUniqueId 
+| project BackupItemUniqueId , StorageConsumedInMBs) on BackupItemUniqueId
+| project BackupItemUniqueId , BackupItemFriendlyName , StorageConsumedInMBs, _ResourceId 
+| sort by StorageConsumedInMBs desc 

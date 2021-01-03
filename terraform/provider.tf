@@ -1,10 +1,6 @@
 terraform {
   required_providers {
     azurerm                    = "~> 2.41"
-    docker = {
-      source                   = "kreuzwerker/docker"
-      version                  = "~> 2.9.0"
-    }
     null                       = "~> 3.0.0"
     random                     = "~> 3.0.0"
   }

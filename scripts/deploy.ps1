@@ -167,7 +167,7 @@ try {
 
                 # BUG: https://github.com/Azure/azure-cli/issues/8687
                 # rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused "exec: \"rcon-cli say hi\": executable file not found in $PATH"
-                Send-MinecraftMessage -Message "Server will go down in ${GracePeriodSeconds} seconds" -SleepSeconds $GracePeriodSeconds
+                # Send-MinecraftMessage -Message "Server will go down in ${GracePeriodSeconds} seconds" -SleepSeconds $GracePeriodSeconds
             }
 
             if (!$Force -or $containerGroupReplaced -or $minecraftDataReplaced) {
@@ -177,13 +177,13 @@ try {
 
                 if ($proceedanswer -ne "yes") {
                     Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
-                    Exit
+                    exit
                 }
             }
         }
 
         Invoke "terraform apply $forceArgs '$planFile'"
-        WaitFor-MinecraftServer -Timeout 120 -Interval 3
+        WaitFor-MinecraftServer -Timeout 180 -Interval 10
         if ($Follow) {
             # Wait for Minecraft to boot up
             Show-MinecraftLog -Tail

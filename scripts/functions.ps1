@@ -88,7 +88,7 @@ function Execute-MinecraftCommand (
         if (![string]::IsNullOrEmpty($containerGroupID)) {
             $containerCommand = [string]::IsNullOrEmpty($Command) ? "rcon-cli" : "rcon-cli ${Command}"
             Write-Host "Sending command '${containerCommand}' to server ${serverFQDN}..."
-            az container exec --ids $containerGroupID --exec-command "${containerCommand}"
+            az container exec --ids $containerGroupID --exec-command "${containerCommand}" --container-name minecraft
             if (!$HideLog) {
                 az container logs --ids $containerGroupID
             }
@@ -162,7 +162,7 @@ function Invoke (
     $exitCode = $LASTEXITCODE
     if ($exitCode -ne 0) {
         Write-Warning "'$cmd' exited with status $exitCode"
-        return $exitCode
+        exit $exitCode
     }
 }
 
@@ -182,7 +182,7 @@ function Send-MinecraftMessage (
         
         if (![string]::IsNullOrEmpty($containerGroupID)) {
             Write-Host "Sending message '${Message}' to server ${serverFQDN}..."
-            az container exec --ids $containerGroupID --exec-command "rcon-cli say ${Message}"
+            az container exec --ids $containerGroupID --exec-command "rcon-cli say ${Message}" --container-name minecraft
             if (!$HideLog) {
                 az container logs --ids $containerGroupID
             }
@@ -233,14 +233,19 @@ function WaitFor-MinecraftServer (
           $timer  = [system.diagnostics.stopwatch]::StartNew()
           
           do {
-            $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($serverFQDN, $serverPort)
-            if (!$mineCraftConnection.Connected) {
+            try {
                 Write-Host "Pinging ${serverFQDN} on port ${serverPort}..."
-                Start-Sleep -Seconds $Interval
+                $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($serverFQDN, $serverPort) -ErrorAction SilentlyContinue
+                if (!$mineCraftConnection.Connected) {
+                    Start-Sleep -Seconds $Interval
+                }
+            } catch [System.Management.Automation.MethodInvocationException] {
+                Write-Verbose $_
             }
           } while (!$mineCraftConnection.Connected -and ($timer.Elapsed.TotalSeconds -lt $Timeout))
           if ($mineCraftConnection.Connected) {
             Write-Host "Connected to ${serverFQDN}:${serverPort} in $($timer.Elapsed.TotalSeconds) seconds"
+            $mineCraftConnection.Close()
           } else {
             Write-Host "Could not connect to ${serverFQDN}:${serverPort}"
           }

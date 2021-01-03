@@ -89,6 +89,7 @@ resource azurerm_container_group minecraft_server {
       "DIFFICULTY"             = var.minecraft_difficulty
       "ENABLE_COMMAND_BLOCK"   = var.minecraft_enable_command_blocks
       "EULA"                   = "true"
+      "ICON"                   = var.minecraft_icon
       "MAX_PLAYERS"            = var.minecraft_max_players
       "MODS"                   = join(",",var.minecraft_mods)
       "MODE"                   = var.minecraft_mode
@@ -128,7 +129,7 @@ resource azurerm_container_group minecraft_server {
       storage_account_key      = azurerm_storage_account.minecraft.primary_access_key
     }
   }
-
+  
   diagnostics {
     log_analytics {
       workspace_id             = azurerm_log_analytics_workspace.monitor.workspace_id

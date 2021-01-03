@@ -1,0 +1,6 @@
+// Backup jobs with status
+AzureDiagnostics  
+| where ResourceProvider == "MICROSOFT.RECOVERYSERVICES" and Category == "AzureBackupReport"  
+| where OperationName == "Job" and JobOperation_s == "Backup" //and JobStatus_s == "Failed" 
+| project TimeGenerated, JobStartDateTime_s, JobOperation_s, JobStatus_s , JobFailureCode_s, JobDurationInSecs_s , AdHocOrScheduledJob_s
+| order by TimeGenerated desc
