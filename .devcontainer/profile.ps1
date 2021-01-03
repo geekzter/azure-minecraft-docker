@@ -20,4 +20,4 @@ Write-Host "To update Codespace configuration, run $repoDirectory/.devcontainer/
 Write-Host "To provision infrastructure, make sure you're logged in with Azure CLI e.g. run 'az login'. Then, either:"
 Write-Host " - change to the $repoDirectory/terraform directory and run 'terraform apply', or:"
 Write-Host " - run $repoDirectory/scripts/deploy.ps1 -apply"
-Write-Host "To destroy infrastructure, replace 'apply with 'destroy' in above statements"
+Write-Host "To destroy infrastructure, replace 'apply' with 'destroy' in above statements"
