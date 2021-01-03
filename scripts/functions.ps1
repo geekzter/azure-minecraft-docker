@@ -241,6 +241,7 @@ function WaitFor-MinecraftServer (
           } while (!$mineCraftConnection.Connected -and ($timer.Elapsed.TotalSeconds -lt $Timeout))
           if ($mineCraftConnection.Connected) {
             Write-Host "Connected to ${serverFQDN}:${serverPort} in $($timer.Elapsed.TotalSeconds) seconds"
+            $mineCraftConnection.Close()
           } else {
             Write-Host "Could not connect to ${serverFQDN}:${serverPort}"
           }

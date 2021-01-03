@@ -183,7 +183,7 @@ try {
         }
 
         Invoke "terraform apply $forceArgs '$planFile'"
-        WaitFor-MinecraftServer -Timeout 120 -Interval 3
+        WaitFor-MinecraftServer -Timeout 120 -Interval 10
         if ($Follow) {
             # Wait for Minecraft to boot up
             Show-MinecraftLog -Tail

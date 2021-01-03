@@ -35,6 +35,10 @@ variable minecraft_ftb_mod {
   type         = string
   default      = ""
 }
+variable minecraft_icon {
+  # default      = "https://raw.githubusercontent.com/geekzter/azure-minecraft-docker/main/visuals/aci.png"
+  default      = ""
+}
 variable minecraft_max_players {
   type         = number
   default      = 10

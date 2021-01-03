@@ -89,7 +89,7 @@ resource azurerm_container_group minecraft_server {
       "DIFFICULTY"             = var.minecraft_difficulty
       "ENABLE_COMMAND_BLOCK"   = var.minecraft_enable_command_blocks
       "EULA"                   = "true"
-      # "ICON"                   = ""
+      "ICON"                   = var.minecraft_icon
       "MAX_PLAYERS"            = var.minecraft_max_players
       "MODS"                   = join(",",var.minecraft_mods)
       "MODE"                   = var.minecraft_mode
