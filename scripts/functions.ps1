@@ -233,10 +233,14 @@ function WaitFor-MinecraftServer (
           $timer  = [system.diagnostics.stopwatch]::StartNew()
           
           do {
-            $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($serverFQDN, $serverPort) -ErrorAction SilentlyContinue
-            if (!$mineCraftConnection.Connected) {
-                Write-Host "Pinging ${serverFQDN} on port ${serverPort}..."
-                Start-Sleep -Seconds $Interval
+            try {
+                $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($serverFQDN, $serverPort) -ErrorAction SilentlyContinue
+                if (!$mineCraftConnection.Connected) {
+                    Write-Host "Pinging ${serverFQDN} on port ${serverPort}..."
+                    Start-Sleep -Seconds $Interval
+                }
+            } catch [System.Management.Automation.MethodInvocationException] {
+                Write-Verbose $_
             }
           } while (!$mineCraftConnection.Connected -and ($timer.Elapsed.TotalSeconds -lt $Timeout))
           if ($mineCraftConnection.Connected) {
