@@ -25,7 +25,7 @@ If you set this up locally, make sure you have the following pre-requisites:
 
 Once you have those, you can go ahead and provision:
 - Use Azure CLI for SSO with [Terraform](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/azure_cli): `az login`
-Select subscription to use: `az account set --subscription 00000000-0000-0000-0000-000000000000`
+- Select subscription to use: `az account set --subscription 00000000-0000-0000-0000-000000000000`
 - Initialize terraform: `terraform init`
 - Provision cloud infrastructure: `terraform apply`
 
