@@ -118,3 +118,16 @@ variable vanity_hostname_prefix {
   type         = string
   default      = "minecraft"
 }
+
+variable workflow_sp_application_id {
+  description = "Application ID of Logic App Connection Service Principal"
+  default     = ""
+}
+variable workflow_sp_object_id {
+  description = "Object ID of Logic App Connection Service Principal"
+  default     = ""
+}
+variable workflow_sp_application_secret {
+  description = "Password of Logic App Connection Service Principal"
+  default     = ""
+}

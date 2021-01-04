@@ -46,3 +46,30 @@ resource azurerm_dashboard minecraft_dashboard {
     )
   )
 }
+
+resource azurerm_logic_app_workflow shutdown {
+  name                         = "${azurerm_resource_group.minecraft.name}-shutdown"
+  resource_group_name          = azurerm_resource_group.minecraft.name
+  location                     = azurerm_resource_group.minecraft.location
+
+  # lifecycle {
+  #   ignore_changes             = [
+  #       "parameters.$connections"
+  #   ]
+  # }
+}  
+
+resource azurerm_template_deployment container_instance_api_connection {
+  name                         = "${azurerm_logic_app_workflow.shutdown.name}-connection"
+  resource_group_name          = azurerm_resource_group.minecraft.name
+  deployment_mode              = "Incremental"
+  template_body                = file("${path.root}/arm/workflow-connection.json")
+  parameters                   = {                                    
+    "api_id"                   = "/subscriptions/${data.azurerm_subscription.primary.subscription_id}/providers/Microsoft.Web/locations/${azurerm_resource_group.minecraft.location}/managedApis/aci"
+    "connection_name"          = "${azurerm_logic_app_workflow.shutdown.name}-connection"
+    "client_id"                = local.workflow_sp_application_id
+    "client_secret"            = local.workflow_sp_application_secret
+    "location"                 = azurerm_resource_group.minecraft.location       
+    "tenant_id"                = data.azurerm_subscription.primary.tenant_id
+  }                                                                                                                                          
+}

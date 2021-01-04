@@ -13,6 +13,9 @@ locals {
   environment                  = replace(terraform.workspace,"default","dev")
   # https://github.com/itzg/docker-minecraft-server
   container_image              = var.container_image_tag != null && var.container_image_tag != "" ? "itzg/minecraft-server:${var.container_image_tag}" : "itzg/minecraft-server"
+  workflow_sp_application_id   = local.create_service_principal ? module.service_principal.0.application_id : var.workflow_sp_application_id
+  workflow_sp_application_secret= local.create_service_principal ? module.service_principal.0.secret : var.workflow_sp_application_secret
+  create_service_principal     = (var.workflow_sp_application_id == "" || var.workflow_sp_object_id == "" || var.workflow_sp_application_secret == "") ? true : false  
   minecraft_server_fqdn        = var.vanity_dns_zone_id != "" ? replace(try(azurerm_dns_cname_record.vanity_hostname.0.fqdn,""),"/\\W*$/","") : azurerm_container_group.minecraft_server.fqdn
   minecraft_server_port        = 25565
   # subscription_guid            = split("/",azurerm_resource_group.minecraft.id)[1]
@@ -135,6 +138,13 @@ resource azurerm_container_group minecraft_server {
       workspace_id             = azurerm_log_analytics_workspace.monitor.workspace_id
       workspace_key            = azurerm_log_analytics_workspace.monitor.primary_shared_key
     }
+  }
+
+  # TODO: Used MSI authenticate to file shares
+  #       https://github.com/terraform-providers/terraform-provider-azurerm/pull/8961
+  #       https://github.com/terraform-providers/terraform-provider-azurerm/issues/8960
+  identity {
+    type                       = "SystemAssigned"
   }
 
   tags                         = local.tags

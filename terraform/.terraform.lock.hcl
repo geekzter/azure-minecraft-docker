@@ -1,6 +1,23 @@
 # This file is maintained automatically by "terraform init".
 # Manual edits may be lost in future updates.
 
+provider "registry.terraform.io/hashicorp/azuread" {
+  version = "1.1.1"
+  hashes = [
+    "h1:yiaql6uUx2BX4D6/sHNaBGQUWy8PzVDCoLLHI4teTJY=",
+    "zh:3f18644190901ab9bf2324e0547175961d9c012df16838caf813b6eb696eb5f6",
+    "zh:5375040bc18f8b5f5904886133244be655f7dce3bc06cab7016a8d427e5e1301",
+    "zh:59776019d7ef3ae7727c36d8eec6da52b4496b7152a86f023fa4091d3f5e2834",
+    "zh:80ea97821d0cb0f0bf6c95238d01753445c6cfb3f3028f97f016eac2ed939379",
+    "zh:a212c3ee8267c6cb741ffb2c2c654110405aad8916e76ccc8195c5c0f3a9d28c",
+    "zh:ad2878ed73be84d1119dbeb604d4f997cc9e33797b9c41e89b86c4f2e43dc59a",
+    "zh:c8b64fdf6f28dc4e1b141105534cbb39d11c6a7cc33a09470bb663820d91217d",
+    "zh:cc7c3ba3e1d18ace829e971d107106a09facb5fc0c658d42ab9dcd87add09a0c",
+    "zh:cde9059c900898400e21d07253d86b2340f5dcdccf9f39c42186904f31533dea",
+    "zh:eb96bf0ac5e6ae7d3d191163eeefd49dd8f6b853d8b9798faa225f251d5fc6c0",
+  ]
+}
+
 provider "registry.terraform.io/hashicorp/azurerm" {
   version     = "2.41.0"
   constraints = "~> 2.41"
@@ -58,6 +75,23 @@ provider "registry.terraform.io/hashicorp/random" {
     "zh:c73e0eaeea6c65b1cf5098b101d51a2789b054201ce7986a6d206a9e2dacaefd",
     "zh:e8f9ed41ac83dbe407de9f0206ef1148204a0d51ba240318af801ffb3ee5f578",
     "zh:fbdd0684e62563d3ac33425b0ac9439d543a3942465f4b26582bcfabcb149515",
+  ]
+}
+
+provider "registry.terraform.io/hashicorp/time" {
+  version = "0.6.0"
+  hashes = [
+    "h1:AzpZsovYtv0/V2/lp/4chIiaXxPWaAOpqqoXceNAW7g=",
+    "zh:130c61cb41888107bf1e2f1db05b4f664d63af70e7828c0ab16be9fc5302aede",
+    "zh:16132715a10cb31dc6ce6d9320904f84ddb32cbb74516e528009463370d6f715",
+    "zh:2fb8701ac13115bd92187a9c6e47ca2ecedf98943e48e3f5d8a8f3f4bd3fcdf4",
+    "zh:30b4b44748fbfa592a22664c31ac5f664ca5fd18265442a85cd0b41a99b21c86",
+    "zh:5205fa477ebcb1f7d82a701a9a511c6fd555ec209e523081d65b38a5a3423db5",
+    "zh:7584700dc1421f22f6352d61859774e9f6151c48e490f2c0f2ae019274bfd028",
+    "zh:7cc58b561fbb6c86a4f4a7e670434381a1ffa664ca559702fc7eb79ab36164e4",
+    "zh:b7d119ce2f948311a2acb8b32e027562cd291116ecf93af788318c168f82a856",
+    "zh:bd759418034e245f7ca4914ae72c0fbd82cedec12b32980f6ea74aa9c474ba7f",
+    "zh:c06c65224ee9aa8634f8d44552bc803aac0a3a8949b865137873c56d6b2025d7",
   ]
 }
 
