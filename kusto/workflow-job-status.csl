@@ -1,0 +1,4 @@
+AzureDiagnostics 
+| where ResourceProvider == "MICROSOFT.LOGIC"
+| where Category == "WorkflowRuntime"
+| where OperationName has "workflowRunCompleted"
