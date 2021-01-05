@@ -13,6 +13,11 @@ variable enable_backup {
   default      = false
 }
 
+variable enable_auto_startstop {
+  type         = bool
+  default      = false
+}
+
 # https://github.com/itzg/docker-minecraft-server#allow-nether
 variable minecraft_allow_nether {
   type         = bool
@@ -102,6 +107,14 @@ variable run_id {
   type         = string
   default      = ""
 }
+variable start_time {
+  default      = "07:00"
+  description  = "Daily start time in hh:mm:ss format"
+}
+variable stop_time {
+  default      = "23:59"
+  description  = "Daily start time in hh:mm:ss format"
+}
 variable subscription_id {
   type         = string
   default      = ""
@@ -109,6 +122,11 @@ variable subscription_id {
 variable tenant_id {
   type         = string
   default      = ""
+}
+# https://support.microsoft.com/en-us/topic/microsoft-time-zone-index-values-14d39245-e55b-965d-05e6-7d9ea80e885e
+variable timezone {
+  type         = string
+  default      = "W. Europe Standard Time"
 }
 variable vanity_dns_zone_id {
   type         = string
@@ -123,11 +141,11 @@ variable workflow_sp_application_id {
   description = "Application ID of Logic App Connection Service Principal"
   default     = ""
 }
-variable workflow_sp_object_id {
-  description = "Object ID of Logic App Connection Service Principal"
-  default     = ""
-}
 variable workflow_sp_application_secret {
   description = "Password of Logic App Connection Service Principal"
+  default     = ""
+}
+variable workflow_sp_object_id {
+  description = "Object ID of Logic App Connection Service Principal"
   default     = ""
 }

@@ -76,6 +76,7 @@ function Execute-MinecraftCommand (
     [parameter(mandatory=$false)][switch]$HideLog,
     [parameter(mandatory=$false)][int]$SleepSeconds=0
 ) {
+    WaitFor-MinecraftServer
     try {
         AzLogin
         

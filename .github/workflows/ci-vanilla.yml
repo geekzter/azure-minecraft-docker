@@ -68,6 +68,10 @@ jobs:
           $env:ARM_TENANT_ID = $servicePrincipal.tenantId
 
           $env:TF_VAR_run_id=$env:GITHUB_RUN_ID
+          # We may not be able to create a Service Principal with a Service Principal, reuse Terraform SP for Logic App:
+          $env:TF_VAR_workflow_sp_application_id = $servicePrincipal.clientId
+          $env:TF_VAR_workflow_sp_application_secret = $servicePrincipal.clientSecret
+          $env:TF_VAR_workflow_sp_object_id = $servicePrincipal.objectId
           
           # List environment variables
           Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
