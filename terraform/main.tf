@@ -137,6 +137,13 @@ resource azurerm_container_group minecraft_server {
     }
   }
 
+  # TODO: Used MSI authenticate to file shares
+  #       https://github.com/terraform-providers/terraform-provider-azurerm/pull/8961
+  #       https://github.com/terraform-providers/terraform-provider-azurerm/issues/8960
+  identity {
+    type                       = "SystemAssigned"
+  }
+
   tags                         = local.tags
 
   depends_on                   = [

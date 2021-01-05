@@ -23,9 +23,11 @@ If you set this up locally, make sure you have the following pre-requisites:
 - [PowerShell](https://github.com/PowerShell/PowerShell#get-powershell)
 - [Terraform](https://www.terraform.io/downloads.html) (to get that you can use [tfenv](https://github.com/tfutils/tfenv) on Linux & macOS, [Homebrew](https://github.com/hashicorp/homebrew-tap) on macOS or [chocolatey](https://chocolatey.org/packages/terraform) on Windows)
 
+On macOS, you can run `brew bundle` to install the pre-requisites.
+
 Once you have those, you can go ahead and provision:
 - Use Azure CLI for SSO with [Terraform](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/azure_cli): `az login`
-Select subscription to use: `az account set --subscription 00000000-0000-0000-0000-000000000000`
+- Select subscription to use: `az account set --subscription 00000000-0000-0000-0000-000000000000`
 - Initialize terraform: `terraform init`
 - Provision cloud infrastructure: `terraform apply`
 
@@ -34,6 +36,7 @@ You can customize the deployment by overriding defaults for Terraform [input var
 - Use the `minecraft_users` array to define users allowed to log in
 - `vanity_dns_zone_id` and `vanity_hostname_prefix` let you use a custom DNS name for the Minecraft server, using an Azure DNS managed domain
 - Once things get serious, you may want to start backing up data with `enable_backup`
+- Are your kids home schooling on the same computer that has Minecraft installed? Configure auto shutdown & startup with `enable_auto_startstop`, `start_time` & `stop_time`
 
 See [variables.tf](./terraform/variables.tf) for all input variables.
 

@@ -69,6 +69,13 @@ output storage_key {
   sensitive   = true
   value       = azurerm_storage_account.minecraft.primary_access_key
 }
+output workflow_sp_application_id {
+  value       = local.workflow_sp_application_id
+}
+output workflow_sp_application_secret {
+  sensitive   = true
+  value       = local.workflow_sp_application_secret
+}
 output workspace {
   value       = terraform.workspace
 }

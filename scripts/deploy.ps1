@@ -163,7 +163,7 @@ try {
                 Write-Warning "You're about to replace the container instance group in workspace '${workspace}'! Inform users so they can bail out."
                 
                 Write-Host "Opening rcon-cli to send any last commands and messages (e.g. list, save-all, say):"
-                Execute-MinecraftCommand
+                Execute-MinecraftCommand -HideLog
 
                 # BUG: https://github.com/Azure/azure-cli/issues/8687
                 # rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused "exec: \"rcon-cli say hi\": executable file not found in $PATH"
