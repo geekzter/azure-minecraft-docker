@@ -17,6 +17,9 @@ provider azurerm {
 data azurerm_subscription default {
   provider                     = azurerm.defaults
 }
+provider azuread {
+  tenant_id                    = var.tenant_id != null && var.tenant_id != "" ? var.tenant_id : data.azurerm_subscription.default.tenant_id
+}
 provider azurerm {
   features {
     template_deployment {
