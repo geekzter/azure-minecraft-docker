@@ -144,6 +144,7 @@ variable workflow_sp_application_id {
 variable workflow_sp_application_secret {
   description = "Password of Logic App Connection Service Principal"
   default     = ""
+  sensitive   = true
 }
 variable workflow_sp_object_id {
   description = "Object ID of Logic App Connection Service Principal"
