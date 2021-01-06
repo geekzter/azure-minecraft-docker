@@ -2,8 +2,10 @@
 # Manual edits may be lost in future updates.
 
 provider "registry.terraform.io/hashicorp/azuread" {
-  version = "1.1.1"
+  version     = "1.1.1"
+  constraints = ">= 1.1.1"
   hashes = [
+    "h1:M8cDmZ4zdkyidfMZcMpuQ37YNPIr8rER6MZ5viX1xC4=",
     "h1:yiaql6uUx2BX4D6/sHNaBGQUWy8PzVDCoLLHI4teTJY=",
     "zh:3f18644190901ab9bf2324e0547175961d9c012df16838caf813b6eb696eb5f6",
     "zh:5375040bc18f8b5f5904886133244be655f7dce3bc06cab7016a8d427e5e1301",
@@ -82,6 +84,7 @@ provider "registry.terraform.io/hashicorp/time" {
   version = "0.6.0"
   hashes = [
     "h1:AzpZsovYtv0/V2/lp/4chIiaXxPWaAOpqqoXceNAW7g=",
+    "h1:CI0tS9o8Yrcq789g4M0NaY4IWfN6MOX41FnZHoCGPKg=",
     "zh:130c61cb41888107bf1e2f1db05b4f664d63af70e7828c0ab16be9fc5302aede",
     "zh:16132715a10cb31dc6ce6d9320904f84ddb32cbb74516e528009463370d6f715",
     "zh:2fb8701ac13115bd92187a9c6e47ca2ecedf98943e48e3f5d8a8f3f4bd3fcdf4",
