@@ -8,14 +8,20 @@ variable location {
   default      = "westeurope" # Amsterdam
 }
 
+variable enable_auto_startstop {
+  type         = bool
+  default      = false
+}
+
 variable enable_backup {
   type         = bool
   default      = false
 }
 
-variable enable_auto_startstop {
+variable enable_log_filter {
   type         = bool
   default      = false
+  description  = "Enable log filter (bukkit/paper/spigot) that is configured to hide chat messages"
 }
 
 # https://github.com/itzg/docker-minecraft-server#allow-nether

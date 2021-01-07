@@ -23,6 +23,26 @@ resource azurerm_storage_share minecraft_share {
   storage_account_name         = azurerm_storage_account.minecraft.name
   quota                        = 50
 }
+# https://www.spigotmc.org/resources/console-spam-fix.18410/download?version=366123
+resource azurerm_storage_share_directory csf {
+  name                         = "plugins/ConsoleSpamFix"
+  share_name                   = azurerm_storage_share.minecraft_share.name
+  storage_account_name         = azurerm_storage_account.minecraft.name
+
+  count                        = var.enable_log_filter ? 1 : 0
+}
+# BUG: https://github.com/terraform-providers/terraform-provider-azurerm/issues/10001
+# resource azurerm_storage_share_file csf_config {
+#   name                         = "config.yml"
+#   path                         = "plugins/ConsoleSpamFix"
+#   storage_share_id             = azurerm_storage_share.minecraft_share.id
+#   source                       = "${path.root}/minecraft/csf/config.yml"
+#   content_type                 = "application/x-yaml" # ext/yaml
+
+#   count                        = var.enable_log_filter ? 1 : 0
+
+#   depends_on                   = [azurerm_storage_share_directory.csf]
+# }
 
 resource azurerm_storage_share minecraft_modpacks {
   name                         = "minecraft-aci-modpacks-${local.suffix}"
