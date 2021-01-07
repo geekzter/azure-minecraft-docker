@@ -178,7 +178,9 @@ resource azurerm_resource_group_template_deployment start_workflow {
     connection_name            = local.connection_name
     connection_name_json       = local.connection_name_json
     container_group_operation  = "${azurerm_container_group.minecraft_server.id}/start"
+    container_group_id         = "${azurerm_container_group.minecraft_server.id}"
     location                   = azurerm_resource_group.minecraft.location
+    operation                  = "start"
     start_time                 = "${formatdate("YYYY-MM-DD",timestamp())}T${var.start_time}Z"
     time_zone                  = var.timezone
     workflow_name              = azurerm_logic_app_workflow.start.0.name
@@ -199,8 +201,9 @@ resource azurerm_resource_group_template_deployment stop_workflow {
     connection_id              = local.connection_id
     connection_name            = local.connection_name
     connection_name_json       = local.connection_name_json
-    container_group_operation  = "${azurerm_container_group.minecraft_server.id}/stop"
+    container_group_id         = "${azurerm_container_group.minecraft_server.id}"
     location                   = azurerm_resource_group.minecraft.location       
+    operation                  = "stop"
     start_time                 = "${formatdate("YYYY-MM-DD",timestamp())}T${var.stop_time}Z"
     time_zone                  = var.timezone
     workflow_name              = azurerm_logic_app_workflow.stop.0.name

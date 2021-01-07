@@ -22,7 +22,7 @@
                         }
                     },
                     "triggers": {
-                        "Recurrence": {
+                        "${operation}": {
                             "recurrence": {
                                 "frequency": "Day",
                                 "interval": 1,
@@ -33,7 +33,7 @@
                         }
                     },
                     "actions": {
-                        "Start_containers_in_a_container_group": {
+                        "${operation}_minecraft": {
                             "runAfter": {},
                             "type": "ApiConnection",
                             "inputs": {
@@ -43,7 +43,7 @@
                                     }
                                 },
                                 "method": "post",
-                                "path": "${container_group_operation}",
+                                "path": "${container_group_id}/${operation}",
                                 "queries": {
                                     "x-ms-api-version": "2019-12-01"
                                 }
