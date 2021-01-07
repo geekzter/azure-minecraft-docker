@@ -36,7 +36,7 @@ You can customize the deployment by overriding defaults for Terraform [input var
 - Use the `minecraft_users` array to define users allowed to log in
 - `vanity_dns_zone_id` and `vanity_hostname_prefix` let you use a custom DNS name for the Minecraft server, using an Azure DNS managed domain
 - Once things get serious, you may want to start backing up data with `enable_backup`
-- Are your kids home schooling on the same computer that has Minecraft installed? Configure auto shutdown & startup with `enable_auto_startstop`, `start_time` & `stop_time`
+- Are your kids home schooling on the same computer that has Minecraft installed? Configure auto shutdown & startup with `enable_auto_startstop`, `start_time` & `stop_time`. The Logic App triggers created can be favorited in the [mobile app](https://azure.microsoft.com/en-us/features/azure-portal/mobile-app/) for on-demand action.
 
 See [variables.tf](./terraform/variables.tf) for all input variables.
 
