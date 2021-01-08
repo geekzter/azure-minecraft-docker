@@ -36,3 +36,7 @@ backend.tf
 
 # Ignore temporary files
 *.*_
+
+
+# Ignore downloaded plugins
+*.jar

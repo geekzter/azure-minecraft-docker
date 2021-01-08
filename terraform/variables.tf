@@ -18,10 +18,14 @@ variable enable_backup {
   default      = false
 }
 
-variable enable_log_filter {
+variable configure_privacy_plugin {
   type         = bool
   default      = false
-  description  = "Enable log filter (bukkit/paper/spigot) that is configured to hide chat messages"
+  description  = "Enable log filter (bukkit/paper/spigot) that is configured to hide chat messages, and hide plugin stats"
+}
+
+variable log_filter_jar {
+  default      = "https://media.forgecdn.net/files/3106/184/ConsoleSpamFix-1.8.5.jar"
 }
 
 # https://github.com/itzg/docker-minecraft-server#allow-nether
