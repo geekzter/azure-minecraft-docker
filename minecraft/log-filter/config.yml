@@ -3,7 +3,7 @@
 # https://www.spigotmc.org/resources/console-spam-fix.18410
 
 Messages-To-Hide-Filter:
-# User messages
+# Chat messages from users
 - '<'
 - '>'
 

@@ -18,10 +18,10 @@ variable enable_backup {
   default      = false
 }
 
-variable configure_privacy_plugin {
+variable enable_log_filter {
   type         = bool
   default      = false
-  description  = "Enable log filter (bukkit/paper/spigot) that is configured to hide chat messages, and hide plugin stats"
+  description  = "Enable log filter (bukkit/paper/spigot) that is configured to hide chat messages for improved privacy, and hide plugin stats"
 }
 
 variable log_filter_jar {
@@ -82,6 +82,7 @@ variable minecraft_ops {
 variable minecraft_snooper_enabled {
   type         = bool
   default      = false
+  description  = "Leave disabled if you're privacy conscious"
 }
 # https://github.com/itzg/docker-minecraft-server#timezone-configuration
 variable minecraft_timezone {

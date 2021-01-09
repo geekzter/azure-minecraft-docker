@@ -17,5 +17,3 @@ foreach ($pluginUrl in $Url) {
         Write-Host "$filePath already exists"
     }
 }
-
-# https://media.forgecdn.net/files/3106/184/ConsoleSpamFix-1.8.5.jar
