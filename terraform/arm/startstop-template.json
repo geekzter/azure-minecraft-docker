@@ -24,8 +24,17 @@
                     "triggers": {
                         "${operation}": {
                             "recurrence": {
-                                "frequency": "Day",
+                                "frequency": "Week",
                                 "interval": 1,
+                                "schedule": {
+                                    "weekDays": [
+                                        "Monday",
+                                        "Tuesday",
+                                        "Wednesday",
+                                        "Thursday",
+                                        "Friday"
+                                    ]
+                                },
                                 "startTime": "${start_time}",
                                 "timeZone": "${time_zone}"
                             },

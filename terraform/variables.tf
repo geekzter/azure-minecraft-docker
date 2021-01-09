@@ -120,11 +120,11 @@ variable run_id {
 }
 variable start_time {
   default      = "07:00"
-  description  = "Daily start time in hh:mm:ss format"
+  description  = "Daily (weekdays) start time in hh:mm:ss format"
 }
 variable stop_time {
-  default      = "23:59"
-  description  = "Daily start time in hh:mm:ss format"
+  default      = "00:01"
+  description  = "Daily (weekdays) start time in hh:mm:ss format"
 }
 variable subscription_id {
   type         = string
