@@ -155,6 +155,24 @@ function Get-TerraformWorkspace() {
     return $workspace
 }
 
+function Import-TerraformResource ( 
+    [parameter(mandatory=$true)][string]$ResourceName,
+    [parameter(mandatory=$true)][string]$ResourceID
+) {
+    try {
+        Push-Location (Get-TerraformDirectory)
+        $resourceInState = $(terraform state show $ResourceName 2>$null)
+        if ($resourceInState) {
+            Write-Warning "Resource $ResourceName already exists in Terraform state, skipping import"
+            return
+        }
+        Write-Host "Importing ${ResourceName}..."
+        terraform import $ResourceName $ResourceID
+    } finally {
+        Pop-Location
+    }
+}
+
 function Invoke (
     [string]$cmd
 ) {
@@ -166,6 +184,7 @@ function Invoke (
         exit $exitCode
     }
 }
+
 
 function Send-MinecraftMessage ( 
     [parameter(mandatory=$true,position=0)][string]$Message,
@@ -219,6 +238,7 @@ function Show-MinecraftLog (
 
 function WaitFor-MinecraftServer (
     [parameter(mandatory=$false)][int]$Timeout=120,
+    [parameter(mandatory=$false)][int]$MaxTries=50,
     [parameter(mandatory=$false)][int]$Interval=10
 ) {
     try {
@@ -232,8 +252,9 @@ function WaitFor-MinecraftServer (
     
         if (![string]::IsNullOrEmpty($serverFQDN)) {
           $timer  = [system.diagnostics.stopwatch]::StartNew()
-          
+          $connectionAttempts = 0
           do {
+            $connectionAttempts++
             try {
                 Write-Host "Pinging ${serverFQDN} on port ${serverPort}..."
                 $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($serverFQDN, $serverPort) -ErrorAction SilentlyContinue
@@ -243,7 +264,7 @@ function WaitFor-MinecraftServer (
             } catch [System.Management.Automation.MethodInvocationException] {
                 Write-Verbose $_
             }
-          } while (!$mineCraftConnection.Connected -and ($timer.Elapsed.TotalSeconds -lt $Timeout))
+          } while (!$mineCraftConnection.Connected -and ($timer.Elapsed.TotalSeconds -lt $Timeout) -and ($connectionAttempts -le $MaxTries))
           if ($mineCraftConnection.Connected) {
             Write-Host "Connected to ${serverFQDN}:${serverPort} in $($timer.Elapsed.TotalSeconds) seconds"
             $mineCraftConnection.Close()
