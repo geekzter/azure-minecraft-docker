@@ -103,7 +103,7 @@ resource azurerm_role_assignment terraform_storage_owner {
   role_definition_name         = "Storage Blob Data Contributor"
   principal_id                 = each.value
 
-  for_each                     = toset(var.resource_group_contributors)
+  for_each                     = toset(var.solution_contributors)
 }
 
 resource azurerm_storage_blob minecraft_configuration {

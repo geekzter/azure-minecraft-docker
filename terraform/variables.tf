@@ -103,21 +103,28 @@ variable minecraft_version {
   type         = string
   default      = "LATEST"
 }
-variable resource_group_contributors {
-  type         = list
-  default      = []
-  description  = "Object ID's of security principals that are designated Contributors"
-}
-variable resource_group_readers {
-  type         = list
-  default      = []
-  description  = "Object ID's of security principals that are designated Readers"
-}
 
 variable run_id {
   type         = string
   default      = ""
 }
+
+variable solution_contributors {
+  type         = list
+  default      = []
+  description  = "Object ID's of security principals that are designated Contributors"
+}
+variable solution_operators {
+  type         = list
+  default      = []
+  description  = "Object ID's of security principals that are designated Operators"
+}
+variable solution_readers {
+  type         = list
+  default      = []
+  description  = "Object ID's of security principals that are designated Readers"
+}
+
 variable start_time {
   default      = "07:00"
   description  = "Daily (weekdays) start time in hh:mm:ss format"
