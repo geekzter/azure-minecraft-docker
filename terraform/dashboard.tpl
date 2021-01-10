@@ -519,7 +519,7 @@
               },
               {
                 "name": "scopeName",
-                "value": "${subscription_guid}"
+                "value": "Resources with tag repository='azure-minecraft-docker' in subscription ${subscription_guid}"
               },
               {
                 "isOptional": true,
