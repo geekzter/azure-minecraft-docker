@@ -73,7 +73,7 @@ function AzLogin (
 
 function Execute-MinecraftCommand (
     [parameter(Mandatory=$false)][string]$Command,
-    [parameter(mandatory=$false)][switch]$HideLog,
+    [parameter(mandatory=$false)][switch]$ShowLog,
     [parameter(mandatory=$false)][int]$SleepSeconds=0
 ) {
     WaitFor-MinecraftServer
@@ -90,13 +90,13 @@ function Execute-MinecraftCommand (
             $containerCommand = [string]::IsNullOrEmpty($Command) ? "rcon-cli" : "rcon-cli ${Command}"
             Write-Host "Sending command '${containerCommand}' to server ${serverFQDN}..."
             az container exec --ids $containerGroupID --exec-command "${containerCommand}" --container-name minecraft
-            if (!$HideLog) {
+            if ($ShowLog) {
                 az container logs --ids $containerGroupID
             }
             if ($SleepSeconds -gt 0) {
                 Write-Host "Sleeping $SleepSeconds seconds..."
                 Start-Sleep -Seconds $SleepSeconds 
-                if (!$HideLog) {
+                if ($ShowLog) {
                     az container logs --ids $containerGroupID
                 }
             }
@@ -188,7 +188,7 @@ function Invoke (
 
 function Send-MinecraftMessage ( 
     [parameter(mandatory=$true,position=0)][string]$Message,
-    [parameter(mandatory=$false)][switch]$HideLog,
+    [parameter(mandatory=$false)][switch]$ShowLog,
     [parameter(mandatory=$false)][int]$SleepSeconds=0
 ) {
     try {
@@ -203,13 +203,13 @@ function Send-MinecraftMessage (
         if (![string]::IsNullOrEmpty($containerGroupID)) {
             Write-Host "Sending message '${Message}' to server ${serverFQDN}..."
             az container exec --ids $containerGroupID --exec-command "rcon-cli say ${Message}" --container-name minecraft
-            if (!$HideLog) {
+            if ($ShowLog) {
                 az container logs --ids $containerGroupID
             }
             if ($SleepSeconds -gt 0) {
                 Write-Host "Sleeping $SleepSeconds seconds..."
                 Start-Sleep -Seconds $SleepSeconds 
-                if (!$HideLog) {
+                if ($ShowLog) {
                     az container logs --ids $containerGroupID
                 }
             }

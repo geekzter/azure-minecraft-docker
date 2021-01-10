@@ -7,9 +7,9 @@
 
 ### Arguments
 param ( 
-    [parameter(mandatory=$false)][switch]$HideLog,
+    [parameter(mandatory=$false)][switch]$ShowLog,
     [parameter(mandatory=$false)][int]$SleepSeconds=0
 )
 . (Join-Path $PSScriptRoot functions.ps1)
 
-Execute-MinecraftCommand -HideLog:$HideLog -SleepSeconds $SleepSeconds
+Execute-MinecraftCommand -ShowLog:$ShowLog -SleepSeconds $SleepSeconds
