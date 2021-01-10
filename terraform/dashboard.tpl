@@ -519,7 +519,7 @@
               },
               {
                 "name": "scopeName",
-                "value": "Microsoft Internal - Eric van Wijk"
+                "value": "${subscription_guid}"
               },
               {
                 "isOptional": true,
