@@ -185,7 +185,7 @@ jobs:
 
           # Remove resource locks first
           $storageAccountID = $(terraform output -raw storage_account_id)
-          if ($storageAccountID) {
+          if ($storageAccountID -and (!($storageAccountID -match "\[\d+m"))) {
             $storageLockID = $(az resource lock list --resource $storageAccountID --query [].id -o tsv)
           }
           if ($storageLockID) {
