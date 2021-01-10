@@ -8,14 +8,24 @@ variable location {
   default      = "westeurope" # Amsterdam
 }
 
+variable enable_auto_startstop {
+  type         = bool
+  default      = false
+}
+
 variable enable_backup {
   type         = bool
   default      = false
 }
 
-variable enable_auto_startstop {
+variable enable_log_filter {
   type         = bool
   default      = false
+  description  = "Enable log filter (bukkit/paper/spigot) that is configured to hide chat messages for improved privacy, and hide plugin stats"
+}
+
+variable log_filter_jar {
+  default      = "https://media.forgecdn.net/files/3106/184/ConsoleSpamFix-1.8.5.jar"
 }
 
 # https://github.com/itzg/docker-minecraft-server#allow-nether
@@ -72,6 +82,7 @@ variable minecraft_ops {
 variable minecraft_snooper_enabled {
   type         = bool
   default      = false
+  description  = "Leave disabled if you're privacy conscious"
 }
 # https://github.com/itzg/docker-minecraft-server#timezone-configuration
 variable minecraft_timezone {
@@ -92,28 +103,35 @@ variable minecraft_version {
   type         = string
   default      = "LATEST"
 }
-variable resource_group_contributors {
-  type         = list
-  default      = []
-  description  = "Object ID's of security principals that are designated Contributors"
-}
-variable resource_group_readers {
-  type         = list
-  default      = []
-  description  = "Object ID's of security principals that are designated Readers"
-}
 
 variable run_id {
   type         = string
   default      = ""
 }
+
+variable solution_contributors {
+  type         = list
+  default      = []
+  description  = "Object ID's of security principals that are designated Contributors"
+}
+variable solution_operators {
+  type         = list
+  default      = []
+  description  = "Object ID's of security principals that are designated Operators"
+}
+variable solution_readers {
+  type         = list
+  default      = []
+  description  = "Object ID's of security principals that are designated Readers"
+}
+
 variable start_time {
   default      = "07:00"
-  description  = "Daily start time in hh:mm:ss format"
+  description  = "Daily (weekdays) start time in hh:mm:ss format"
 }
 variable stop_time {
-  default      = "23:59"
-  description  = "Daily start time in hh:mm:ss format"
+  default      = "00:01"
+  description  = "Daily (weekdays) start time in hh:mm:ss format"
 }
 variable subscription_id {
   type         = string
@@ -144,6 +162,7 @@ variable workflow_sp_application_id {
 variable workflow_sp_application_secret {
   description = "Password of Logic App Connection Service Principal"
   default     = ""
+  sensitive   = true
 }
 variable workflow_sp_object_id {
   description = "Object ID of Logic App Connection Service Principal"

@@ -23,6 +23,68 @@ resource azurerm_storage_share minecraft_share {
   storage_account_name         = azurerm_storage_account.minecraft.name
   quota                        = 50
 }
+# https://www.spigotmc.org/resources/console-spam-fix.18410/download?version=366123
+resource azurerm_storage_share_directory plugins {
+  name                         = "plugins"
+  share_name                   = azurerm_storage_share.minecraft_share.name
+  storage_account_name         = azurerm_storage_account.minecraft.name
+
+  count                        = var.enable_log_filter ? 1 : 0
+}
+resource azurerm_storage_share_directory bstats {
+  name                         = "${azurerm_storage_share_directory.plugins.0.name}/bStats"
+  share_name                   = azurerm_storage_share.minecraft_share.name
+  storage_account_name         = azurerm_storage_account.minecraft.name
+
+  count                        = var.enable_log_filter ? 1 : 0
+}
+resource azurerm_storage_share_file bstats_config {
+  name                         = "config.yml"
+  path                         = azurerm_storage_share_directory.bstats.0.name
+  storage_share_id             = azurerm_storage_share.minecraft_share.id
+  source                       = "${path.root}/../minecraft/bstats/config.yml"
+  content_type                 = "application/yaml"
+
+  count                        = var.enable_log_filter ? 1 : 0
+}
+resource azurerm_storage_share_directory log_filter {
+  name                         = "${azurerm_storage_share_directory.plugins.0.name}/ConsoleSpamFix"
+  share_name                   = azurerm_storage_share.minecraft_share.name
+  storage_account_name         = azurerm_storage_account.minecraft.name
+
+  count                        = var.enable_log_filter ? 1 : 0
+}
+resource azurerm_storage_share_file log_filter_config {
+  name                         = "config.yml"
+  path                         = azurerm_storage_share_directory.log_filter.0.name
+  storage_share_id             = azurerm_storage_share.minecraft_share.id
+  source                       = "${path.root}/../minecraft/log-filter/config.yml"
+  content_type                 = "application/yaml"
+
+  count                        = var.enable_log_filter ? 1 : 0
+}
+resource null_resource log_filter_jar {
+  provisioner local-exec {
+    command                    = "../scripts/download_plugins.ps1 -Url ${var.log_filter_jar}"
+    interpreter                = ["pwsh","-nop","-c"]
+  }
+
+  count                        = var.enable_log_filter && !fileexists("${path.root}/../minecraft/plugins/${basename(var.log_filter_jar)}") ? 1 : 0
+}
+resource azurerm_storage_share_file log_filter_jar {
+  name                         = basename(var.log_filter_jar)
+  path                         = azurerm_storage_share_directory.plugins.0.name
+  storage_share_id             = azurerm_storage_share.minecraft_share.id
+  source                       = "${path.root}/../minecraft/plugins/${basename(var.log_filter_jar)}"
+  content_type                 = "application/java-archive"
+
+  count                        = var.enable_log_filter ? 1 : 0
+
+  depends_on                   = [
+    azurerm_storage_share_file.log_filter_config,
+    null_resource.log_filter_jar
+  ]
+}
 
 resource azurerm_storage_share minecraft_modpacks {
   name                         = "minecraft-aci-modpacks-${local.suffix}"
@@ -41,7 +103,7 @@ resource azurerm_role_assignment terraform_storage_owner {
   role_definition_name         = "Storage Blob Data Contributor"
   principal_id                 = each.value
 
-  for_each                     = toset(var.resource_group_contributors)
+  for_each                     = toset(var.solution_contributors)
 }
 
 resource azurerm_storage_blob minecraft_configuration {
@@ -235,7 +297,7 @@ resource azurerm_backup_container_storage_account minecraft {
 
 # BUG: https://github.com/terraform-providers/terraform-provider-azurerm/issues/9452
 # FIX: https://github.com/terraform-providers/terraform-provider-azurerm/pull/9015
-#      https://github.com/terraform-providers/terraform-provider-azurerm/milestone/107
+#      https://github.com/terraform-providers/terraform-provider-azurerm/milestone/108
 # resource azurerm_backup_protected_file_share minecraft_data {
 #   resource_group_name          = azurerm_resource_group.minecraft.name
 #   recovery_vault_name          = azurerm_recovery_services_vault.backup.0.name

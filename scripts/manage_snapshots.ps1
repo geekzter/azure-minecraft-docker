@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 <# 
 .SYNOPSIS 
-    Show the live Minecraft log
+    Create file share snapshots
 #> 
 #Requires -Version 7
 
@@ -29,7 +29,7 @@ try {
         }
         az storage share list --include-snapshots --account-name $storageAccount --account-key $storageKey -o table
     } else {
-        Write-Warning "Storage Fiile Share has not been created, nothing to do"
+        Write-Warning "Storage File Share has not been created, nothing to do"
         exit 
     } 
 } finally {

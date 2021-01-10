@@ -34,9 +34,10 @@ Once you have those, you can go ahead and provision:
 ### Customization
 You can customize the deployment by overriding defaults for Terraform [input variables](https://www.terraform.io/docs/configuration/variables.html). The easiest way to do this is to copy [config.auto.tfvars.example](./terraform/config.auto.tfvars.example) and save it as config.auto.tfvars.
 - Use the `minecraft_users` array to define users allowed to log in
-- `vanity_dns_zone_id` and `vanity_hostname_prefix` let you use a custom DNS name for the Minecraft server, using an Azure DNS managed domain
+- Use a custom DNS name with `vanity_dns_zone_id` and `vanity_hostname_prefix`, using an Azure DNS managed domain
 - Once things get serious, you may want to start backing up data with `enable_backup`
-- Are your kids home schooling on the same computer that has Minecraft installed? Configure auto shutdown & startup with `enable_auto_startstop`, `start_time` & `stop_time`
+- Are your kids home schooling on the same computer that has Minecraft installed? Configure auto shutdown & startup during weekdays with `enable_auto_startstop`, `start_time` & `stop_time`. The Logic App triggers created can be favorited in the [mobile app](https://azure.microsoft.com/en-us/features/azure-portal/mobile-app/) for on-demand startup & shutdown.
+- Concerned about chat messages appearing in logs? `enable_log_filter` uses the [Console Spam Fix](https://dev.bukkit.org/projects/console-spam-fix) and [configures](./minecraft/log-filter/config.yml) it to hide chat messages from logs. This feature is dependent on [PowerShell](https://github.com/PowerShell/PowerShell) and is more brittle in automation, but satisfies a key privacy requirement.
 
 See [variables.tf](./terraform/variables.tf) for all input variables.
 

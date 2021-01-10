@@ -49,6 +49,10 @@ $workspace = Get-TerraformWorkspace
 $planFile  = "${workspace}.tfplan".ToLower()
 $varsFile  = "${workspace}.tfvars".ToLower()
 $inAutomation = ($env:TF_IN_AUTOMATION -ieq "true")
+if (($workspace -ieq "prod") -and $Force) {
+    $Force = $false
+    Write-Warning "Ignoring -Force in workspace '${workspace}'"
+}
 
 try {
     $tfdirectory = (Get-TerraformDirectory)
@@ -144,7 +148,7 @@ try {
 
         if ($serverFQDNReplaced) {
             if ($workspace -ieq "prod") {
-                Write-Error "You're about to change the Minecraft Server hostname in workspace 'prod'!!! Please figure out another way of doing so, exiting..."
+                Write-Error "You're about to change the Minecraft Server hostname in workspace '${workspace}'!!! Please figure out another way of doing so, exiting..."
                 exit 
             }
             Write-Warning "You're about to change the Minecraft Server hostname in workspace '${workspace}'!!!"
@@ -152,7 +156,7 @@ try {
 
         if ($minecraftDataReplaced) {
             if ($workspace -ieq "prod") {
-                Write-Error "You're about to delete Minecraft world data in workspace 'prod'!!! Please figure out another way of doing so, exiting..."
+                Write-Error "You're about to delete Minecraft world data in workspace '${workspace}'!!! Please figure out another way of doing so, exiting..."
                 exit 
             }
             Write-Warning "You're about to delete Minecraft world data in workspace '${workspace}'!!!"
@@ -163,7 +167,7 @@ try {
                 Write-Warning "You're about to replace the container instance group in workspace '${workspace}'! Inform users so they can bail out."
                 
                 Write-Host "Opening rcon-cli to send any last commands and messages (e.g. list, save-all, say):"
-                Execute-MinecraftCommand -HideLog
+                Execute-MinecraftCommand
 
                 # BUG: https://github.com/Azure/azure-cli/issues/8687
                 # rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused "exec: \"rcon-cli say hi\": executable file not found in $PATH"

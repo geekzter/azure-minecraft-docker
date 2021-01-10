@@ -73,7 +73,7 @@ function AzLogin (
 
 function Execute-MinecraftCommand (
     [parameter(Mandatory=$false)][string]$Command,
-    [parameter(mandatory=$false)][switch]$HideLog,
+    [parameter(mandatory=$false)][switch]$ShowLog,
     [parameter(mandatory=$false)][int]$SleepSeconds=0
 ) {
     WaitFor-MinecraftServer
@@ -90,13 +90,13 @@ function Execute-MinecraftCommand (
             $containerCommand = [string]::IsNullOrEmpty($Command) ? "rcon-cli" : "rcon-cli ${Command}"
             Write-Host "Sending command '${containerCommand}' to server ${serverFQDN}..."
             az container exec --ids $containerGroupID --exec-command "${containerCommand}" --container-name minecraft
-            if (!$HideLog) {
+            if ($ShowLog) {
                 az container logs --ids $containerGroupID
             }
             if ($SleepSeconds -gt 0) {
                 Write-Host "Sleeping $SleepSeconds seconds..."
                 Start-Sleep -Seconds $SleepSeconds 
-                if (!$HideLog) {
+                if ($ShowLog) {
                     az container logs --ids $containerGroupID
                 }
             }
@@ -155,6 +155,24 @@ function Get-TerraformWorkspace() {
     return $workspace
 }
 
+function Import-TerraformResource ( 
+    [parameter(mandatory=$true)][string]$ResourceName,
+    [parameter(mandatory=$true)][string]$ResourceID
+) {
+    try {
+        Push-Location (Get-TerraformDirectory)
+        $resourceInState = $(terraform state show $ResourceName 2>$null)
+        if ($resourceInState) {
+            Write-Warning "Resource $ResourceName already exists in Terraform state, skipping import"
+            return
+        }
+        Write-Host "Importing ${ResourceName}..."
+        terraform import $ResourceName $ResourceID
+    } finally {
+        Pop-Location
+    }
+}
+
 function Invoke (
     [string]$cmd
 ) {
@@ -167,9 +185,10 @@ function Invoke (
     }
 }
 
+
 function Send-MinecraftMessage ( 
     [parameter(mandatory=$true,position=0)][string]$Message,
-    [parameter(mandatory=$false)][switch]$HideLog,
+    [parameter(mandatory=$false)][switch]$ShowLog,
     [parameter(mandatory=$false)][int]$SleepSeconds=0
 ) {
     try {
@@ -184,13 +203,13 @@ function Send-MinecraftMessage (
         if (![string]::IsNullOrEmpty($containerGroupID)) {
             Write-Host "Sending message '${Message}' to server ${serverFQDN}..."
             az container exec --ids $containerGroupID --exec-command "rcon-cli say ${Message}" --container-name minecraft
-            if (!$HideLog) {
+            if ($ShowLog) {
                 az container logs --ids $containerGroupID
             }
             if ($SleepSeconds -gt 0) {
                 Write-Host "Sleeping $SleepSeconds seconds..."
                 Start-Sleep -Seconds $SleepSeconds 
-                if (!$HideLog) {
+                if ($ShowLog) {
                     az container logs --ids $containerGroupID
                 }
             }
@@ -219,6 +238,7 @@ function Show-MinecraftLog (
 
 function WaitFor-MinecraftServer (
     [parameter(mandatory=$false)][int]$Timeout=120,
+    [parameter(mandatory=$false)][int]$MaxTries=50,
     [parameter(mandatory=$false)][int]$Interval=10
 ) {
     try {
@@ -232,8 +252,9 @@ function WaitFor-MinecraftServer (
     
         if (![string]::IsNullOrEmpty($serverFQDN)) {
           $timer  = [system.diagnostics.stopwatch]::StartNew()
-          
+          $connectionAttempts = 0
           do {
+            $connectionAttempts++
             try {
                 Write-Host "Pinging ${serverFQDN} on port ${serverPort}..."
                 $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($serverFQDN, $serverPort) -ErrorAction SilentlyContinue
@@ -243,7 +264,7 @@ function WaitFor-MinecraftServer (
             } catch [System.Management.Automation.MethodInvocationException] {
                 Write-Verbose $_
             }
-          } while (!$mineCraftConnection.Connected -and ($timer.Elapsed.TotalSeconds -lt $Timeout))
+          } while (!$mineCraftConnection.Connected -and ($timer.Elapsed.TotalSeconds -lt $Timeout) -and ($connectionAttempts -le $MaxTries))
           if ($mineCraftConnection.Connected) {
             Write-Host "Connected to ${serverFQDN}:${serverPort} in $($timer.Elapsed.TotalSeconds) seconds"
             $mineCraftConnection.Close()
