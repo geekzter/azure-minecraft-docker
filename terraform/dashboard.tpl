@@ -31,35 +31,119 @@
           "position": {
             "colSpan": 2,
             "metadata": null,
-            "rowSpan": 1,
+            "rowSpan": 2,
             "x": 0,
             "y": 0
           }
         },
         "1": {
           "metadata": {
-            "asset": {
-              "idInputName": "id",
-              "type": "Workspace"
-            },
-            "deepLink": "#@/resource${resource_group_id}/providers/Microsoft.OperationalInsights/workspaces/${resource_group}-loganalytics/Overview",
+            "deepLink": "#@/resource${resource_group_id}/providers/Microsoft.Storage/storageAccounts/minecraftstor${suffix}/fileList",
             "inputs": [
               {
-                "name": "id",
-                "value": "${resource_group_id}/providers/microsoft.operationalinsights/workspaces/${resource_group}-loganalytics"
+                "name": "storageAccountId",
+                "value": "${resource_group_id}/providers/Microsoft.Storage/storageAccounts/minecraftstor${suffix}"
               }
             ],
-            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/WorkspacePart"
+            "type": "Extension/Microsoft_Azure_FileStorage/PartType/FileServicePinnedPart"
           },
           "position": {
             "colSpan": 2,
             "metadata": null,
-            "rowSpan": 1,
+            "rowSpan": 2,
             "x": 2,
             "y": 0
           }
         },
         "10": {
+          "metadata": {
+            "filters": {
+              "MsPortalFx_TimeRange": {
+                "model": {
+                  "format": "local",
+                  "granularity": "auto",
+                  "relative": "60m"
+                }
+              }
+            },
+            "inputs": [
+              {
+                "isOptional": true,
+                "name": "options",
+                "value": {
+                  "chart": {
+                    "metrics": [
+                      {
+                        "aggregationType": 4,
+                        "metricVisualization": {
+                          "displayName": "Network Bytes Transmitted Per Second",
+                          "resourceDisplayName": "minecraft-${suffix}"
+                        },
+                        "name": "NetworkBytesTransmittedPerSecond",
+                        "resourceMetadata": {
+                          "id": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}",
+                          "resourceGroup": "${resource_group}"
+                        }
+                      }
+                    ],
+                    "openBladeOnClick": {
+                      "openBlade": true
+                    },
+                    "title": "Network bytes transmitted",
+                    "titleKind": 2,
+                    "visualization": {
+                      "chartType": 2
+                    }
+                  }
+                }
+              },
+              {
+                "isOptional": true,
+                "name": "sharedTimeRange"
+              }
+            ],
+            "settings": {
+              "content": {
+                "options": {
+                  "chart": {
+                    "metrics": [
+                      {
+                        "aggregationType": 4,
+                        "metricVisualization": {
+                          "displayName": "Network Bytes Transmitted Per Second",
+                          "resourceDisplayName": "minecraft-${suffix}"
+                        },
+                        "name": "NetworkBytesTransmittedPerSecond",
+                        "resourceMetadata": {
+                          "id": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}",
+                          "resourceGroup": "${resource_group}"
+                        }
+                      }
+                    ],
+                    "openBladeOnClick": {
+                      "openBlade": true
+                    },
+                    "title": "Network bytes transmitted",
+                    "titleKind": 2,
+                    "visualization": {
+                      "chartType": 2,
+                      "disablePinning": true
+                    }
+                  }
+                }
+              }
+            },
+            "type": "Extension/HubsExtension/PartType/MonitorChartPart"
+          },
+          "position": {
+            "colSpan": 6,
+            "metadata": null,
+            "rowSpan": 4,
+            "x": 12,
+            "y": 8
+          }
+        },
+        "11": {
           "metadata": {
             "deepLink": "#@/resource${resource_group_id}/overview",
             "inputs": [
@@ -78,12 +162,12 @@
           "position": {
             "colSpan": 6,
             "metadata": null,
-            "rowSpan": 3,
-            "x": 0,
-            "y": 9
+            "rowSpan": 4,
+            "x": 6,
+            "y": 10
           }
         },
-        "11": {
+        "12": {
           "metadata": {
             "filters": {
               "MsPortalFx_TimeRange": {
@@ -204,108 +288,47 @@
         },
         "2": {
           "metadata": {
-            "deepLink": "#@/resource${resource_group_id}/providers/Microsoft.Storage/storageAccounts/minecraftstor${suffix}/fileList",
+            "asset": {
+              "idInputName": "id",
+              "type": "Workspace"
+            },
+            "deepLink": "#@/resource${resource_group_id}/providers/Microsoft.OperationalInsights/workspaces/${resource_group}-loganalytics/Overview",
             "inputs": [
               {
-                "name": "storageAccountId",
-                "value": "${resource_group_id}/providers/Microsoft.Storage/storageAccounts/minecraftstor${suffix}"
+                "name": "id",
+                "value": "${resource_group_id}/providers/microsoft.operationalinsights/workspaces/${resource_group}-loganalytics"
               }
             ],
-            "type": "Extension/Microsoft_Azure_FileStorage/PartType/FileServicePinnedPart"
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/WorkspacePart"
           },
           "position": {
             "colSpan": 2,
             "metadata": null,
-            "rowSpan": 1,
+            "rowSpan": 2,
             "x": 4,
             "y": 0
           }
         },
         "3": {
           "metadata": {
-            "inputs": [
-              {
-                "isOptional": true,
-                "name": "ComponentId",
-                "value": {
-                  "Name": "${resource_group}-loganalytics",
-                  "ResourceGroup": "${resource_group}",
-                  "ResourceId": "${resource_group_id}/providers/microsoft.operationalinsights/workspaces/${resource_group}-loganalytics",
-                  "SubscriptionId": "${subscription_guid}"
-                }
-              },
-              {
-                "isOptional": true,
-                "name": "Dimensions"
-              },
-              {
-                "isOptional": true,
-                "name": "PartId",
-                "value": "11a37614-4dbc-4fe6-a814-91aee9a148a9"
-              },
-              {
-                "isOptional": true,
-                "name": "Version",
-                "value": "1.0"
-              },
-              {
-                "isOptional": true,
-                "name": "resourceTypeMode",
-                "value": "workspace"
-              },
-              {
-                "isOptional": true,
-                "name": "TimeRange",
-                "value": "P1D"
-              },
-              {
-                "isOptional": true,
-                "name": "DashboardId"
-              },
-              {
-                "isOptional": true,
-                "name": "DraftRequestParameters"
-              },
-              {
-                "isOptional": true,
-                "name": "Query",
-                "value": "ContainerEvent_CL \n| project TimeGenerated, Message\n| order by TimeGenerated desc\n"
-              },
-              {
-                "isOptional": true,
-                "name": "ControlType",
-                "value": "AnalyticsGrid"
-              },
-              {
-                "isOptional": true,
-                "name": "SpecificChart"
-              },
-              {
-                "isOptional": true,
-                "name": "PartTitle",
-                "value": "Analytics"
-              },
-              {
-                "isOptional": true,
-                "name": "PartSubTitle",
-                "value": "${resource_group}-loganalytics"
-              }
-            ],
+            "inputs": [],
             "settings": {
               "content": {
-                "GridColumnsWidth": {
-                  "Message": "362px"
-                },
-                "PartSubTitle": "${resource_group}-loganalytics",
-                "PartTitle": "Events"
+                "settings": {
+                  "content": "<img src='https://github.com/geekzter/azure-minecraft-docker/raw/week2/visuals/minecraft-logo-800.png' align='middle'/>\n",
+                  "markdownSource": 1,
+                  "markdownUri": "https://logos-world.net/wp-content/uploads/2020/04/Minecraft-Logo.png",
+                  "subtitle": "",
+                  "title": " "
+                }
               }
             },
-            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
+            "type": "Extension/HubsExtension/PartType/MarkdownPart"
           },
           "position": {
             "colSpan": 6,
             "metadata": null,
-            "rowSpan": 5,
+            "rowSpan": 2,
             "x": 6,
             "y": 0
           }
@@ -400,11 +423,104 @@
         },
         "5": {
           "metadata": {
+            "inputs": [
+              {
+                "isOptional": true,
+                "name": "ComponentId",
+                "value": {
+                  "Name": "${resource_group}-loganalytics",
+                  "ResourceGroup": "${resource_group}",
+                  "ResourceId": "${resource_group_id}/providers/microsoft.operationalinsights/workspaces/${resource_group}-loganalytics",
+                  "SubscriptionId": "${subscription_guid}"
+                }
+              },
+              {
+                "isOptional": true,
+                "name": "Dimensions"
+              },
+              {
+                "isOptional": true,
+                "name": "PartId",
+                "value": "11a37614-4dbc-4fe6-a814-91aee9a148a9"
+              },
+              {
+                "isOptional": true,
+                "name": "Version",
+                "value": "1.0"
+              },
+              {
+                "isOptional": true,
+                "name": "resourceTypeMode",
+                "value": "workspace"
+              },
+              {
+                "isOptional": true,
+                "name": "TimeRange",
+                "value": "P1D"
+              },
+              {
+                "isOptional": true,
+                "name": "DashboardId"
+              },
+              {
+                "isOptional": true,
+                "name": "DraftRequestParameters"
+              },
+              {
+                "isOptional": true,
+                "name": "Query",
+                "value": "ContainerEvent_CL \n| project TimeGenerated, Message\n| order by TimeGenerated desc\n"
+              },
+              {
+                "isOptional": true,
+                "name": "ControlType",
+                "value": "AnalyticsGrid"
+              },
+              {
+                "isOptional": true,
+                "name": "SpecificChart"
+              },
+              {
+                "isOptional": true,
+                "name": "PartTitle",
+                "value": "Analytics"
+              },
+              {
+                "isOptional": true,
+                "name": "PartSubTitle",
+                "value": "${resource_group}-loganalytics"
+              },
+              {
+                "isOptional": true,
+                "name": "Scope"
+              }
+            ],
+            "settings": {
+              "content": {
+                "GridColumnsWidth": {
+                  "Message": "362px"
+                },
+                "PartSubTitle": "${resource_group}-loganalytics",
+                "PartTitle": "Events"
+              }
+            },
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
+          },
+          "position": {
+            "colSpan": 6,
+            "metadata": null,
+            "rowSpan": 4,
+            "x": 0,
+            "y": 2
+          }
+        },
+        "6": {
+          "metadata": {
             "inputs": [],
             "settings": {
               "content": {
                 "settings": {
-                  "content": "Minecraft Server running at <a href='minecraft://${minecraft_server_fqdn}' target='_blank'>${minecraft_server_fqdn}</a> on <img width='10' src='https://portal.azure.com/favicon.ico'/>&nbsp;<a href='https://azure.microsoft.com/en-us/services/container-instances/' target='_blank'>Container&nbsp;Instance</a> and <img width='10' src='https://portal.azure.com/favicon.ico'/> <a href='https://azure.microsoft.com/en-us/services/storage/files/' target='_blank'>File Shares</a>\n\nThe technology stack is all on GitHub:\n<ul>\n<li><a href='https://github.com/PaperMC' target='_blank'>Paper Minecraft</a>\n<li>Minecraft Docker image: <a href='https://github.com/itzg/docker-minecraft-server' target='_blank'>itzg/docker-minecraft-server</a>\n<li>Repo that deployed this infrastructure:<a href='https://github.com/geekzter/azure-minecraft-docker' target='_blank'>\ngeekzter/azure-minecraft-docker </a>\n<li>GitHub Actions <a href='https://github.com/geekzter/azure-minecraft-docker/actions?query=workflow%3Aci-vanilla' target='_blank'>\nCI</a> (<a href='https://github.com/geekzter/azure-minecraft-docker/tree/main/.github/workflows' target='_blank'>source</a>)\n<li><a href='https://github.com/features/codespaces' target='_blank'>\nCodespace</a> (<a href='https://github.com/geekzter/azure-minecraft-docker/tree/main/.devcontainer' target='_blank'>definition</a>)\n<li><a href='https://github.com/PowerShell/PowerShell' target='_blank'>Powershell</a>\n<li><a href='https://github.com/hashicorp/terraform' target='_blank'>Terraform</a>\n<li>Terraform <a href='https://github.com/terraform-providers/terraform-provider-azurerm' target='_blank'>azurerm provider</a>\n<li><a href='https://github.com/Azure/azure-cli' target='_blank'>Azure CLI</a>\n</ul>",
+                  "content": "Minecraft Server running at <a href='minecraft://${minecraft_server_fqdn}' target='_blank'>${minecraft_server_fqdn}</a> on <img width='10' src='https://portal.azure.com/favicon.ico'/>&nbsp;<a href='https://azure.microsoft.com/en-us/services/container-instances/' target='_blank'>Container&nbsp;Instance</a> and <img width='10' src='https://portal.azure.com/favicon.ico'/> <a href='https://azure.microsoft.com/en-us/services/storage/files/' target='_blank'>File Shares</a>. \n<br/>\nThe technology stack is all on GitHub:\n<ul>\n<li><a href='https://github.com/PaperMC' target='_blank'>Paper Minecraft</a>\n<li>Minecraft Docker image: <a href='https://github.com/itzg/docker-minecraft-server' target='_blank'>itzg/docker-minecraft-server</a>\n<li>Repo that deployed this infrastructure:<a href='https://github.com/geekzter/azure-minecraft-docker' target='_blank'>\ngeekzter/azure-minecraft-docker </a>\n<li>GitHub Actions <a href='https://github.com/geekzter/azure-minecraft-docker/actions?query=workflow%3Aci-vanilla' target='_blank'>\nCI</a> (<a href='https://github.com/geekzter/azure-minecraft-docker/tree/main/.github/workflows' target='_blank'>source</a>)\n<li><a href='https://github.com/features/codespaces' target='_blank'>\nCodespace</a> (<a href='https://github.com/geekzter/azure-minecraft-docker/tree/main/.devcontainer' target='_blank'>definition</a>)\n<li><a href='https://github.com/PowerShell/PowerShell' target='_blank'>Powershell</a>\n<li><a href='https://github.com/hashicorp/terraform' target='_blank'>Terraform</a>\n<li>Terraform <a href='https://github.com/terraform-providers/terraform-provider-azurerm' target='_blank'>azurerm provider</a>\n<li><a href='https://github.com/Azure/azure-cli' target='_blank'>Azure CLI</a>\n</ul>",
                   "markdownSource": 1,
                   "subtitle": "Powered by Docker & Azure Container Instance",
                   "title": "Minecraft Server "
@@ -417,11 +533,11 @@
             "colSpan": 6,
             "metadata": null,
             "rowSpan": 4,
-            "x": 0,
-            "y": 1
+            "x": 6,
+            "y": 2
           }
         },
-        "6": {
+        "7": {
           "metadata": {
             "filters": {
               "MsPortalFx_TimeRange": {
@@ -509,7 +625,100 @@
             "y": 4
           }
         },
-        "7": {
+        "8": {
+          "metadata": {
+            "inputs": [
+              {
+                "isOptional": true,
+                "name": "ComponentId",
+                "value": {
+                  "Name": "${resource_group}-loganalytics",
+                  "ResourceGroup": "${resource_group}",
+                  "ResourceId": "${resource_group_id}/providers/microsoft.operationalinsights/workspaces/${resource_group}-loganalytics",
+                  "SubscriptionId": "${subscription_guid}"
+                }
+              },
+              {
+                "isOptional": true,
+                "name": "Dimensions"
+              },
+              {
+                "isOptional": true,
+                "name": "PartId",
+                "value": "688a3af1-10e7-459c-a613-30a97b00a33d"
+              },
+              {
+                "isOptional": true,
+                "name": "Version",
+                "value": "1.0"
+              },
+              {
+                "isOptional": true,
+                "name": "resourceTypeMode",
+                "value": "workspace"
+              },
+              {
+                "isOptional": true,
+                "name": "TimeRange",
+                "value": "P1D"
+              },
+              {
+                "isOptional": true,
+                "name": "DashboardId"
+              },
+              {
+                "isOptional": true,
+                "name": "DraftRequestParameters"
+              },
+              {
+                "isOptional": true,
+                "name": "Query",
+                "value": "ContainerInstanceLog_CL \n| where Message contains \"connect\" or Message contains \"[/\" \n| project TimeGenerated, Message\n| order by TimeGenerated desc\n"
+              },
+              {
+                "isOptional": true,
+                "name": "ControlType",
+                "value": "AnalyticsGrid"
+              },
+              {
+                "isOptional": true,
+                "name": "SpecificChart"
+              },
+              {
+                "isOptional": true,
+                "name": "PartTitle",
+                "value": "Analytics"
+              },
+              {
+                "isOptional": true,
+                "name": "PartSubTitle",
+                "value": "${resource_group}-loganalytics"
+              },
+              {
+                "isOptional": true,
+                "name": "Scope"
+              }
+            ],
+            "settings": {
+              "content": {
+                "GridColumnsWidth": {
+                  "Message": "359px"
+                },
+                "PartSubTitle": "${resource_group}-loganalytics",
+                "PartTitle": "Connection Events"
+              }
+            },
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
+          },
+          "position": {
+            "colSpan": 6,
+            "metadata": null,
+            "rowSpan": 8,
+            "x": 0,
+            "y": 6
+          }
+        },
+        "9": {
           "metadata": {
             "deepLink": "#blade/Microsoft_Azure_CostManagement/Menu/costanalysis",
             "inputs": [
@@ -519,7 +728,7 @@
               },
               {
                 "name": "scopeName",
-                "value": "Resources with tag repository='azure-minecraft-docker' in subscription ${subscription_guid}"
+                "value": "Resources tagged repository='azure-minecraft-docker' in subscription ${subscription_guid}"
               },
               {
                 "isOptional": true,
@@ -529,7 +738,7 @@
                   "chart": "Area",
                   "currency": "USD",
                   "dateRange": "ThisMonth",
-                  "displayName": "Minecraft Server",
+                  "displayName": "Cost Consumption",
                   "kpis": [
                     {
                       "enabled": true,
@@ -607,185 +816,8 @@
             "colSpan": 6,
             "metadata": null,
             "rowSpan": 4,
-            "x": 0,
-            "y": 5
-          }
-        },
-        "8": {
-          "metadata": {
-            "inputs": [
-              {
-                "isOptional": true,
-                "name": "ComponentId",
-                "value": {
-                  "Name": "${resource_group}-loganalytics",
-                  "ResourceGroup": "${resource_group}",
-                  "ResourceId": "${resource_group_id}/providers/microsoft.operationalinsights/workspaces/${resource_group}-loganalytics",
-                  "SubscriptionId": "${subscription_guid}"
-                }
-              },
-              {
-                "isOptional": true,
-                "name": "Dimensions"
-              },
-              {
-                "isOptional": true,
-                "name": "PartId",
-                "value": "688a3af1-10e7-459c-a613-30a97b00a33d"
-              },
-              {
-                "isOptional": true,
-                "name": "Version",
-                "value": "1.0"
-              },
-              {
-                "isOptional": true,
-                "name": "resourceTypeMode",
-                "value": "workspace"
-              },
-              {
-                "isOptional": true,
-                "name": "TimeRange",
-                "value": "P1D"
-              },
-              {
-                "isOptional": true,
-                "name": "DashboardId"
-              },
-              {
-                "isOptional": true,
-                "name": "DraftRequestParameters"
-              },
-              {
-                "isOptional": true,
-                "name": "Query",
-                "value": "ContainerInstanceLog_CL \n| where Message contains \"connect\" or Message contains \"[/\" \n| project TimeGenerated, Message\n| order by TimeGenerated desc\n"
-              },
-              {
-                "isOptional": true,
-                "name": "ControlType",
-                "value": "AnalyticsGrid"
-              },
-              {
-                "isOptional": true,
-                "name": "SpecificChart"
-              },
-              {
-                "isOptional": true,
-                "name": "PartTitle",
-                "value": "Analytics"
-              },
-              {
-                "isOptional": true,
-                "name": "PartSubTitle",
-                "value": "${resource_group}-loganalytics"
-              }
-            ],
-            "settings": {
-              "content": {
-                "GridColumnsWidth": {
-                  "Message": "359px"
-                },
-                "PartSubTitle": "${resource_group}-loganalytics",
-                "PartTitle": "Connection Events"
-              }
-            },
-            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
-          },
-          "position": {
-            "colSpan": 6,
-            "metadata": null,
-            "rowSpan": 7,
             "x": 6,
-            "y": 5
-          }
-        },
-        "9": {
-          "metadata": {
-            "filters": {
-              "MsPortalFx_TimeRange": {
-                "model": {
-                  "format": "local",
-                  "granularity": "auto",
-                  "relative": "60m"
-                }
-              }
-            },
-            "inputs": [
-              {
-                "isOptional": true,
-                "name": "options",
-                "value": {
-                  "chart": {
-                    "metrics": [
-                      {
-                        "aggregationType": 4,
-                        "metricVisualization": {
-                          "displayName": "Network Bytes Transmitted Per Second",
-                          "resourceDisplayName": "minecraft-${suffix}"
-                        },
-                        "name": "NetworkBytesTransmittedPerSecond",
-                        "resourceMetadata": {
-                          "id": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}",
-                          "resourceGroup": "${resource_group}"
-                        }
-                      }
-                    ],
-                    "openBladeOnClick": {
-                      "openBlade": true
-                    },
-                    "title": "Network bytes transmitted",
-                    "titleKind": 2,
-                    "visualization": {
-                      "chartType": 2
-                    }
-                  }
-                }
-              },
-              {
-                "isOptional": true,
-                "name": "sharedTimeRange"
-              }
-            ],
-            "settings": {
-              "content": {
-                "options": {
-                  "chart": {
-                    "metrics": [
-                      {
-                        "aggregationType": 4,
-                        "metricVisualization": {
-                          "displayName": "Network Bytes Transmitted Per Second",
-                          "resourceDisplayName": "minecraft-${suffix}"
-                        },
-                        "name": "NetworkBytesTransmittedPerSecond",
-                        "resourceMetadata": {
-                          "id": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}",
-                          "resourceGroup": "${resource_group}"
-                        }
-                      }
-                    ],
-                    "openBladeOnClick": {
-                      "openBlade": true
-                    },
-                    "title": "Network bytes transmitted",
-                    "titleKind": 2,
-                    "visualization": {
-                      "chartType": 2,
-                      "disablePinning": true
-                    }
-                  }
-                }
-              }
-            },
-            "type": "Extension/HubsExtension/PartType/MonitorChartPart"
-          },
-          "position": {
-            "colSpan": 6,
-            "metadata": null,
-            "rowSpan": 4,
-            "x": 12,
-            "y": 8
+            "y": 6
           }
         }
       }
@@ -805,12 +837,12 @@
               "value": "Past 24 hours"
             },
             "filteredPartIds": [
-              "StartboardPart-LogsDashboardPart-42de4876-4f34-46a1-a933-f68c06cbb4b3",
-              "StartboardPart-MonitorChartPart-42de4876-4f34-46a1-a933-f68c06cbb4b5",
-              "StartboardPart-MonitorChartPart-42de4876-4f34-46a1-a933-f68c06cbb4b9",
-              "StartboardPart-LogsDashboardPart-42de4876-4f34-46a1-a933-f68c06cbb4bd",
-              "StartboardPart-MonitorChartPart-42de4876-4f34-46a1-a933-f68c06cbb4bf",
-              "StartboardPart-MonitorChartPart-42de4876-4f34-46a1-a933-f68c06cbb4c3"
+              "StartboardPart-MonitorChartPart-327e050d-0cd2-4afc-8207-8a3c4f3860e7",
+              "StartboardPart-MonitorChartPart-327e050d-0cd2-4afc-8207-8a3c4f3860eb",
+              "StartboardPart-MonitorChartPart-327e050d-0cd2-4afc-8207-8a3c4f3860f1",
+              "StartboardPart-LogsDashboardPart-327e050d-0cd2-4afc-8207-8a3c4f3860f3",
+              "StartboardPart-MonitorChartPart-327e050d-0cd2-4afc-8207-8a3c4f3860f7",
+              "StartboardPart-LogsDashboardPart-327e050d-0cd2-4afc-8207-8a3c4f3860f9"
             ],
             "model": {
               "format": "utc",
