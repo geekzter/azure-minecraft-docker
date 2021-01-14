@@ -295,9 +295,9 @@ resource azurerm_backup_container_storage_account minecraft {
   count                        = var.enable_backup ? 1 : 0
 }
 
-# BUG: https://github.com/terraform-providers/terraform-provider-azurerm/issues/9452
+# BUG: https://github.com/terraform-providers/terraform-provider-azurerm/issues/9368
+#      https://github.com/terraform-providers/terraform-provider-azurerm/issues/9452
 # FIX: https://github.com/terraform-providers/terraform-provider-azurerm/pull/9015
-#      https://github.com/terraform-providers/terraform-provider-azurerm/milestone/108
 # resource azurerm_backup_protected_file_share minecraft_data {
 #   resource_group_name          = azurerm_resource_group.minecraft.name
 #   recovery_vault_name          = azurerm_recovery_services_vault.backup.0.name
