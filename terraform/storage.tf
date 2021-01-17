@@ -136,6 +136,17 @@ resource azurerm_storage_blob minecraft_user_configuration {
   depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
 }
 
+resource azurerm_storage_blob minecraft_backend_configuration {
+  name                         = "${local.config_directory}/backend.tf"
+  storage_account_name         = azurerm_storage_account.minecraft.name
+  storage_container_name       = azurerm_storage_container.configuration.name
+  type                         = "Block"
+  source                       = "${path.root}/backend.tf"
+
+  count                        = fileexists("${path.root}/backend.tf") ? 1 : 0
+  depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
+}
+
 resource azurerm_storage_blob minecraft_auto_vars_configuration {
   name                         = "${local.config_directory}/config.auto.tfvars"
   storage_account_name         = azurerm_storage_account.minecraft.name
@@ -295,9 +306,10 @@ resource azurerm_backup_container_storage_account minecraft {
   count                        = var.enable_backup ? 1 : 0
 }
 
-# BUG: https://github.com/terraform-providers/terraform-provider-azurerm/issues/9452
+# BUG: https://github.com/terraform-providers/terraform-provider-azurerm/issues/9368
+#      https://github.com/terraform-providers/terraform-provider-azurerm/issues/9452
 # FIX: https://github.com/terraform-providers/terraform-provider-azurerm/pull/9015
-#      https://github.com/terraform-providers/terraform-provider-azurerm/milestone/108
+#      https://github.com/terraform-providers/terraform-provider-azurerm/milestone/109
 # resource azurerm_backup_protected_file_share minecraft_data {
 #   resource_group_name          = azurerm_resource_group.minecraft.name
 #   recovery_vault_name          = azurerm_recovery_services_vault.backup.0.name
