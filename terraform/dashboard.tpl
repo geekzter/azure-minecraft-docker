@@ -315,7 +315,7 @@
             "settings": {
               "content": {
                 "settings": {
-                  "content": "<img src='https://github.com/geekzter/azure-minecraft-docker/raw/week2/visuals/minecraft-logo-800.png' align='middle'/>\n",
+                  "content": "<img src='https://github.com/geekzter/azure-minecraft-docker/raw/main/visuals/minecraft-logo-800.png' align='middle'/>\n",
                   "markdownSource": 1,
                   "markdownUri": "https://logos-world.net/wp-content/uploads/2020/04/Minecraft-Logo.png",
                   "subtitle": "",
