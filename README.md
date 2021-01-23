@@ -41,7 +41,7 @@ You can customize the deployment by overriding defaults for Terraform [input var
 
 See [variables.tf](./terraform/variables.tf) for all input variables.
 ## Dashboard
-Once provisioned, this dashboard like this becomes available in the Azure Portal:   
+Once provisioned, a dashboard like this becomes available in the Azure Portal:   
 
 ![alt text](./visuals/dashboard.png "Dashboard")
 
