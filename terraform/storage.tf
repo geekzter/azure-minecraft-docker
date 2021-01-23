@@ -318,3 +318,16 @@ resource azurerm_management_lock minecraft_backup_lock {
     azurerm_monitor_diagnostic_setting.backup_vault
   ]
 }
+
+locals {
+  all_resource_locks           = var.enable_backup ? concat(local.storage_resource_locks,local.backup_resource_locks) : local.storage_resource_locks
+  backup_resource_locks        = concat(
+    azurerm_management_lock.minecraft_backup_lock.*.id,
+    [
+      replace(azurerm_management_lock.minecraft_data_lock.id,azurerm_management_lock.minecraft_data_lock.name,"AzureBackupProtectionLock"),
+    ],
+  )
+  storage_resource_locks       = [
+    azurerm_management_lock.minecraft_data_lock.id
+  ]
+}

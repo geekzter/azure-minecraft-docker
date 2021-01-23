@@ -630,12 +630,19 @@
             "inputs": [
               {
                 "isOptional": true,
-                "name": "ComponentId",
+                "name": "resourceTypeMode"
+              },
+              {
+                "isOptional": true,
+                "name": "ComponentId"
+              },
+              {
+                "isOptional": true,
+                "name": "Scope",
                 "value": {
-                  "Name": "${resource_group}-loganalytics",
-                  "ResourceGroup": "${resource_group}",
-                  "ResourceId": "${resource_group_id}/providers/microsoft.operationalinsights/workspaces/${resource_group}-loganalytics",
-                  "SubscriptionId": "${subscription_guid}"
+                  "resourceIds": [
+                    "${resource_group_id}/providers/microsoft.operationalinsights/workspaces/${resource_group}-loganalytics"
+                  ]
                 }
               },
               {
@@ -645,17 +652,12 @@
               {
                 "isOptional": true,
                 "name": "PartId",
-                "value": "688a3af1-10e7-459c-a613-30a97b00a33d"
+                "value": "15a53e10-286d-4b38-ac93-bd98b26c8546"
               },
               {
                 "isOptional": true,
                 "name": "Version",
-                "value": "1.0"
-              },
-              {
-                "isOptional": true,
-                "name": "resourceTypeMode",
-                "value": "workspace"
+                "value": "2.0"
               },
               {
                 "isOptional": true,
@@ -673,7 +675,7 @@
               {
                 "isOptional": true,
                 "name": "Query",
-                "value": "ContainerInstanceLog_CL \n| where Message contains \"connect\" or Message contains \"[/\" \n| project TimeGenerated, Message\n| order by TimeGenerated desc\n"
+                "value": "ContainerInstanceLog_CL \n| where Message contains \"connect\" or Message contains \"[/\" \n| order by TimeGenerated desc\n| project Message\n\n"
               },
               {
                 "isOptional": true,
@@ -693,16 +695,12 @@
                 "isOptional": true,
                 "name": "PartSubTitle",
                 "value": "${resource_group}-loganalytics"
-              },
-              {
-                "isOptional": true,
-                "name": "Scope"
               }
             ],
             "settings": {
               "content": {
                 "GridColumnsWidth": {
-                  "Message": "359px"
+                  "Message": "502px"
                 },
                 "PartSubTitle": "${resource_group}-loganalytics",
                 "PartTitle": "Connection Events"
@@ -837,12 +835,12 @@
               "value": "Past 24 hours"
             },
             "filteredPartIds": [
-              "StartboardPart-MonitorChartPart-327e050d-0cd2-4afc-8207-8a3c4f3860e7",
-              "StartboardPart-MonitorChartPart-327e050d-0cd2-4afc-8207-8a3c4f3860eb",
-              "StartboardPart-MonitorChartPart-327e050d-0cd2-4afc-8207-8a3c4f3860f1",
-              "StartboardPart-LogsDashboardPart-327e050d-0cd2-4afc-8207-8a3c4f3860f3",
-              "StartboardPart-MonitorChartPart-327e050d-0cd2-4afc-8207-8a3c4f3860f7",
-              "StartboardPart-LogsDashboardPart-327e050d-0cd2-4afc-8207-8a3c4f3860f9"
+              "StartboardPart-MonitorChartPart-81c62d84-096d-48e7-b9a8-25a6e5e9209c",
+              "StartboardPart-LogsDashboardPart-81c62d84-096d-48e7-b9a8-25a6e5e9209e",
+              "StartboardPart-MonitorChartPart-81c62d84-096d-48e7-b9a8-25a6e5e920a2",
+              "StartboardPart-MonitorChartPart-81c62d84-096d-48e7-b9a8-25a6e5e920a8",
+              "StartboardPart-MonitorChartPart-81c62d84-096d-48e7-b9a8-25a6e5e920ac",
+              "StartboardPart-LogsDashboardPart-81c62d84-096d-48e7-b9a8-25a6e5e920ae"
             ],
             "model": {
               "format": "utc",
@@ -867,7 +865,7 @@
   "resourceGroup": "${resource_group}",
   "tags": {
     "application": "Minecraft",
-    "environment": "${environment}",
+    "environment": "${workspace}",
     "hidden-title": "Minecraft ({environment})",
     "provisioner": "terraform",
     "repository": "azure-minecraft-docker",
