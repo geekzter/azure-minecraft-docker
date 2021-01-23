@@ -40,7 +40,10 @@ You can customize the deployment by overriding defaults for Terraform [input var
 - Concerned about chat messages appearing in logs? `enable_log_filter` uses the [Console Spam Fix](https://dev.bukkit.org/projects/console-spam-fix) and [configures](./minecraft/log-filter/config.yml) it to hide chat messages from logs. This feature is dependent on [PowerShell](https://github.com/PowerShell/PowerShell) and is more brittle in automation, but satisfies a key privacy requirement.
 
 See [variables.tf](./terraform/variables.tf) for all input variables.
+## Dashboard
+Once provisioned, this dashboard like this becomes available in the Azure Portal:   
 
+![alt text](./visuals/dashboard.png "Dashboard")
 
 ## Resources
 - [itzg/minecraft-server](https://hub.docker.com/r/itzg/minecraft-server) on Docker Hub
