@@ -8,7 +8,7 @@ resource random_string password {
 }
 
 resource azuread_application app {
-  name                         = var.name
+  display_name                 = var.name
   homepage                     = "https://${var.name}"
   identifier_uris              = ["http://${var.name}"]
   reply_urls                   = ["http://${var.name}/replyignored"]

@@ -45,6 +45,9 @@ output resource_group {
 output resource_group_id {
   value       = azurerm_resource_group.minecraft.id
 }
+output resource_locks {
+  value       = local.all_resource_locks
+}
 output resource_suffix {
   value       = local.suffix
 }

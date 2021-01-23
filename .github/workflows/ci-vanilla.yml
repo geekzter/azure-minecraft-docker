@@ -39,7 +39,7 @@ jobs:
     # strategy:
     #     matrix:
     #       os: [windows-latest, ubuntu-latest, macos-latest]
-    #       terraform-versions: [0.11.14, latest]
+    #       terraform-versions: [0.13.6, latest]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout source
@@ -184,12 +184,10 @@ jobs:
           Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
 
           # Remove resource locks first
-          $storageAccountID = $(terraform output -raw storage_account_id)
-          if ($storageAccountID -and (!($storageAccountID -match "\[\d+m"))) {
-            $storageLockID = $(az resource lock list --resource $storageAccountID --query [].id -o tsv)
-          }
-          if ($storageLockID) {
-            az resource lock delete --ids $storageLockID --verbose
+          $resourceLocksJSON = $(terraform output -json resource_locks 2>$null)
+          if ($resourceLocksJSON -and ($resourceLocksJSON -match "^\[.*\]$")) {
+            $resourceLocks = ($resourceLocksJSON | ConvertFrom-JSON)
+            az resource lock delete --ids $resourceLocks --verbose
           }
 
           # Build JMESPath expression

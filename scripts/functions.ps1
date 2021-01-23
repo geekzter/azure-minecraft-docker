@@ -76,36 +76,37 @@ function Execute-MinecraftCommand (
     [parameter(mandatory=$false)][switch]$ShowLog,
     [parameter(mandatory=$false)][int]$SleepSeconds=0
 ) {
-    WaitFor-MinecraftServer
-    try {
-        AzLogin
+    if (WaitFor-MinecraftServer) {
+        try {
+            AzLogin
+            
+            $tfdirectory = $(Join-Path (Get-Item $PSScriptRoot).Parent.FullName "terraform")
+            Push-Location $tfdirectory
+            
+            $containerGroupID = (Get-TerraformOutput "container_group_id")
+            $serverFQDN       = (Get-TerraformOutput "minecraft_server_fqdn")
         
-        $tfdirectory = $(Join-Path (Get-Item $PSScriptRoot).Parent.FullName "terraform")
-        Push-Location $tfdirectory
-        
-        $containerGroupID = (Get-TerraformOutput "container_group_id")
-        $serverFQDN       = (Get-TerraformOutput "minecraft_server_fqdn")
-    
-        if (![string]::IsNullOrEmpty($containerGroupID)) {
-            $containerCommand = [string]::IsNullOrEmpty($Command) ? "rcon-cli" : "rcon-cli ${Command}"
-            Write-Host "Sending command '${containerCommand}' to server ${serverFQDN}..."
-            az container exec --ids $containerGroupID --exec-command "${containerCommand}" --container-name minecraft
-            if ($ShowLog) {
-                az container logs --ids $containerGroupID
-            }
-            if ($SleepSeconds -gt 0) {
-                Write-Host "Sleeping $SleepSeconds seconds..."
-                Start-Sleep -Seconds $SleepSeconds 
+            if (![string]::IsNullOrEmpty($containerGroupID)) {
+                $containerCommand = [string]::IsNullOrEmpty($Command) ? "rcon-cli" : "rcon-cli ${Command}"
+                Write-Host "Sending command '${containerCommand}' to server ${serverFQDN}..."
+                az container exec --ids $containerGroupID --exec-command "${containerCommand}" --container-name minecraft
                 if ($ShowLog) {
                     az container logs --ids $containerGroupID
                 }
-            }
-        } else {
-            Write-Warning "Container Instance has not been created, nothing to do"
-            return 
-        } 
-    } finally {
-        Pop-Location
+                if ($SleepSeconds -gt 0) {
+                    Write-Host "Sleeping $SleepSeconds seconds..."
+                    Start-Sleep -Seconds $SleepSeconds 
+                    if ($ShowLog) {
+                        az container logs --ids $containerGroupID
+                    }
+                }
+            } else {
+                Write-Warning "Container Instance has not been created, nothing to do"
+                return 
+            } 
+        } finally {
+            Pop-Location
+        }
     }
 }
 
@@ -272,9 +273,10 @@ function WaitFor-MinecraftServer (
             Write-Host "Could not connect to ${serverFQDN}:${serverPort}"
           }
 
+          return $true
         } else {
             Write-Warning "Server has not been created, nothing to do"
-            return 
+            return $false
         } 
     } finally {
         Pop-Location

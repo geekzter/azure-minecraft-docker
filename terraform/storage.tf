@@ -265,21 +265,12 @@ resource azurerm_monitor_diagnostic_setting backup_vault {
   count                        = var.enable_backup ? 1 : 0
 }
 
-resource azurerm_management_lock minecraft_backup_lock {
-  name                         = "${azurerm_recovery_services_vault.backup.0.name}-lock"
-  scope                        = azurerm_recovery_services_vault.backup.0.id
-  lock_level                   = "CanNotDelete"
-  notes                        = "Do not accidentally delete Minecraft (world) backups"
-
-  count                        = var.enable_backup ? 1 : 0
-}
-
 resource azurerm_backup_policy_file_share nightly {
   name                         = "${azurerm_recovery_services_vault.backup.0.name}-nightly"
   resource_group_name          = azurerm_recovery_services_vault.backup.0.resource_group_name
   recovery_vault_name          = azurerm_recovery_services_vault.backup.0.name
 
-  timezone                     = "W. Europe Standard Time"
+  timezone                     = var.timezone
 
   backup {
     frequency                  = "Daily"
@@ -298,38 +289,45 @@ resource azurerm_backup_container_storage_account minecraft {
   recovery_vault_name          = azurerm_recovery_services_vault.backup.0.name
   storage_account_id           = azurerm_storage_account.minecraft.id
 
-  # provisioner local-exec {
-  #   command                    = "az backup protection disable -v ${self.recovery_vault_name} -g ${self.resource_group_name} -c ${split("/",self.storage_account_id)[8]} -i minecraft-aci-data-${split("-",self.resource_group_name)[2]} --delete-backup-data true -y -o table"
-  #   when                       = destroy
-  # }
+  count                        = var.enable_backup ? 1 : 0
+}
+
+resource azurerm_backup_protected_file_share minecraft_data {
+  resource_group_name          = azurerm_resource_group.minecraft.name
+  recovery_vault_name          = azurerm_recovery_services_vault.backup.0.name
+  source_storage_account_id    = azurerm_storage_account.minecraft.id
+  source_file_share_name       = azurerm_storage_share.minecraft_share.name
+  backup_policy_id             = azurerm_backup_policy_file_share.nightly.0.id
+
+  depends_on                   = [azurerm_backup_container_storage_account.minecraft]
 
   count                        = var.enable_backup ? 1 : 0
 }
 
-# BUG: https://github.com/terraform-providers/terraform-provider-azurerm/issues/9368
-#      https://github.com/terraform-providers/terraform-provider-azurerm/issues/9452
-# FIX: https://github.com/terraform-providers/terraform-provider-azurerm/pull/9015
-#      https://github.com/terraform-providers/terraform-provider-azurerm/milestone/109
-# resource azurerm_backup_protected_file_share minecraft_data {
-#   resource_group_name          = azurerm_resource_group.minecraft.name
-#   recovery_vault_name          = azurerm_recovery_services_vault.backup.0.name
-#   source_storage_account_id    = azurerm_storage_account.minecraft.id
-#   source_file_share_name       = azurerm_storage_share.minecraft_share.name
-#   backup_policy_id             = azurerm_backup_policy_file_share.nightly.0.id
-
-#   depends_on                   = [azurerm_backup_container_storage_account.minecraft]
-
-#   count                        = var.enable_backup ? 1 : 0
-# }
-# HACK: Instruct on manual workaround
-resource null_resource mineecraft_data_backup {
-  provisioner local-exec {
-    command                    = "echo 'Manually enable backup of fileshare ${azurerm_storage_share.minecraft_share.name} to vault ${azurerm_recovery_services_vault.backup.0.name}'"
-  }
+resource azurerm_management_lock minecraft_backup_lock {
+  name                         = "${azurerm_recovery_services_vault.backup.0.name}-lock"
+  scope                        = azurerm_recovery_services_vault.backup.0.id
+  lock_level                   = "CanNotDelete"
+  notes                        = "Do not accidentally delete Minecraft (world) backups"
 
   count                        = var.enable_backup ? 1 : 0
 
   depends_on                   = [
-    azurerm_backup_container_storage_account.minecraft
+    azurerm_backup_protected_file_share.minecraft_data,
+    azurerm_storage_share.minecraft_modpacks,
+    azurerm_monitor_diagnostic_setting.backup_vault
+  ]
+}
+
+locals {
+  all_resource_locks           = var.enable_backup ? concat(local.storage_resource_locks,local.backup_resource_locks) : local.storage_resource_locks
+  backup_resource_locks        = concat(
+    azurerm_management_lock.minecraft_backup_lock.*.id,
+    [
+      replace(azurerm_management_lock.minecraft_data_lock.id,azurerm_management_lock.minecraft_data_lock.name,"AzureBackupProtectionLock"),
+    ],
+  )
+  storage_resource_locks       = [
+    azurerm_management_lock.minecraft_data_lock.id
   ]
 }

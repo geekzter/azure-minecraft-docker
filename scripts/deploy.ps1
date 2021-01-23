@@ -204,14 +204,10 @@ try {
             exit 
         }
 
-        # Send notice (broken)
-        # Send-MinecraftMessage -Message "The server will die in ${GracePeriodSeconds} seconds!!!" -SleepSeconds $GracePeriodSeconds
-        Write-Warning "You are about to destroy the Minecraft Server in workspace '${workspace}'!"
+        Write-Warning "If it exists, this will delete the Minecraft Server in workspace '${workspace}'!"
         Write-Host "Opening rcon-cli to send any last commands and messages (e.g. list, say):"
         Execute-MinecraftCommand
         
-        # Punch hole in PaaS Firewalls (placeholder)
-
         # Now let Terraform do it's work
         Invoke "terraform destroy $varArgs $forceArgs"
     }
