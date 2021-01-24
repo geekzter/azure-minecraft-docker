@@ -44,6 +44,7 @@ See [variables.tf](./terraform/variables.tf) for all input variables.
 Once provisioned, a dashboard like this becomes available in the Azure Portal:   
 
 ![alt text](./visuals/dashboard.png "Dashboard")
+You can update the dashboard in the portal and re-generate the [template](./terraform/dashboard.tpl) using [templatize_dashboard.ps1](./scripts/templatize_dashboard.ps1).
 
 ## Resources
 - [itzg/minecraft-server](https://hub.docker.com/r/itzg/minecraft-server) on Docker Hub
