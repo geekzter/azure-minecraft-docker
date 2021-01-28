@@ -401,7 +401,7 @@
                     "openBladeOnClick": {
                       "openBlade": true
                     },
-                    "title": "CPU",
+                    "title": "CPU (millicores)",
                     "titleKind": 2,
                     "visualization": {
                       "chartType": 2,
