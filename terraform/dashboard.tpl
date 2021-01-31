@@ -162,7 +162,7 @@
           "position": {
             "colSpan": 6,
             "metadata": null,
-            "rowSpan": 4,
+            "rowSpan": 6,
             "x": 6,
             "y": 10
           }
@@ -251,7 +251,7 @@
                         }
                       }
                     ],
-                    "title": "Avg Used capacity for minecraftstor${suffix}",
+                    "title": "Data storage",
                     "titleKind": 1,
                     "visualization": {
                       "axisVisualization": {
@@ -711,7 +711,7 @@
           "position": {
             "colSpan": 6,
             "metadata": null,
-            "rowSpan": 8,
+            "rowSpan": 10,
             "x": 0,
             "y": 6
           }
@@ -835,12 +835,12 @@
               "value": "Past 24 hours"
             },
             "filteredPartIds": [
-              "StartboardPart-MonitorChartPart-81c62d84-096d-48e7-b9a8-25a6e5e9209c",
-              "StartboardPart-LogsDashboardPart-81c62d84-096d-48e7-b9a8-25a6e5e9209e",
-              "StartboardPart-MonitorChartPart-81c62d84-096d-48e7-b9a8-25a6e5e920a2",
-              "StartboardPart-MonitorChartPart-81c62d84-096d-48e7-b9a8-25a6e5e920a8",
-              "StartboardPart-MonitorChartPart-81c62d84-096d-48e7-b9a8-25a6e5e920ac",
-              "StartboardPart-LogsDashboardPart-81c62d84-096d-48e7-b9a8-25a6e5e920ae"
+              "StartboardPart-MonitorChartPart-969049d2-5d71-474e-a52f-b22b7dfe6010",
+              "StartboardPart-LogsDashboardPart-969049d2-5d71-474e-a52f-b22b7dfe6012",
+              "StartboardPart-MonitorChartPart-969049d2-5d71-474e-a52f-b22b7dfe6016",
+              "StartboardPart-LogsDashboardPart-969049d2-5d71-474e-a52f-b22b7dfe6018",
+              "StartboardPart-MonitorChartPart-969049d2-5d71-474e-a52f-b22b7dfe601c",
+              "StartboardPart-MonitorChartPart-969049d2-5d71-474e-a52f-b22b7dfe6020"
             ],
             "model": {
               "format": "utc",
