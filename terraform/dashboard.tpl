@@ -740,9 +740,9 @@
             "settings": {
               "content": {
                 "GridColumnsWidth": {
-                  "Message": "502px",
-                  "MessageWithoutTimestamp": "354px",
-                  "TimeGenerated": "139px"
+                  "Message": "362px",
+                  "MessageWithoutTimestamp": "362px",
+                  "TimeGenerated": "138px"
                 },
                 "PartSubTitle": "${resource_group}-loganalytics",
                 "PartTitle": "Connection Events",
