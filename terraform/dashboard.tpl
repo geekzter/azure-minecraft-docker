@@ -31,7 +31,7 @@
           "position": {
             "colSpan": 2,
             "metadata": null,
-            "rowSpan": 2,
+            "rowSpan": 1,
             "x": 0,
             "y": 0
           }
@@ -50,7 +50,7 @@
           "position": {
             "colSpan": 2,
             "metadata": null,
-            "rowSpan": 2,
+            "rowSpan": 1,
             "x": 2,
             "y": 0
           }
@@ -62,7 +62,7 @@
                 "model": {
                   "format": "local",
                   "granularity": "auto",
-                  "relative": "60m"
+                  "relative": "240m"
                 }
               }
             },
@@ -114,20 +114,33 @@
                           "resourceDisplayName": "minecraft-${suffix}"
                         },
                         "name": "NetworkBytesTransmittedPerSecond",
+                        "namespace": "microsoft.containerinstance/containergroups",
                         "resourceMetadata": {
                           "id": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}",
                           "resourceGroup": "${resource_group}"
                         }
                       }
                     ],
-                    "openBladeOnClick": {
-                      "openBlade": true
-                    },
                     "title": "Network bytes transmitted",
                     "titleKind": 2,
                     "visualization": {
+                      "axisVisualization": {
+                        "x": {
+                          "axisType": 2,
+                          "isVisible": true
+                        },
+                        "y": {
+                          "axisType": 1,
+                          "isVisible": true
+                        }
+                      },
                       "chartType": 2,
-                      "disablePinning": true
+                      "disablePinning": true,
+                      "legendVisualization": {
+                        "hideSubtitle": false,
+                        "isVisible": true,
+                        "position": 2
+                      }
                     }
                   }
                 }
@@ -172,9 +185,9 @@
             "filters": {
               "MsPortalFx_TimeRange": {
                 "model": {
-                  "format": "local",
+                  "format": "utc",
                   "granularity": "auto",
-                  "relative": "1440m"
+                  "relative": "43200m"
                 }
               }
             },
@@ -251,8 +264,8 @@
                         }
                       }
                     ],
-                    "title": "Data storage",
-                    "titleKind": 1,
+                    "title": "Used capacity",
+                    "titleKind": 2,
                     "visualization": {
                       "axisVisualization": {
                         "x": {
@@ -304,7 +317,7 @@
           "position": {
             "colSpan": 2,
             "metadata": null,
-            "rowSpan": 2,
+            "rowSpan": 1,
             "x": 4,
             "y": 0
           }
@@ -340,7 +353,7 @@
                 "model": {
                   "format": "local",
                   "granularity": "auto",
-                  "relative": "60m"
+                  "relative": "240m"
                 }
               }
             },
@@ -392,20 +405,33 @@
                           "resourceDisplayName": "minecraft-${suffix}"
                         },
                         "name": "CpuUsage",
+                        "namespace": "microsoft.containerinstance/containergroups",
                         "resourceMetadata": {
                           "id": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}",
                           "resourceGroup": "${resource_group}"
                         }
                       }
                     ],
-                    "openBladeOnClick": {
-                      "openBlade": true
-                    },
                     "title": "CPU (millicores)",
                     "titleKind": 2,
                     "visualization": {
+                      "axisVisualization": {
+                        "x": {
+                          "axisType": 2,
+                          "isVisible": true
+                        },
+                        "y": {
+                          "axisType": 1,
+                          "isVisible": true
+                        }
+                      },
                       "chartType": 2,
-                      "disablePinning": true
+                      "disablePinning": true,
+                      "legendVisualization": {
+                        "hideSubtitle": false,
+                        "isVisible": true,
+                        "position": 2
+                      }
                     }
                   }
                 }
@@ -509,9 +535,9 @@
           "position": {
             "colSpan": 6,
             "metadata": null,
-            "rowSpan": 4,
+            "rowSpan": 5,
             "x": 0,
-            "y": 2
+            "y": 1
           }
         },
         "6": {
@@ -544,7 +570,7 @@
                 "model": {
                   "format": "local",
                   "granularity": "auto",
-                  "relative": "60m"
+                  "relative": "240m"
                 }
               }
             },
@@ -596,20 +622,33 @@
                           "resourceDisplayName": "minecraft-${suffix}"
                         },
                         "name": "MemoryUsage",
+                        "namespace": "microsoft.containerinstance/containergroups",
                         "resourceMetadata": {
                           "id": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}",
                           "resourceGroup": "${resource_group}"
                         }
                       }
                     ],
-                    "openBladeOnClick": {
-                      "openBlade": true
-                    },
                     "title": "Memory",
                     "titleKind": 2,
                     "visualization": {
+                      "axisVisualization": {
+                        "x": {
+                          "axisType": 2,
+                          "isVisible": true
+                        },
+                        "y": {
+                          "axisType": 1,
+                          "isVisible": true
+                        }
+                      },
                       "chartType": 2,
-                      "disablePinning": true
+                      "disablePinning": true,
+                      "legendVisualization": {
+                        "hideSubtitle": false,
+                        "isVisible": true,
+                        "position": 2
+                      }
                     }
                   }
                 }
@@ -832,20 +871,20 @@
           "MsPortalFx_TimeRange": {
             "displayCache": {
               "name": "UTC Time",
-              "value": "Past 24 hours"
+              "value": "Past 30 days"
             },
             "filteredPartIds": [
-              "StartboardPart-MonitorChartPart-969049d2-5d71-474e-a52f-b22b7dfe6010",
-              "StartboardPart-LogsDashboardPart-969049d2-5d71-474e-a52f-b22b7dfe6012",
-              "StartboardPart-MonitorChartPart-969049d2-5d71-474e-a52f-b22b7dfe6016",
-              "StartboardPart-LogsDashboardPart-969049d2-5d71-474e-a52f-b22b7dfe6018",
-              "StartboardPart-MonitorChartPart-969049d2-5d71-474e-a52f-b22b7dfe601c",
-              "StartboardPart-MonitorChartPart-969049d2-5d71-474e-a52f-b22b7dfe6020"
+              "StartboardPart-MonitorChartPart-ef443005-cc0f-4263-827e-30c2a368b00f",
+              "StartboardPart-LogsDashboardPart-ef443005-cc0f-4263-827e-30c2a368b011",
+              "StartboardPart-MonitorChartPart-ef443005-cc0f-4263-827e-30c2a368b015",
+              "StartboardPart-LogsDashboardPart-ef443005-cc0f-4263-827e-30c2a368b017",
+              "StartboardPart-MonitorChartPart-ef443005-cc0f-4263-827e-30c2a368b01b",
+              "StartboardPart-MonitorChartPart-ef443005-cc0f-4263-827e-30c2a368b01f"
             ],
             "model": {
               "format": "utc",
               "granularity": "auto",
-              "relative": "24h"
+              "relative": "43200m"
             }
           }
         }
@@ -865,7 +904,7 @@
   "resourceGroup": "${resource_group}",
   "tags": {
     "application": "Minecraft",
-    "environment": "${workspace}",
+    "environment": "${environment}",
     "hidden-title": "Minecraft ({environment})",
     "provisioner": "terraform",
     "repository": "azure-minecraft-docker",
