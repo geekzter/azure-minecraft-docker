@@ -269,14 +269,14 @@ resource azurerm_monitor_metric_alert cpu {
   name                         = "${azurerm_resource_group.minecraft.name}-cpu-alert"
   resource_group_name          = azurerm_resource_group.minecraft.name
   scopes                       = [azurerm_container_group.minecraft_server.id]
-  description                  = "Action will be triggered when CPU usage is greater than 900 millicores"
+  description                  = "Action will be triggered when CPU usage is greater than 950 millicores"
 
   criteria {
     metric_namespace           = "microsoft.containerinstance/containergroups"
     metric_name                = "CpuUsage"
     aggregation                = "Average"
     operator                   = "GreaterThan"
-    threshold                  = 900 # 900 millicores = 90% of 1 core
+    threshold                  = 950 # 950 millicores = 95% of 1 core
 
     dimension {
       name                     = "containerName"
@@ -313,7 +313,3 @@ resource azurerm_monitor_metric_alert cpu_dynamic {
     action_group_id            = azurerm_monitor_action_group.arm_roles.id
   }
 }
-
-# CPU, Memory out of whack
-# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_smart_detector_alert_rule
-# https://docs.microsoft.com/en-us/azure/container-instances/container-instances-monitor#available-metrics
