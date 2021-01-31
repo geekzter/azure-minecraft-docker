@@ -62,7 +62,7 @@
                 "model": {
                   "format": "local",
                   "granularity": "auto",
-                  "relative": "240m"
+                  "relative": "1440m"
                 }
               }
             },
@@ -185,7 +185,7 @@
             "filters": {
               "MsPortalFx_TimeRange": {
                 "model": {
-                  "format": "utc",
+                  "format": "local",
                   "granularity": "auto",
                   "relative": "43200m"
                 }
@@ -353,7 +353,7 @@
                 "model": {
                   "format": "local",
                   "granularity": "auto",
-                  "relative": "240m"
+                  "relative": "1440m"
                 }
               }
             },
@@ -524,7 +524,8 @@
             "settings": {
               "content": {
                 "GridColumnsWidth": {
-                  "Message": "362px"
+                  "Message": "362px",
+                  "TimeGenerated": "138px"
                 },
                 "PartSubTitle": "${resource_group}-loganalytics",
                 "PartTitle": "Events"
@@ -570,7 +571,7 @@
                 "model": {
                   "format": "local",
                   "granularity": "auto",
-                  "relative": "240m"
+                  "relative": "1440m"
                 }
               }
             },
@@ -739,10 +740,13 @@
             "settings": {
               "content": {
                 "GridColumnsWidth": {
-                  "Message": "502px"
+                  "Message": "502px",
+                  "MessageWithoutTimestamp": "354px",
+                  "TimeGenerated": "139px"
                 },
                 "PartSubTitle": "${resource_group}-loganalytics",
-                "PartTitle": "Connection Events"
+                "PartTitle": "Connection Events",
+                "Query": "ContainerInstanceLog_CL \n| where Message contains \"connect\" or Message contains \"[/\" \n| extend MessageWithoutTimestamp=replace(@'\\[[^\\]]* (\\w+)\\]: ', @'[\\1] ', Message)\n| order by TimeGenerated desc\n| project TimeGenerated, Message=tolower(MessageWithoutTimestamp)"
               }
             },
             "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
@@ -870,19 +874,19 @@
         "value": {
           "MsPortalFx_TimeRange": {
             "displayCache": {
-              "name": "UTC Time",
+              "name": "Local Time",
               "value": "Past 30 days"
             },
             "filteredPartIds": [
-              "StartboardPart-MonitorChartPart-ef443005-cc0f-4263-827e-30c2a368b00f",
-              "StartboardPart-LogsDashboardPart-ef443005-cc0f-4263-827e-30c2a368b011",
-              "StartboardPart-MonitorChartPart-ef443005-cc0f-4263-827e-30c2a368b015",
-              "StartboardPart-LogsDashboardPart-ef443005-cc0f-4263-827e-30c2a368b017",
-              "StartboardPart-MonitorChartPart-ef443005-cc0f-4263-827e-30c2a368b01b",
-              "StartboardPart-MonitorChartPart-ef443005-cc0f-4263-827e-30c2a368b01f"
+              "StartboardPart-MonitorChartPart-88cd0059-456c-41b3-8c28-7ad1fb3e5102",
+              "StartboardPart-LogsDashboardPart-88cd0059-456c-41b3-8c28-7ad1fb3e5104",
+              "StartboardPart-MonitorChartPart-88cd0059-456c-41b3-8c28-7ad1fb3e5108",
+              "StartboardPart-LogsDashboardPart-88cd0059-456c-41b3-8c28-7ad1fb3e510a",
+              "StartboardPart-MonitorChartPart-88cd0059-456c-41b3-8c28-7ad1fb3e510e",
+              "StartboardPart-MonitorChartPart-88cd0059-456c-41b3-8c28-7ad1fb3e5112"
             ],
             "model": {
-              "format": "utc",
+              "format": "local",
               "granularity": "auto",
               "relative": "43200m"
             }
@@ -904,7 +908,7 @@
   "resourceGroup": "${resource_group}",
   "tags": {
     "application": "Minecraft",
-    "environment": "${environment}",
+    "environment": "${workspace}",
     "hidden-title": "Minecraft ({environment})",
     "provisioner": "terraform",
     "repository": "azure-minecraft-docker",
