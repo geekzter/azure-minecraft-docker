@@ -1,0 +1,4 @@
+ContainerEvent_CL 
+| where Reason_s == "Started"
+| order by TimeGenerated desc
+| project Message

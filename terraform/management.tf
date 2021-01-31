@@ -213,3 +213,103 @@ resource azurerm_resource_group_template_deployment stop_workflow {
 
   depends_on                   = [azurerm_resource_group_template_deployment.container_instance_api_connection]
 }
+
+data azurerm_role_definition contributor {
+  name                         = "Contributor"
+}
+data azurerm_role_definition reader {
+  name                         = "Reader"
+}
+
+resource azurerm_monitor_action_group arm_roles {
+  name                         = "${azurerm_resource_group.minecraft.name}-alert-group"
+  resource_group_name          = azurerm_resource_group.minecraft.name
+  short_name                   = "arm-roles"
+
+  arm_role_receiver {
+    name                       = data.azurerm_role_definition.contributor.name
+    role_id                    = split("/",data.azurerm_role_definition.contributor.id)[4]
+    use_common_alert_schema    = true
+  }
+
+  arm_role_receiver {
+    name                       = data.azurerm_role_definition.reader.name
+    role_id                    = split("/",data.azurerm_role_definition.reader.id)[4]
+    use_common_alert_schema    = true
+  }
+}
+
+# Memory > 1.9 GB
+# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_metric_alert
+resource azurerm_monitor_metric_alert memory {
+  name                         = "${azurerm_resource_group.minecraft.name}-memory-alert"
+  resource_group_name          = azurerm_resource_group.minecraft.name
+  scopes                       = [azurerm_container_group.minecraft_server.id]
+  description                  = "Action will be triggered when Memory usage is greater than 1.9 GB"
+
+  criteria {
+    metric_namespace           = "microsoft.containerinstance/containergroups"
+    metric_name                = "MemoryUsage"
+    aggregation                = "Average"
+    operator                   = "GreaterThan"
+    threshold                  = 1900000000 # 1.9 GB
+
+    dimension {
+      name                     = "containerName"
+      operator                 = "Include"
+      values                   = ["minecraft"]
+    }
+  }
+
+  action {
+    action_group_id            = azurerm_monitor_action_group.arm_roles.id
+  }
+}
+resource azurerm_monitor_metric_alert cpu {
+  name                         = "${azurerm_resource_group.minecraft.name}-cpu-alert"
+  resource_group_name          = azurerm_resource_group.minecraft.name
+  scopes                       = [azurerm_container_group.minecraft_server.id]
+  description                  = "Action will be triggered when CPU usage is greater than 950 millicores"
+
+  criteria {
+    metric_namespace           = "microsoft.containerinstance/containergroups"
+    metric_name                = "CpuUsage"
+    aggregation                = "Average"
+    operator                   = "GreaterThan"
+    threshold                  = 950 # 950 millicores = 95% of 1 core
+
+    dimension {
+      name                     = "containerName"
+      operator                 = "Include"
+      values                   = ["minecraft"]
+    }
+  }
+
+  action {
+    action_group_id            = azurerm_monitor_action_group.arm_roles.id
+  }
+}
+resource azurerm_monitor_metric_alert cpu_dynamic {
+  name                         = "${azurerm_resource_group.minecraft.name}-cpu-dynamic-alert"
+  resource_group_name          = azurerm_resource_group.minecraft.name
+  scopes                       = [azurerm_container_group.minecraft_server.id]
+  description                  = "Action will be triggered when CPU usage is unusually high"
+
+  dynamic_criteria {
+    metric_namespace           = "microsoft.containerinstance/containergroups"
+    metric_name                = "CpuUsage"
+    aggregation                = "Average"
+    operator                   = "GreaterThan"
+    alert_sensitivity          = "Medium"
+
+    dimension {
+      name                     = "containerName"
+      operator                 = "Include"
+      values                   = ["minecraft"]
+    }
+  }
+
+  action {
+    action_group_id            = azurerm_monitor_action_group.arm_roles.id
+  }
+}

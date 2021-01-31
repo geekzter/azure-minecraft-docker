@@ -31,7 +31,7 @@
           "position": {
             "colSpan": 2,
             "metadata": null,
-            "rowSpan": 2,
+            "rowSpan": 1,
             "x": 0,
             "y": 0
           }
@@ -50,7 +50,7 @@
           "position": {
             "colSpan": 2,
             "metadata": null,
-            "rowSpan": 2,
+            "rowSpan": 1,
             "x": 2,
             "y": 0
           }
@@ -62,7 +62,7 @@
                 "model": {
                   "format": "local",
                   "granularity": "auto",
-                  "relative": "60m"
+                  "relative": "1440m"
                 }
               }
             },
@@ -114,20 +114,33 @@
                           "resourceDisplayName": "minecraft-${suffix}"
                         },
                         "name": "NetworkBytesTransmittedPerSecond",
+                        "namespace": "microsoft.containerinstance/containergroups",
                         "resourceMetadata": {
                           "id": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}",
                           "resourceGroup": "${resource_group}"
                         }
                       }
                     ],
-                    "openBladeOnClick": {
-                      "openBlade": true
-                    },
                     "title": "Network bytes transmitted",
                     "titleKind": 2,
                     "visualization": {
+                      "axisVisualization": {
+                        "x": {
+                          "axisType": 2,
+                          "isVisible": true
+                        },
+                        "y": {
+                          "axisType": 1,
+                          "isVisible": true
+                        }
+                      },
                       "chartType": 2,
-                      "disablePinning": true
+                      "disablePinning": true,
+                      "legendVisualization": {
+                        "hideSubtitle": false,
+                        "isVisible": true,
+                        "position": 2
+                      }
                     }
                   }
                 }
@@ -162,7 +175,7 @@
           "position": {
             "colSpan": 6,
             "metadata": null,
-            "rowSpan": 4,
+            "rowSpan": 6,
             "x": 6,
             "y": 10
           }
@@ -174,7 +187,7 @@
                 "model": {
                   "format": "local",
                   "granularity": "auto",
-                  "relative": "1440m"
+                  "relative": "43200m"
                 }
               }
             },
@@ -251,8 +264,8 @@
                         }
                       }
                     ],
-                    "title": "Avg Used capacity for minecraftstor${suffix}",
-                    "titleKind": 1,
+                    "title": "Used capacity",
+                    "titleKind": 2,
                     "visualization": {
                       "axisVisualization": {
                         "x": {
@@ -304,7 +317,7 @@
           "position": {
             "colSpan": 2,
             "metadata": null,
-            "rowSpan": 2,
+            "rowSpan": 1,
             "x": 4,
             "y": 0
           }
@@ -340,7 +353,7 @@
                 "model": {
                   "format": "local",
                   "granularity": "auto",
-                  "relative": "60m"
+                  "relative": "1440m"
                 }
               }
             },
@@ -392,20 +405,33 @@
                           "resourceDisplayName": "minecraft-${suffix}"
                         },
                         "name": "CpuUsage",
+                        "namespace": "microsoft.containerinstance/containergroups",
                         "resourceMetadata": {
                           "id": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}",
                           "resourceGroup": "${resource_group}"
                         }
                       }
                     ],
-                    "openBladeOnClick": {
-                      "openBlade": true
-                    },
-                    "title": "CPU",
+                    "title": "CPU (millicores)",
                     "titleKind": 2,
                     "visualization": {
+                      "axisVisualization": {
+                        "x": {
+                          "axisType": 2,
+                          "isVisible": true
+                        },
+                        "y": {
+                          "axisType": 1,
+                          "isVisible": true
+                        }
+                      },
                       "chartType": 2,
-                      "disablePinning": true
+                      "disablePinning": true,
+                      "legendVisualization": {
+                        "hideSubtitle": false,
+                        "isVisible": true,
+                        "position": 2
+                      }
                     }
                   }
                 }
@@ -498,7 +524,8 @@
             "settings": {
               "content": {
                 "GridColumnsWidth": {
-                  "Message": "362px"
+                  "Message": "362px",
+                  "TimeGenerated": "138px"
                 },
                 "PartSubTitle": "${resource_group}-loganalytics",
                 "PartTitle": "Events"
@@ -509,9 +536,9 @@
           "position": {
             "colSpan": 6,
             "metadata": null,
-            "rowSpan": 4,
+            "rowSpan": 5,
             "x": 0,
-            "y": 2
+            "y": 1
           }
         },
         "6": {
@@ -544,7 +571,7 @@
                 "model": {
                   "format": "local",
                   "granularity": "auto",
-                  "relative": "60m"
+                  "relative": "1440m"
                 }
               }
             },
@@ -596,20 +623,33 @@
                           "resourceDisplayName": "minecraft-${suffix}"
                         },
                         "name": "MemoryUsage",
+                        "namespace": "microsoft.containerinstance/containergroups",
                         "resourceMetadata": {
                           "id": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}",
                           "resourceGroup": "${resource_group}"
                         }
                       }
                     ],
-                    "openBladeOnClick": {
-                      "openBlade": true
-                    },
                     "title": "Memory",
                     "titleKind": 2,
                     "visualization": {
+                      "axisVisualization": {
+                        "x": {
+                          "axisType": 2,
+                          "isVisible": true
+                        },
+                        "y": {
+                          "axisType": 1,
+                          "isVisible": true
+                        }
+                      },
                       "chartType": 2,
-                      "disablePinning": true
+                      "disablePinning": true,
+                      "legendVisualization": {
+                        "hideSubtitle": false,
+                        "isVisible": true,
+                        "position": 2
+                      }
                     }
                   }
                 }
@@ -700,10 +740,13 @@
             "settings": {
               "content": {
                 "GridColumnsWidth": {
-                  "Message": "502px"
+                  "Message": "362px",
+                  "MessageWithoutTimestamp": "362px",
+                  "TimeGenerated": "138px"
                 },
                 "PartSubTitle": "${resource_group}-loganalytics",
-                "PartTitle": "Connection Events"
+                "PartTitle": "Connection Events",
+                "Query": "ContainerInstanceLog_CL \n| where Message contains \"connect\" or Message contains \"[/\" \n| extend MessageWithoutTimestamp=replace(@'\\[[^\\]]* (\\w+)\\]: ', @'[\\1] ', Message)\n| order by TimeGenerated desc\n| project TimeGenerated, Message=tolower(MessageWithoutTimestamp)"
               }
             },
             "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
@@ -711,7 +754,7 @@
           "position": {
             "colSpan": 6,
             "metadata": null,
-            "rowSpan": 8,
+            "rowSpan": 10,
             "x": 0,
             "y": 6
           }
@@ -726,7 +769,7 @@
               },
               {
                 "name": "scopeName",
-                "value": "Resources tagged 'repository'='azure-minecraft-docker' in subscription ${subscription_guid}"
+                "value": "Resources tagged 'repository'='azure-minecraft-docker'"
               },
               {
                 "isOptional": true,
@@ -831,21 +874,21 @@
         "value": {
           "MsPortalFx_TimeRange": {
             "displayCache": {
-              "name": "UTC Time",
-              "value": "Past 24 hours"
+              "name": "Local Time",
+              "value": "Past 30 days"
             },
             "filteredPartIds": [
-              "StartboardPart-MonitorChartPart-81c62d84-096d-48e7-b9a8-25a6e5e9209c",
-              "StartboardPart-LogsDashboardPart-81c62d84-096d-48e7-b9a8-25a6e5e9209e",
-              "StartboardPart-MonitorChartPart-81c62d84-096d-48e7-b9a8-25a6e5e920a2",
-              "StartboardPart-MonitorChartPart-81c62d84-096d-48e7-b9a8-25a6e5e920a8",
-              "StartboardPart-MonitorChartPart-81c62d84-096d-48e7-b9a8-25a6e5e920ac",
-              "StartboardPart-LogsDashboardPart-81c62d84-096d-48e7-b9a8-25a6e5e920ae"
+              "StartboardPart-MonitorChartPart-88cd0059-456c-41b3-8c28-7ad1fb3e5102",
+              "StartboardPart-LogsDashboardPart-88cd0059-456c-41b3-8c28-7ad1fb3e5104",
+              "StartboardPart-MonitorChartPart-88cd0059-456c-41b3-8c28-7ad1fb3e5108",
+              "StartboardPart-LogsDashboardPart-88cd0059-456c-41b3-8c28-7ad1fb3e510a",
+              "StartboardPart-MonitorChartPart-88cd0059-456c-41b3-8c28-7ad1fb3e510e",
+              "StartboardPart-MonitorChartPart-88cd0059-456c-41b3-8c28-7ad1fb3e5112"
             ],
             "model": {
-              "format": "utc",
+              "format": "local",
               "granularity": "auto",
-              "relative": "24h"
+              "relative": "43200m"
             }
           }
         }
