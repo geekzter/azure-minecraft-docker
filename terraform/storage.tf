@@ -204,7 +204,7 @@ resource azurerm_monitor_diagnostic_setting backup_vault {
 
     retention_policy {
       enabled                  = true
-      days                     = 30
+      days                     = 365
     }
   }
   log {
@@ -213,7 +213,7 @@ resource azurerm_monitor_diagnostic_setting backup_vault {
 
     retention_policy {
       enabled                  = true
-      days                     = 30
+      days                     = 365
     }
   }
   log {
@@ -222,7 +222,7 @@ resource azurerm_monitor_diagnostic_setting backup_vault {
 
     retention_policy {
       enabled                  = true
-      days                     = 30
+      days                     = 365
     }
   }
   log {
@@ -231,7 +231,7 @@ resource azurerm_monitor_diagnostic_setting backup_vault {
 
     retention_policy {
       enabled                  = true
-      days                     = 30
+      days                     = 365
     }
   }
   log {
@@ -240,7 +240,7 @@ resource azurerm_monitor_diagnostic_setting backup_vault {
 
     retention_policy {
       enabled                  = true
-      days                     = 30
+      days                     = 365
     }
   }
   log {
@@ -249,7 +249,7 @@ resource azurerm_monitor_diagnostic_setting backup_vault {
 
     retention_policy {
       enabled                  = true
-      days                     = 30
+      days                     = 365
     }
   }
   log {
@@ -258,7 +258,7 @@ resource azurerm_monitor_diagnostic_setting backup_vault {
 
     retention_policy {
       enabled                  = true
-      days                     = 30
+      days                     = 365
     }
   }
 
@@ -278,7 +278,7 @@ resource azurerm_backup_policy_file_share nightly {
   }
 
   retention_daily {
-    count                      = 10
+    count                      = 30
   }
 
   count                        = var.enable_backup ? 1 : 0
