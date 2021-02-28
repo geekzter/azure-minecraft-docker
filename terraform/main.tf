@@ -64,28 +64,38 @@ resource azurerm_role_assignment backup_operators {
 
   for_each                     = toset(var.solution_operators)
 }
-resource azurerm_role_definition container_operator {
-  name                         = "Container Operator (custom)"
-  scope                        = azurerm_resource_group.minecraft.id
-  description                  = "This is a custom role created via Terraform"
+# BUG: https://github.com/terraform-providers/terraform-provider-azurerm/issues/440
+# # resource random_uuid container_operator {}
+# resource azurerm_role_definition container_operator {
+#   name                         = "Minecraft Container Operator (${terraform.workspace})"
+#   # role_definition_id           = random_uuid.container_operator.result
+#   scope                        = azurerm_resource_group.minecraft.id
+#   description                  = "This is a custom role created via Terraform"
 
-  permissions {
-    actions                    = [
-      "Microsoft.ContainerInstance/containerGroups/*/action",
-      "Microsoft.ContainerInstance/containerGroups/*/read",
-    ]
-    not_actions                = []
-  }
+#   permissions {
+#     actions                    = [
+#       "Microsoft.ContainerInstance/containerGroups/*/action",
+#       "Microsoft.ContainerInstance/containerGroups/*/read",
+#     ]
+#     not_actions                = []
+#   }
 
-  assignable_scopes            = [
-    azurerm_resource_group.minecraft.id
-  ]
+#   assignable_scopes            = [
+#     azurerm_resource_group.minecraft.id
+#   ]
 
-  count                        = length(var.solution_operators) > 0 ? 1 : 0
-}
+#   count                        = length(var.solution_operators) > 0 ? 1 : 0
+# }
+# resource azurerm_role_assignment container_operators {
+#   scope                        = azurerm_resource_group.minecraft.id
+#   role_definition_id           = azurerm_role_definition.container_operator.0.role_definition_resource_id
+#   principal_id                 = each.value
+
+#   for_each                     = toset(var.solution_operators)
+# }
 resource azurerm_role_assignment container_operators {
-  scope                        = azurerm_resource_group.minecraft.id
-  role_definition_id           = azurerm_role_definition.container_operator.0.role_definition_resource_id
+  scope                        = azurerm_container_group.minecraft_server.id
+  role_definition_name         = "Contributor"
   principal_id                 = each.value
 
   for_each                     = toset(var.solution_operators)
@@ -125,31 +135,34 @@ resource azurerm_role_assignment logic_app_operators {
 
   for_each                     = toset(var.solution_operators)
 }
-resource azurerm_role_definition logic_app_runner {
-  name                         = "Logic App Runners (custom)"
-  scope                        = azurerm_resource_group.minecraft.id
-  description                  = "This is a custom role created via Terraform"
+# BUG: https://github.com/terraform-providers/terraform-provider-azurerm/issues/440
+# # resource random_uuid logic_app_runner {}
+# resource azurerm_role_definition logic_app_runner {
+#   name                         = "Minecraft Logic App Runners (${terraform.workspace})"
+#   # role_definition_id           = random_uuid.logic_app_runner.result
+#   scope                        = azurerm_resource_group.minecraft.id
+#   description                  = "This is a custom role created via Terraform"
 
-  permissions {
-    actions                    = [
-      "Microsoft.Logic/workflows/triggers/run/action",
-    ]
-    not_actions                = []
-  }
+#   permissions {
+#     actions                    = [
+#       "Microsoft.Logic/workflows/triggers/run/action",
+#     ]
+#     not_actions                = []
+#   }
 
-  assignable_scopes            = [
-    azurerm_resource_group.minecraft.id
-  ]
+#   assignable_scopes            = [
+#     azurerm_resource_group.minecraft.id
+#   ]
 
-  count                        = length(var.solution_operators) > 0 ? 1 : 0
-}
-resource azurerm_role_assignment logic_app_runners {
-  scope                        = azurerm_resource_group.minecraft.id
-  role_definition_id           = azurerm_role_definition.logic_app_runner.0.role_definition_resource_id
-  principal_id                 = each.value
+#   count                        = length(var.solution_operators) > 0 ? 1 : 0
+# }
+# resource azurerm_role_assignment logic_app_runners {
+#   scope                        = azurerm_resource_group.minecraft.id
+#   role_definition_id           = azurerm_role_definition.logic_app_runner.0.role_definition_resource_id
+#   principal_id                 = each.value
 
-  for_each                     = toset(var.solution_operators)
-}
+#   for_each                     = toset(var.solution_operators)
+# }
 resource azurerm_role_assignment readers {
   scope                        = azurerm_resource_group.minecraft.id
   role_definition_name         = "Reader"

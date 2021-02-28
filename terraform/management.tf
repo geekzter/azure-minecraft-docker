@@ -78,7 +78,7 @@ resource azurerm_logic_app_workflow start {
     ]
   }
 
-  count                        = var.enable_auto_startstop ? 1 : 0
+  count                        = var.enable_auto_startstop && var.start_time != null && var.start_time != "" ? 1 : 0
 }  
 resource azurerm_monitor_diagnostic_setting start_workflow {
   name                         = "${azurerm_logic_app_workflow.start.0.name}-logs"
@@ -102,7 +102,7 @@ resource azurerm_monitor_diagnostic_setting start_workflow {
       days                     = 30
     }
   }
-  count                        = var.enable_auto_startstop ? 1 : 0
+  count                        = var.enable_auto_startstop && var.start_time != null && var.start_time != "" ? 1 : 0
 }
 
 resource azurerm_logic_app_workflow stop {
@@ -116,7 +116,7 @@ resource azurerm_logic_app_workflow stop {
     ]
   }
 
-  count                        = var.enable_auto_startstop ? 1 : 0
+  count                        = var.enable_auto_startstop && var.stop_time != null && var.stop_time != "" ? 1 : 0
 }  
 resource azurerm_monitor_diagnostic_setting stop_workflow {
   name                         = "${azurerm_logic_app_workflow.stop.0.name}-logs"
@@ -141,7 +141,7 @@ resource azurerm_monitor_diagnostic_setting stop_workflow {
     }
   }
 
-  count                        = var.enable_auto_startstop ? 1 : 0
+  count                        = var.enable_auto_startstop && var.stop_time != null && var.stop_time != "" ? 1 : 0
 }
 
 resource azurerm_resource_group_template_deployment container_instance_api_connection {
@@ -186,7 +186,7 @@ resource azurerm_resource_group_template_deployment start_workflow {
     workflow_name              = azurerm_logic_app_workflow.start.0.name
   })
 
-  count                        = var.enable_auto_startstop ? 1 : 0
+  count                        = var.enable_auto_startstop && var.start_time != null && var.start_time != "" ? 1 : 0
 
   depends_on                   = [azurerm_resource_group_template_deployment.container_instance_api_connection]
 }
@@ -209,7 +209,7 @@ resource azurerm_resource_group_template_deployment stop_workflow {
     workflow_name              = azurerm_logic_app_workflow.stop.0.name
   })
 
-  count                        = var.enable_auto_startstop ? 1 : 0
+  count                        = var.enable_auto_startstop && var.stop_time != null && var.stop_time != "" ? 1 : 0
 
   depends_on                   = [azurerm_resource_group_template_deployment.container_instance_api_connection]
 }
@@ -269,14 +269,14 @@ resource azurerm_monitor_metric_alert cpu {
   name                         = "${azurerm_resource_group.minecraft.name}-cpu-alert"
   resource_group_name          = azurerm_resource_group.minecraft.name
   scopes                       = [azurerm_container_group.minecraft_server.id]
-  description                  = "Action will be triggered when CPU usage is greater than 950 millicores"
+  description                  = "Action will be triggered when CPU usage is greater than 975 millicores"
 
   criteria {
     metric_namespace           = "microsoft.containerinstance/containergroups"
     metric_name                = "CpuUsage"
     aggregation                = "Average"
     operator                   = "GreaterThan"
-    threshold                  = 950 # 950 millicores = 95% of 1 core
+    threshold                  = 975 # 975 millicores = 97.5% of 1 core
 
     dimension {
       name                     = "containerName"
