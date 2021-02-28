@@ -21,9 +21,10 @@ on:
   workflow_dispatch:
 
 env:
-  TF_VAR_backend_storage_container: ${{ secrets.TF_VAR_backend_storage_container }}
-  TF_VAR_backend_storage_account: ${{ secrets.TF_VAR_backend_storage_account }}
-  TF_VAR_backend_resource_group: ${{ secrets.TF_VAR_backend_resource_group }}
+  # ARM_SAS_TOKEN: ${{ secrets.ARM_SAS_TOKEN }}
+  # TF_VAR_backend_storage_container: ${{ secrets.TF_VAR_backend_storage_container }}
+  # TF_VAR_backend_storage_account: ${{ secrets.TF_VAR_backend_storage_account }}
+  # TF_VAR_backend_resource_group: ${{ secrets.TF_VAR_backend_resource_group }}
   TF_IN_AUTOMATION: true
   TF_WORKSPACE: ci
 
