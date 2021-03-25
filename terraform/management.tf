@@ -300,7 +300,7 @@ resource azurerm_monitor_metric_alert cpu_dynamic {
     metric_name                = "CpuUsage"
     aggregation                = "Average"
     operator                   = "GreaterThan"
-    alert_sensitivity          = "Medium"
+    alert_sensitivity          = "Low"
 
     dimension {
       name                     = "containerName"
