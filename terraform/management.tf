@@ -143,6 +143,24 @@ resource azurerm_monitor_diagnostic_setting stop_workflow {
 
   count                        = var.enable_auto_startstop && var.stop_time != null && var.stop_time != "" ? 1 : 0
 }
+# resource azurerm_logic_app_trigger_recurrence stop_trigger {
+#   name                         = "stop"
+#   logic_app_id                 = azurerm_logic_app_workflow.stop.0.id
+#   frequency                    = "Week"
+#   interval                     = 1
+#   start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T${var.start_time}:00Z"
+#   schedule {
+#     on_these_days              = [
+#       "Monday",
+#       "Tuesday", 
+#       "Wednesday", 
+#       "Thursday", 
+#       "Friday",
+#     ]
+#   }
+
+#   count                        = var.enable_auto_startstop && var.stop_time != null && var.stop_time != "" ? 1 : 0
+# }
 
 resource azurerm_resource_group_template_deployment container_instance_api_connection {
   name                         = "${azurerm_resource_group.minecraft.name}-aci-connection"
@@ -211,8 +229,12 @@ resource azurerm_resource_group_template_deployment stop_workflow {
 
   count                        = var.enable_auto_startstop && var.stop_time != null && var.stop_time != "" ? 1 : 0
 
-  depends_on                   = [azurerm_resource_group_template_deployment.container_instance_api_connection]
+  depends_on                   = [
+    azurerm_resource_group_template_deployment.container_instance_api_connection,
+    # azurerm_logic_app_trigger_recurrence.stop_trigger
+  ]
 }
+
 
 data azurerm_role_definition contributor {
   name                         = "Contributor"
