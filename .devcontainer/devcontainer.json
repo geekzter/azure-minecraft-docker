@@ -2,7 +2,9 @@
   // Install extensions
   "extensions": [
     "4ops.terraform",
+    "ms-azuretools.vscode-azurefunctions",
     "ms-azuretools.vscode-azureterraform",
+    "ms-dotnettools.csharp",
     "ms-vscode.azurecli",
     "ms-vscode.PowerShell"
   ],

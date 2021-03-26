@@ -355,3 +355,50 @@ resource azurerm_monitor_metric_alert cpu_dynamic {
     action_group_id            = azurerm_monitor_action_group.arm_roles.id
   }
 }
+resource azurerm_monitor_scheduled_query_rules_alert container_failed_alert {
+  name                         = "${azurerm_resource_group.minecraft.name}-container-failed-alert"
+  resource_group_name          = azurerm_resource_group.minecraft.name
+  location                     = azurerm_resource_group.minecraft.location
+
+  action {
+    action_group               = [azurerm_monitor_action_group.arm_roles.id]
+    email_subject              = "Minecraft container failed"
+  }
+  data_source_id               = azurerm_log_analytics_workspace.monitor.id
+  description                  = "Alert when Mincraft container fails"
+  enabled                      = true
+  query                        = templatefile("${path.root}/../kusto/container-failed.csl", { 
+    resource_group_name        = azurerm_resource_group.minecraft.name
+  })  
+  severity                     = 1
+  frequency                    = 5
+  time_window                  = 30
+  trigger {
+    operator                   = "GreaterThan"
+    threshold                  = 0
+  }
+}
+resource azurerm_monitor_scheduled_query_rules_alert container_inaccessible_alert {
+  name                         = "${azurerm_resource_group.minecraft.name}-container-inaccessible-alert"
+  resource_group_name          = azurerm_resource_group.minecraft.name
+  location                     = azurerm_resource_group.minecraft.location
+
+  action {
+    action_group               = [azurerm_monitor_action_group.arm_roles.id]
+    email_subject              = "Minecraft container inaccessible"
+  }
+  data_source_id               = azurerm_log_analytics_workspace.monitor.id
+  description                  = "Alert when Mincraft container is running but can't be connected to"
+  enabled                      = true
+  query                        = templatefile("${path.root}/../kusto/container-inaccessible.csl", { 
+    container_group_name       = azurerm_container_group.minecraft_server.name
+    function_name              = module.functions.function_name
+  })  
+  severity                     = 1
+  frequency                    = 5
+  time_window                  = 30
+  trigger {
+    operator                   = "GreaterThan"
+    threshold                  = 0
+  }
+}

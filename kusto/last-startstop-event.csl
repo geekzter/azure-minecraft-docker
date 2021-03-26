@@ -1,0 +1,5 @@
+ContainerEvent_CL 
+| where Message startswith_cs "Kill" or Message startswith_cs "Start"
+| extend Operation=split(Message," ")[0]
+| top 1 by TimeGenerated desc nulls last
+| project Operation

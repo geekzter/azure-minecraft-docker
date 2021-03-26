@@ -130,7 +130,7 @@ try {
     }
 
     if ($Apply) {
-        Write-Verbose "Converting $planFile into JSON so we can do some inspection..."
+        Write-Verbose "Converting $planFile into JSON so we can perform some inspection..."
         $planJSON = (terraform show -json $planFile)
 
         # Check whether key resources will be replaced
