@@ -286,6 +286,8 @@ resource azurerm_monitor_metric_alert cpu {
       values                   = ["minecraft"]
     }
   }
+  frequency                    = "PT5M"
+  window_size                  = "PT15M"
 
   action {
     action_group_id            = azurerm_monitor_action_group.arm_roles.id
