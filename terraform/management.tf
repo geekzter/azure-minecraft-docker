@@ -21,6 +21,22 @@ resource azurerm_log_analytics_solution log_analytics_solution {
   }
 } 
 
+resource azurerm_application_insights insights {
+  name                         = "${azurerm_log_analytics_workspace.monitor.resource_group_name}-insights"
+  location                     = azurerm_log_analytics_workspace.monitor.location
+  resource_group_name          = azurerm_log_analytics_workspace.monitor.resource_group_name
+  application_type             = "web"
+
+  # Associate with Log Analytics workspace
+  provisioner local-exec {
+    command                    = "az monitor app-insights component update -a ${self.name} -g ${self.resource_group_name} --workspace ${azurerm_log_analytics_workspace.monitor.id}"
+    environment                = {
+      AZURE_EXTENSION_USE_DYNAMIC_INSTALL = "yes_without_prompt"
+    }  
+  }
+  tags                         = azurerm_resource_group.minecraft.tags
+}
+
 resource azurerm_dashboard minecraft_dashboard {
   name                         = "${azurerm_resource_group.minecraft.name}-dashboard"
   resource_group_name          = azurerm_resource_group.minecraft.name
