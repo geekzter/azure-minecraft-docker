@@ -74,9 +74,10 @@ function AzLogin (
 function Execute-MinecraftCommand (
     [parameter(Mandatory=$false)][string]$Command,
     [parameter(mandatory=$false)][switch]$ShowLog,
-    [parameter(mandatory=$false)][int]$SleepSeconds=0
+    [parameter(mandatory=$false)][int]$SleepSeconds=0,
+    [parameter(mandatory=$false)][switch]$StartServer=$false
 ) {
-    if (WaitFor-MinecraftServer) {
+    if (WaitFor-MinecraftServer -StartServer:$StartServer) {
         try {
             AzLogin
             
@@ -230,7 +231,7 @@ function Show-MinecraftLog (
     $followExpression = $Tail ? "--follow" : ""
 
     if (![string]::IsNullOrEmpty($containerGroupID)) {
-        az container logs --ids $ContainerGroupID $followExpression
+        az container logs --ids $containerGroupID $followExpression
     } else {
         Write-Warning "Container Instance has not been created, nothing to do"
         return 
@@ -240,7 +241,8 @@ function Show-MinecraftLog (
 function WaitFor-MinecraftServer (
     [parameter(mandatory=$false)][int]$Timeout=120,
     [parameter(mandatory=$false)][int]$MaxTries=50,
-    [parameter(mandatory=$false)][int]$Interval=10
+    [parameter(mandatory=$false)][int]$Interval=10,
+    [parameter(mandatory=$false)][switch]$StartServer
 ) {
     try {
         AzLogin
@@ -248,32 +250,47 @@ function WaitFor-MinecraftServer (
         $tfdirectory = $(Join-Path (Get-Item $PSScriptRoot).Parent.FullName "terraform")
         Push-Location $tfdirectory
         
-        $serverFQDN       = (Get-TerraformOutput "minecraft_server_fqdn")
-        $serverPort       = (Get-TerraformOutput "minecraft_server_port")
+        $containerGroup = (Get-TerraformOutput "container_group")
+        $resourceGroup  = (Get-TerraformOutput "resource_group")
+        $serverFQDN     = (Get-TerraformOutput "minecraft_server_fqdn")
+        $serverPort     = (Get-TerraformOutput "minecraft_server_port")
     
         if (![string]::IsNullOrEmpty($serverFQDN)) {
-          $timer  = [system.diagnostics.stopwatch]::StartNew()
-          $connectionAttempts = 0
-          do {
-            $connectionAttempts++
-            try {
-                Write-Host "Pinging ${serverFQDN} on port ${serverPort}..."
-                $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($serverFQDN, $serverPort) -ErrorAction SilentlyContinue
-                if (!$mineCraftConnection.Connected) {
-                    Start-Sleep -Seconds $Interval
+            # First check if the container is running
+            $state = (az container show -n $containerGroup -g $resourceGroup --query "containers[?name=='minecraft'].instanceView.currentState.state" -o tsv)
+            if ($state -ine "Running") {
+                if ($StartServer) {
+                    Write-Host "Starting ${serverFQDN}..."
+                    az container start -n $containerGroup -g $resourceGroup
+                } else {
+                    Write-Warning "${serverFQDN} is not running"
+                    return $false
                 }
-            } catch [System.Management.Automation.MethodInvocationException] {
-                Write-Verbose $_
             }
-          } while (!$mineCraftConnection.Connected -and ($timer.Elapsed.TotalSeconds -lt $Timeout) -and ($connectionAttempts -le $MaxTries))
-          if ($mineCraftConnection.Connected) {
-            Write-Host "Connected to ${serverFQDN}:${serverPort} in $($timer.Elapsed.TotalSeconds) seconds"
-            $mineCraftConnection.Close()
-          } else {
-            Write-Host "Could not connect to ${serverFQDN}:${serverPort}"
-          }
 
-          return $true
+            $timer = [system.diagnostics.stopwatch]::StartNew()
+            $connectionAttempts = 0
+            do {
+                $connectionAttempts++
+                try {
+                    Write-Host "Pinging ${serverFQDN} on port ${serverPort}..."
+                    $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($serverFQDN, $serverPort) -ErrorAction SilentlyContinue
+                    if (!$mineCraftConnection.Connected) {
+                        Start-Sleep -Seconds $Interval
+                    }
+                } catch [System.Management.Automation.MethodInvocationException] {
+                    Write-Verbose $_
+                }
+            } while (!$mineCraftConnection.Connected -and ($timer.Elapsed.TotalSeconds -lt $Timeout) -and ($connectionAttempts -le $MaxTries))
+
+            if ($mineCraftConnection.Connected) {
+                    Write-Host "Connected to ${serverFQDN}:${serverPort} in $($timer.Elapsed.TotalSeconds) seconds"
+                    $mineCraftConnection.Close()
+            } else {
+                    Write-Host "Could not connect to ${serverFQDN}:${serverPort}"
+            }
+
+            return $true
         } else {
             Write-Warning "Server has not been created, nothing to do"
             return $false

@@ -1,3 +1,6 @@
+output container_group {
+  value       = azurerm_container_group.minecraft_server.name
+}
 output container_group_id {
   value       = azurerm_container_group.minecraft_server.id  
 }
