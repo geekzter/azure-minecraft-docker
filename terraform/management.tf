@@ -305,18 +305,18 @@ resource azurerm_monitor_metric_alert memory {
     action_group_id            = azurerm_monitor_action_group.arm_roles.id
   }
 }
-resource azurerm_monitor_metric_alert cpu {
-  name                         = "${azurerm_resource_group.minecraft.name}-cpu-alert"
+resource azurerm_monitor_metric_alert memory_dynamic {
+  name                         = "${azurerm_resource_group.minecraft.name}-memory-dynamic-alert"
   resource_group_name          = azurerm_resource_group.minecraft.name
   scopes                       = [azurerm_container_group.minecraft_server.id]
-  description                  = "Action will be triggered when CPU usage is greater than 975 millicores"
+  description                  = "Action will be triggered when Memory usage is unusually high"
 
-  criteria {
+  dynamic_criteria {
     metric_namespace           = "microsoft.containerinstance/containergroups"
-    metric_name                = "CpuUsage"
+    metric_name                = "MemoryUsage"
     aggregation                = "Average"
     operator                   = "GreaterThan"
-    threshold                  = 975 # 975 millicores = 97.5% of 1 core
+    alert_sensitivity          = "Low"
 
     dimension {
       name                     = "containerName"
@@ -324,13 +324,37 @@ resource azurerm_monitor_metric_alert cpu {
       values                   = ["minecraft"]
     }
   }
-  frequency                    = "PT5M"
-  window_size                  = "PT15M"
 
   action {
     action_group_id            = azurerm_monitor_action_group.arm_roles.id
   }
 }
+# resource azurerm_monitor_metric_alert cpu {
+#   name                         = "${azurerm_resource_group.minecraft.name}-cpu-alert"
+#   resource_group_name          = azurerm_resource_group.minecraft.name
+#   scopes                       = [azurerm_container_group.minecraft_server.id]
+#   description                  = "Action will be triggered when CPU usage is greater than 975 millicores"
+
+#   criteria {
+#     metric_namespace           = "microsoft.containerinstance/containergroups"
+#     metric_name                = "CpuUsage"
+#     aggregation                = "Average"
+#     operator                   = "GreaterThan"
+#     threshold                  = 975 # 975 millicores = 97.5% of 1 core
+
+#     dimension {
+#       name                     = "containerName"
+#       operator                 = "Include"
+#       values                   = ["minecraft"]
+#     }
+#   }
+#   frequency                    = "PT5M"
+#   window_size                  = "PT15M"
+
+#   action {
+#     action_group_id            = azurerm_monitor_action_group.arm_roles.id
+#   }
+# }
 resource azurerm_monitor_metric_alert cpu_dynamic {
   name                         = "${azurerm_resource_group.minecraft.name}-cpu-dynamic-alert"
   resource_group_name          = azurerm_resource_group.minecraft.name
