@@ -118,24 +118,28 @@ function Get-TerraformDirectory() {
 }
 
 function Get-TerraformOutput (
-    [parameter(Mandatory=$true)][string]$OutputVariable
+    [parameter(Mandatory=$true)][string]$OutputVariable,
+    [parameter(Mandatory=$false)][switch]$ComplexType
 ) {
     Invoke-Command -ScriptBlock {
-        try {
-            Push-Location (Get-TerraformDirectory)
-                $Private:ErrorActionPreference    = "SilentlyContinue"
-                Write-Verbose "terraform output ${OutputVariable}: evaluating..."
-                $result = $(terraform output -raw $OutputVariable 2>$null)
-                if ($result -match "\[\d+m") {
-                    # Terraform warning, return null for missing output
-                    Write-Verbose "terraform output ${OutputVariable}: `$null (${result})"
-                    return $null
-                } else {
-                    Write-Verbose "terraform output ${OutputVariable}: ${result}"
-                    return $result
-                }
-            } finally {
-            Pop-Location
+        $Private:ErrorActionPreference    = "SilentlyContinue"
+        Write-Verbose "terraform output ${OutputVariable}: evaluating..."
+        if ($ComplexType) {
+            $result = $(terraform output -json $OutputVariable 2>$null)
+        } else {
+            $result = $(terraform output $OutputVariable 2>$null)
+            $result = (($result -replace '^"','') -replace '"$','') # Remove surrounding quotes (Terraform 0.14)
+        }
+        if ($result -match "\[\d+m") {
+            # Terraform warning, return null for missing output
+            Write-Verbose "terraform output ${OutputVariable}: `$null (${result})"
+            return $null
+        } else {
+            if ($ComplexType) {
+                $result = ($result | ConvertFrom-Json)  
+            }
+            Write-Verbose "terraform output ${OutputVariable}: ${result}"
+            return $result
         }
     }
 }

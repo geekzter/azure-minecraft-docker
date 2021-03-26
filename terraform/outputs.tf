@@ -19,6 +19,10 @@ output environment {
   value       = local.environment
 }
 
+output function_name {
+  value        = [module.functions.function_name]
+}
+
 output location {
   value       = azurerm_resource_group.minecraft.location
 }

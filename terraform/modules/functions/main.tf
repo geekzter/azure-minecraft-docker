@@ -6,6 +6,8 @@ locals {
   app_service_settings         = {
     APPINSIGHTS_INSTRUMENTATIONKEY = var.appinsights_instrumentation_key
     APPLICATIONINSIGHTS_CONNECTION_STRING = "InstrumentationKey=${var.appinsights_instrumentation_key}"
+    MINECRAFT_FQDN             = var.minecraft_fqdn
+    MINECRAFT_PORT             = var.minecraft_port
     FUNCTIONS_WORKER_RUNTIME   = "dotnet"
     # WEBSITE_CONTENTSHARE       = "${var.resource_group_name}-ping-test-content"
     # WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = "DefaultEndpointsProtocol=https;AccountName=${azurerm_storage_account.functions.name};AccountKey=${azurerm_storage_account.functions.primary_access_key};EndpointSuffix=core.windows.net"
