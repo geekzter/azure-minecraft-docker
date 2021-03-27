@@ -1,4 +1,4 @@
-name: .NET
+name: ci-dotnet
 
 on:
   push:
@@ -40,7 +40,7 @@ jobs:
     - name: Build
       run: |
         pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-        dotnet build --no-restore --output ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/bin/publish
+        dotnet build --no-restore --output ./bin/publish
         popd
     - name: Test
       run: |
