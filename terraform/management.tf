@@ -299,6 +299,7 @@ resource azurerm_monitor_metric_alert memory {
     }
   }
   frequency                    = "PT5M"
+  severity                     = 2
   window_size                  = "PT15M"
 
   action {
@@ -324,6 +325,7 @@ resource azurerm_monitor_metric_alert memory_dynamic {
       values                   = ["minecraft"]
     }
   }
+  severity                     = 2
 
   action {
     action_group_id            = azurerm_monitor_action_group.arm_roles.id
@@ -349,6 +351,7 @@ resource azurerm_monitor_metric_alert memory_dynamic {
 #     }
 #   }
 #   frequency                    = "PT5M"
+#   severity                     = 2
 #   window_size                  = "PT15M"
 
 #   action {
@@ -374,6 +377,7 @@ resource azurerm_monitor_metric_alert cpu_dynamic {
       values                   = ["minecraft"]
     }
   }
+  severity                     = 2
 
   action {
     action_group_id            = azurerm_monitor_action_group.arm_roles.id
@@ -396,7 +400,7 @@ resource azurerm_monitor_scheduled_query_rules_alert container_failed_alert {
   })  
   severity                     = 1
   frequency                    = 5
-  time_window                  = 30
+  time_window                  = 5
   trigger {
     operator                   = "GreaterThan"
     threshold                  = 0
@@ -420,7 +424,7 @@ resource azurerm_monitor_scheduled_query_rules_alert container_inaccessible_aler
   })  
   severity                     = 1
   frequency                    = 5
-  time_window                  = 30
+  time_window                  = 5
   trigger {
     operator                   = "GreaterThan"
     threshold                  = 0

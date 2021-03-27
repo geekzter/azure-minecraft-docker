@@ -193,6 +193,18 @@ resource azurerm_container_group minecraft_server {
       "WHITELIST"              = join(",",var.minecraft_users)
     }
     image                      = local.container_image
+    liveness_probe {
+      exec                     = [
+        "/bin/bash",
+        "-c",
+        "/health.sh",
+      ]
+      failure_threshold        = 3
+      initial_delay_seconds    = 300
+      period_seconds           = 10 # 300
+      success_threshold        = 1
+      timeout_seconds          = 10
+    }
     memory                     = "2"
     ports {
       port                     = 80
