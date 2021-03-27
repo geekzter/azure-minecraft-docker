@@ -166,7 +166,6 @@ jobs:
         errorActionPreference: Stop
         failOnStandardError: true
 
-
     - name: Download Function settings
       uses: Azure/powershell@v1
       env:
@@ -176,6 +175,7 @@ jobs:
           pushd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           func azure functionapp fetch-app-settings ${{ steps.terraform-apply.outputs.function_name }}
           popd
+        azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true
         
