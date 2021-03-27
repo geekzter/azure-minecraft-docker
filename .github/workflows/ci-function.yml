@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '${{ env.GITHUB_WORKSPACE }}/functions'
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: './functions'
   DOTNET_VERSION: '3.1.x'
 
 jobs:
