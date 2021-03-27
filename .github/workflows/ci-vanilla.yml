@@ -22,6 +22,8 @@ on:
 
 env:
   # ARM_SAS_TOKEN: ${{ secrets.ARM_SAS_TOKEN }}
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: './functions'
+  DOTNET_VERSION: '3.1.x'  
   # TF_VAR_backend_storage_container: ${{ secrets.TF_VAR_backend_storage_container }}
   # TF_VAR_backend_storage_account: ${{ secrets.TF_VAR_backend_storage_account }}
   # TF_VAR_backend_resource_group: ${{ secrets.TF_VAR_backend_resource_group }}
