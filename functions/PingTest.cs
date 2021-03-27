@@ -42,12 +42,12 @@ namespace EW.Minecraft.Function
             try {
                 TcpClient client;
                 do {
-                    client = CreateClient();
-                    if (!client.Connected) {
-                        // HACK
-                        Thread.Sleep(500);
+                    using (client = CreateClient()) {
+                        if (!client.Connected) {
+                            // HACK
+                            Thread.Sleep(500);
+                        }
                     }
-
                 } 
                 while (!client.Connected && stopwatch.Elapsed.TotalSeconds < 30);
                 success = client.Connected;
