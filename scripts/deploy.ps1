@@ -25,7 +25,7 @@ param (
     [parameter(Mandatory=$false,HelpMessage="Don't show prompts unless something get's deleted that should not be")][switch]$Force=$false,
     [parameter(Mandatory=$false,HelpMessage="Initialize Terraform backend, upgrade modules & provider")][switch]$Upgrade=$false,
     [parameter(mandatory=$false,HelpMessage="Follow Minecraft log that will be displayed after apply")][switch]$Follow,
-    [parameter(Mandatory=$false,HelpMessage="Don't try to set up a Terraform backend if it does not exist")][switch]$NoBackend=$false
+    [parameter(Mandatory=$false,HelpMessage="Don't deploy application artifacts (e.g. function used as Watchdog). Does not control Minecraft container pull")][switch]$NoCode=$false
 ) 
 
 ### Internal Functions
@@ -133,6 +133,7 @@ try {
         Write-Verbose "Converting $planFile into JSON so we can perform some inspection..."
         $planJSON = (terraform show -json $planFile)
 
+        # Validation
         # Check whether key resources will be replaced
         if (Get-Command jq -ErrorAction SilentlyContinue) {
             $containerGroupActions  = $planJSON | jq '.resource_changes[] | select(.address == \"azurerm_container_group.minecraft_server\") | .change.actions' | ConvertFrom-Json
@@ -186,8 +187,18 @@ try {
             }
         }
 
+        # Terraform Apply
         Invoke "terraform apply $forceArgs '$planFile'"
-        $null = WaitFor-MinecraftServer -Timeout 180 -Interval 10
+
+        # Deploy Azure Function
+        if (!$NoCode) {
+            $functionScript = (Join-Path $PSScriptRoot "deploy_functions.ps1")
+            Write-Information "Invoking ${functionScript}"
+            & $functionScript
+        }
+
+        # Start Minecraft
+        $null = WaitFor-MinecraftServer -Timeout 180 -Interval 10 -StartServer
         if ($Follow) {
             # Wait for Minecraft to boot up
             Show-MinecraftLog -Tail

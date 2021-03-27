@@ -25,6 +25,8 @@ try {
         Write-Warning "Azure Function not found, has infrastructure been provisioned?"
         exit
     }
+    $subscriptionID = (Get-TerraformOutput "subscription_guid")
+    az account set -s $subscriptionID # Required as func ignores --subscription
 
     $functionDirectory=$(Join-Path (Split-Path -Parent -Path $PSScriptRoot) "functions")
     Push-Location $functionDirectory
@@ -33,9 +35,9 @@ try {
     [array]::Reverse($functionNames)
     foreach ($functionName in $functionNames) {
         Write-Host "`nFetching settings for function ${functionName}..."
-        func azure functionapp fetch-app-settings $functionName
+        func azure functionapp fetch-app-settings $functionName --subscription $subscriptionID
         Write-Host "`nPublishing to function ${functionName}..."
-        func azure functionapp publish $functionName -b local
+        func azure functionapp publish $functionName -b local --subscription $subscriptionID
     }
     Pop-Location
 } finally {
