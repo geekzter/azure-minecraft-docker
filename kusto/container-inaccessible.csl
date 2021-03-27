@@ -1,6 +1,7 @@
 AppTraces
 | where Message == "TestResult" and OperationName == "PingTest"
 | where AppRoleName == "${function_name}"
+| where TimeGenerated > ago(5m)
 | where "Started" in ((ContainerEvent_CL 
                       | where ContainerGroup_s == "${container_group_name}"
                       | where Message startswith_cs "Kill" or Message startswith_cs "Start"
@@ -8,4 +9,5 @@ AppTraces
                       | top 1 by TimeGenerated desc nulls last
                       | project Operation))
 | extend Connected=Properties['Connected']
+| where Connected =~ "False"
 | order by TimeGenerated desc

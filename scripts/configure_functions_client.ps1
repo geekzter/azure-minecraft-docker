@@ -34,12 +34,14 @@ try {
         Write-Debug "Function names: ${functionNames}"
     }
 
-    $functionDirectory=$(Join-Path (Split-Path -Parent -Path $PSScriptRoot) "functions")
+    $functionDirectory = $(Join-Path (Split-Path -Parent -Path $PSScriptRoot) "functions")
     Push-Location $functionDirectory
+    $subscriptionID    = (Get-TerraformOutput "subscription_guid")
+    az account set -s $subscriptionID # Required as func ignores --subscription
 
     $functionName = $functionNames # There's only one function currently
     Write-Host "`nFetching settings for function ${functionName}..."
-    func azure functionapp fetch-app-settings $functionName
+    func azure functionapp fetch-app-settings $functionName --subscription $subscriptionID
 
     $localSettingsFile = (Join-Path $functionDirectory "local.settings.json")
     if (Test-Path $localSettingsFile) {

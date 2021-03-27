@@ -29,7 +29,7 @@ resource azurerm_application_insights insights {
 
   # Associate with Log Analytics workspace
   provisioner local-exec {
-    command                    = "az monitor app-insights component update -a ${self.name} -g ${self.resource_group_name} --workspace ${azurerm_log_analytics_workspace.monitor.id}"
+    command                    = "az monitor app-insights component update --ids ${self.id} --workspace ${azurerm_log_analytics_workspace.monitor.id}"
     environment                = {
       AZURE_EXTENSION_USE_DYNAMIC_INSTALL = "yes_without_prompt"
     }  
@@ -299,7 +299,7 @@ resource azurerm_monitor_metric_alert memory {
     }
   }
   frequency                    = "PT5M"
-  severity                     = 2
+  severity                     = 3
   window_size                  = "PT15M"
 
   action {
@@ -325,7 +325,7 @@ resource azurerm_monitor_metric_alert memory_dynamic {
       values                   = ["minecraft"]
     }
   }
-  severity                     = 2
+  severity                     = 3
 
   action {
     action_group_id            = azurerm_monitor_action_group.arm_roles.id
@@ -377,7 +377,7 @@ resource azurerm_monitor_metric_alert cpu_dynamic {
       values                   = ["minecraft"]
     }
   }
-  severity                     = 2
+  severity                     = 3
 
   action {
     action_group_id            = azurerm_monitor_action_group.arm_roles.id
@@ -398,7 +398,7 @@ resource azurerm_monitor_scheduled_query_rules_alert container_failed_alert {
   query                        = templatefile("${path.root}/../kusto/container-failed.csl", { 
     resource_group_name        = azurerm_resource_group.minecraft.name
   })  
-  severity                     = 1
+  severity                     = 2
   frequency                    = 5
   time_window                  = 5
   trigger {
@@ -424,7 +424,7 @@ resource azurerm_monitor_scheduled_query_rules_alert container_inaccessible_aler
   })  
   severity                     = 1
   frequency                    = 5
-  time_window                  = 5
+  time_window                  = 2880 # Window defined in query, subquery requires no constraint
   trigger {
     operator                   = "GreaterThan"
     threshold                  = 0

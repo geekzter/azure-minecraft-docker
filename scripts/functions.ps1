@@ -254,18 +254,20 @@ function WaitFor-MinecraftServer (
         $tfdirectory = $(Join-Path (Get-Item $PSScriptRoot).Parent.FullName "terraform")
         Push-Location $tfdirectory
         
-        $containerGroup = (Get-TerraformOutput "container_group")
-        $resourceGroup  = (Get-TerraformOutput "resource_group")
-        $serverFQDN     = (Get-TerraformOutput "minecraft_server_fqdn")
-        $serverPort     = (Get-TerraformOutput "minecraft_server_port")
-    
+        $containerGroupID = (Get-TerraformOutput "container_group_id")
+        $containerGroup   = (Get-TerraformOutput "container_group")
+        $resourceGroup    = (Get-TerraformOutput "resource_group")
+        $serverFQDN       = (Get-TerraformOutput "minecraft_server_fqdn")
+        $serverPort       = (Get-TerraformOutput "minecraft_server_port")
+        $subscriptionID   = (Get-TerraformOutput "subscription_guid")
+
         if (![string]::IsNullOrEmpty($serverFQDN)) {
             # First check if the container is running
-            $state = (az container show -n $containerGroup -g $resourceGroup --query "containers[?name=='minecraft'].instanceView.currentState.state" -o tsv)
+            $state = (az container show --ids $containerGroupID --query "containers[?name=='minecraft'].instanceView.currentState.state" -o tsv)
             if ($state -ine "Running") {
                 if ($StartServer) {
                     Write-Host "Starting ${serverFQDN}..."
-                    az container start -n $containerGroup -g $resourceGroup
+                    az container start -n $containerGroup -g $resourceGroup --subscription $subscriptionID
                 } else {
                     Write-Warning "${serverFQDN} is not running"
                     return $false
