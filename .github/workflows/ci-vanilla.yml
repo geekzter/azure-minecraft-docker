@@ -35,7 +35,7 @@ name: ci-vanilla
 
 jobs:
   dotnet:
-    name: Build Watchdog Function
+    name: Build monitor function
 
     runs-on: ubuntu-latest
 
@@ -165,21 +165,8 @@ jobs:
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true
-
-    # - name: Download Function settings
-    #   uses: Azure/powershell@v1
-    #   env:
-    #     AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-    #   with:
-    #     inlineScript: | 
-    #       pushd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-    #       func azure functionapp fetch-app-settings ${{ steps.terraform-apply.outputs.function_name }}
-    #       popd
-    #     azPSVersion: latest
-    #     errorActionPreference: Stop
-    #     failOnStandardError: true
         
-    - name: 'Run Azure Functions Action'
+    - name: 'Publish Monitor Function'
       uses: Azure/functions-action@v1
       with:
         app-name: ${{ steps.terraform-apply.outputs.function_name }}
@@ -238,6 +225,12 @@ jobs:
         errorActionPreference: Stop
         failOnStandardError: true
 
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: terraform
+        path: '${{ env.GITHUB_WORKSPACE }}/terraform'
+      
     - name: Clean Up
       if: ${{ always() }}
       uses: Azure/powershell@v1
