@@ -229,7 +229,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: terraform
-        path: '${{ env.GITHUB_WORKSPACE }}/terraform'
+        path: 'terraform'
       
     - name: Clean Up
       if: ${{ always() }}
