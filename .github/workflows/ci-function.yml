@@ -5,17 +5,20 @@ on:
     branches:
     - '**'
     paths:
+    - '.github/workflows/ci-function.yml'
     - 'functions/**'
   pull_request:
     branches: 
     - main
     paths:
+    - '.github/workflows/ci-function.yml'
     - 'functions/**'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-  
+
 env:
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '${{ env.GITHUB_WORKSPACE }}/functions'
   DOTNET_VERSION: '3.1.x'
 
 jobs:
@@ -30,8 +33,17 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
     - name: Restore dependencies
-      run: dotnet restore
+      run: |
+        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+        dotnet restore
+        popd
     - name: Build
-      run: dotnet build --no-restore
+      run: |
+        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+        dotnet build --no-restore --output ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/bin/publish
+        popd
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: |
+        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+        dotnet test --no-build --verbosity normal
+        popd
