@@ -425,8 +425,9 @@ resource azurerm_monitor_scheduled_query_rules_alert container_inaccessible_aler
   severity                     = 1
   frequency                    = 5
   time_window                  = 2880 # Window defined in query, subquery requires no constraint
+  # throttling                   = 30
   trigger {
     operator                   = "GreaterThan"
-    threshold                  = 0
+    threshold                  = 2
   }
 }
