@@ -1,0 +1,4 @@
+AppTraces
+| where Message == "TestResult" and OperationName == "PingTest"
+| extend Connected=Properties['Connected']
+| order by TimeGenerated desc

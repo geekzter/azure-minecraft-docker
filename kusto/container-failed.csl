@@ -1,0 +1,4 @@
+ContainerEvent_CL 
+| where Message contains_cs "failed" and ResourceGroup == "${resource_group_name}"
+| project TimeGenerated, Message
+| order by TimeGenerated desc

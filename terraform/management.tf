@@ -21,6 +21,22 @@ resource azurerm_log_analytics_solution log_analytics_solution {
   }
 } 
 
+resource azurerm_application_insights insights {
+  name                         = "${azurerm_log_analytics_workspace.monitor.resource_group_name}-insights"
+  location                     = azurerm_log_analytics_workspace.monitor.location
+  resource_group_name          = azurerm_log_analytics_workspace.monitor.resource_group_name
+  application_type             = "web"
+
+  # Associate with Log Analytics workspace
+  provisioner local-exec {
+    command                    = "az monitor app-insights component update --ids ${self.id} --workspace ${azurerm_log_analytics_workspace.monitor.id}"
+    environment                = {
+      AZURE_EXTENSION_USE_DYNAMIC_INSTALL = "yes_without_prompt"
+    }  
+  }
+  tags                         = azurerm_resource_group.minecraft.tags
+}
+
 resource azurerm_dashboard minecraft_dashboard {
   name                         = "${azurerm_resource_group.minecraft.name}-dashboard"
   resource_group_name          = azurerm_resource_group.minecraft.name
@@ -143,6 +159,24 @@ resource azurerm_monitor_diagnostic_setting stop_workflow {
 
   count                        = var.enable_auto_startstop && var.stop_time != null && var.stop_time != "" ? 1 : 0
 }
+# resource azurerm_logic_app_trigger_recurrence stop_trigger {
+#   name                         = "stop"
+#   logic_app_id                 = azurerm_logic_app_workflow.stop.0.id
+#   frequency                    = "Week"
+#   interval                     = 1
+#   start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T${var.start_time}:00Z"
+#   schedule {
+#     on_these_days              = [
+#       "Monday",
+#       "Tuesday", 
+#       "Wednesday", 
+#       "Thursday", 
+#       "Friday",
+#     ]
+#   }
+
+#   count                        = var.enable_auto_startstop && var.stop_time != null && var.stop_time != "" ? 1 : 0
+# }
 
 resource azurerm_resource_group_template_deployment container_instance_api_connection {
   name                         = "${azurerm_resource_group.minecraft.name}-aci-connection"
@@ -211,8 +245,12 @@ resource azurerm_resource_group_template_deployment stop_workflow {
 
   count                        = var.enable_auto_startstop && var.stop_time != null && var.stop_time != "" ? 1 : 0
 
-  depends_on                   = [azurerm_resource_group_template_deployment.container_instance_api_connection]
+  depends_on                   = [
+    azurerm_resource_group_template_deployment.container_instance_api_connection,
+    # azurerm_logic_app_trigger_recurrence.stop_trigger
+  ]
 }
+
 
 data azurerm_role_definition contributor {
   name                         = "Contributor"
@@ -260,23 +298,26 @@ resource azurerm_monitor_metric_alert memory {
       values                   = ["minecraft"]
     }
   }
+  frequency                    = "PT5M"
+  severity                     = 3
+  window_size                  = "PT15M"
 
   action {
     action_group_id            = azurerm_monitor_action_group.arm_roles.id
   }
 }
-resource azurerm_monitor_metric_alert cpu {
-  name                         = "${azurerm_resource_group.minecraft.name}-cpu-alert"
+resource azurerm_monitor_metric_alert memory_dynamic {
+  name                         = "${azurerm_resource_group.minecraft.name}-memory-dynamic-alert"
   resource_group_name          = azurerm_resource_group.minecraft.name
   scopes                       = [azurerm_container_group.minecraft_server.id]
-  description                  = "Action will be triggered when CPU usage is greater than 975 millicores"
+  description                  = "Action will be triggered when Memory usage is unusually high"
 
-  criteria {
+  dynamic_criteria {
     metric_namespace           = "microsoft.containerinstance/containergroups"
-    metric_name                = "CpuUsage"
+    metric_name                = "MemoryUsage"
     aggregation                = "Average"
     operator                   = "GreaterThan"
-    threshold                  = 975 # 975 millicores = 97.5% of 1 core
+    alert_sensitivity          = "Low"
 
     dimension {
       name                     = "containerName"
@@ -284,11 +325,39 @@ resource azurerm_monitor_metric_alert cpu {
       values                   = ["minecraft"]
     }
   }
+  severity                     = 3
 
   action {
     action_group_id            = azurerm_monitor_action_group.arm_roles.id
   }
 }
+# resource azurerm_monitor_metric_alert cpu {
+#   name                         = "${azurerm_resource_group.minecraft.name}-cpu-alert"
+#   resource_group_name          = azurerm_resource_group.minecraft.name
+#   scopes                       = [azurerm_container_group.minecraft_server.id]
+#   description                  = "Action will be triggered when CPU usage is greater than 975 millicores"
+
+#   criteria {
+#     metric_namespace           = "microsoft.containerinstance/containergroups"
+#     metric_name                = "CpuUsage"
+#     aggregation                = "Average"
+#     operator                   = "GreaterThan"
+#     threshold                  = 975 # 975 millicores = 97.5% of 1 core
+
+#     dimension {
+#       name                     = "containerName"
+#       operator                 = "Include"
+#       values                   = ["minecraft"]
+#     }
+#   }
+#   frequency                    = "PT5M"
+#   severity                     = 2
+#   window_size                  = "PT15M"
+
+#   action {
+#     action_group_id            = azurerm_monitor_action_group.arm_roles.id
+#   }
+# }
 resource azurerm_monitor_metric_alert cpu_dynamic {
   name                         = "${azurerm_resource_group.minecraft.name}-cpu-dynamic-alert"
   resource_group_name          = azurerm_resource_group.minecraft.name
@@ -300,7 +369,7 @@ resource azurerm_monitor_metric_alert cpu_dynamic {
     metric_name                = "CpuUsage"
     aggregation                = "Average"
     operator                   = "GreaterThan"
-    alert_sensitivity          = "Medium"
+    alert_sensitivity          = "Low"
 
     dimension {
       name                     = "containerName"
@@ -308,8 +377,57 @@ resource azurerm_monitor_metric_alert cpu_dynamic {
       values                   = ["minecraft"]
     }
   }
+  severity                     = 3
 
   action {
     action_group_id            = azurerm_monitor_action_group.arm_roles.id
+  }
+}
+resource azurerm_monitor_scheduled_query_rules_alert container_failed_alert {
+  name                         = "${azurerm_resource_group.minecraft.name}-container-failed-alert"
+  resource_group_name          = azurerm_resource_group.minecraft.name
+  location                     = azurerm_resource_group.minecraft.location
+
+  action {
+    action_group               = [azurerm_monitor_action_group.arm_roles.id]
+    email_subject              = "Minecraft container failed"
+  }
+  data_source_id               = azurerm_log_analytics_workspace.monitor.id
+  description                  = "Alert when Mincraft container fails"
+  enabled                      = true
+  query                        = templatefile("${path.root}/../kusto/container-failed.csl", { 
+    resource_group_name        = azurerm_resource_group.minecraft.name
+  })  
+  severity                     = 2
+  frequency                    = 5
+  time_window                  = 5
+  trigger {
+    operator                   = "GreaterThan"
+    threshold                  = 0
+  }
+}
+resource azurerm_monitor_scheduled_query_rules_alert container_inaccessible_alert {
+  name                         = "${azurerm_resource_group.minecraft.name}-container-inaccessible-alert"
+  resource_group_name          = azurerm_resource_group.minecraft.name
+  location                     = azurerm_resource_group.minecraft.location
+
+  action {
+    action_group               = [azurerm_monitor_action_group.arm_roles.id]
+    email_subject              = "Minecraft container inaccessible"
+  }
+  data_source_id               = azurerm_log_analytics_workspace.monitor.id
+  description                  = "Alert when Mincraft container is running but can't be connected to"
+  enabled                      = true
+  query                        = templatefile("${path.root}/../kusto/container-inaccessible.csl", { 
+    container_group_name       = azurerm_container_group.minecraft_server.name
+    function_name              = module.functions.function_name
+  })  
+  severity                     = 1
+  frequency                    = 5
+  time_window                  = 2880 # Window defined in query, subquery requires no constraint
+  # throttling                   = 30
+  trigger {
+    operator                   = "GreaterThan"
+    threshold                  = 2
   }
 }

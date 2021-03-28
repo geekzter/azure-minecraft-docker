@@ -48,7 +48,7 @@
             "type": "Extension/Microsoft_Azure_FileStorage/PartType/FileServicePinnedPart"
           },
           "position": {
-            "colSpan": 2,
+            "colSpan": 1,
             "metadata": null,
             "rowSpan": 1,
             "x": 2,
@@ -56,6 +56,108 @@
           }
         },
         "10": {
+          "metadata": {
+            "deepLink": "#blade/Microsoft_Azure_CostManagement/Menu/costanalysis",
+            "inputs": [
+              {
+                "name": "scope",
+                "value": "/subscriptions/${subscription_guid}"
+              },
+              {
+                "name": "scopeName",
+                "value": "Resources tagged 'repository'='azure-minecraft-docker'"
+              },
+              {
+                "isOptional": true,
+                "name": "view",
+                "value": {
+                  "accumulated": "true",
+                  "chart": "Area",
+                  "currency": "USD",
+                  "dateRange": "ThisMonth",
+                  "displayName": "Cost Consumption",
+                  "kpis": [
+                    {
+                      "enabled": true,
+                      "extendedProperties": {
+                        "amount": 2500,
+                        "name": "NormalBudget",
+                        "timeGrain": "Monthly",
+                        "type": "${subscription_guid}"
+                      },
+                      "id": "${subscription_id}/providers/Microsoft.Consumption/budgets/NormalBudget",
+                      "type": "Budget"
+                    },
+                    {
+                      "enabled": true,
+                      "type": "Forecast"
+                    }
+                  ],
+                  "pivots": [
+                    {
+                      "name": "ServiceName",
+                      "type": "Dimension"
+                    },
+                    {
+                      "name": "ResourceLocation",
+                      "type": "Dimension"
+                    },
+                    {
+                      "name": "ResourceGroupName",
+                      "type": "Dimension"
+                    }
+                  ],
+                  "query": {
+                    "dataSet": {
+                      "aggregation": {
+                        "totalCost": {
+                          "function": "Sum",
+                          "name": "Cost"
+                        },
+                        "totalCostUSD": {
+                          "function": "Sum",
+                          "name": "CostUSD"
+                        }
+                      },
+                      "filter": {
+                        "Tags": {
+                          "Name": "repository",
+                          "Operator": "In",
+                          "Values": [
+                            "azure-minecraft-docker"
+                          ]
+                        }
+                      },
+                      "granularity": "Daily",
+                      "sorting": [
+                        {
+                          "direction": "ascending",
+                          "name": "UsageDate"
+                        }
+                      ]
+                    },
+                    "timeframe": "None",
+                    "type": "ActualCost"
+                  },
+                  "scope": "subscriptions/${subscription_guid}"
+                }
+              },
+              {
+                "isOptional": true,
+                "name": "externalState"
+              }
+            ],
+            "type": "Extension/Microsoft_Azure_CostManagement/PartType/CostAnalysisPinPart"
+          },
+          "position": {
+            "colSpan": 6,
+            "metadata": null,
+            "rowSpan": 4,
+            "x": 6,
+            "y": 6
+          }
+        },
+        "11": {
           "metadata": {
             "filters": {
               "MsPortalFx_TimeRange": {
@@ -156,7 +258,7 @@
             "y": 8
           }
         },
-        "11": {
+        "12": {
           "metadata": {
             "deepLink": "#@/resource${resource_group_id}/overview",
             "inputs": [
@@ -180,7 +282,7 @@
             "y": 10
           }
         },
-        "12": {
+        "13": {
           "metadata": {
             "filters": {
               "MsPortalFx_TimeRange": {
@@ -301,6 +403,24 @@
         },
         "2": {
           "metadata": {
+            "inputs": [
+              {
+                "isOptional": true,
+                "name": "queryInputs"
+              }
+            ],
+            "type": "Extension/Microsoft_Azure_Monitoring/PartType/AlertsManagementSummaryBladePinnedPart"
+          },
+          "position": {
+            "colSpan": 1,
+            "metadata": null,
+            "rowSpan": 1,
+            "x": 3,
+            "y": 0
+          }
+        },
+        "3": {
+          "metadata": {
             "asset": {
               "idInputName": "id",
               "type": "Workspace"
@@ -322,7 +442,7 @@
             "y": 0
           }
         },
-        "3": {
+        "4": {
           "metadata": {
             "inputs": [],
             "settings": {
@@ -346,7 +466,7 @@
             "y": 0
           }
         },
-        "4": {
+        "5": {
           "metadata": {
             "filters": {
               "MsPortalFx_TimeRange": {
@@ -447,7 +567,7 @@
             "y": 0
           }
         },
-        "5": {
+        "6": {
           "metadata": {
             "inputs": [
               {
@@ -519,6 +639,14 @@
               {
                 "isOptional": true,
                 "name": "Scope"
+              },
+              {
+                "isOptional": true,
+                "name": "LegendOptions"
+              },
+              {
+                "isOptional": true,
+                "name": "IsQueryContainTimeRange"
               }
             ],
             "settings": {
@@ -541,7 +669,7 @@
             "y": 1
           }
         },
-        "6": {
+        "7": {
           "metadata": {
             "inputs": [],
             "settings": {
@@ -564,7 +692,7 @@
             "y": 2
           }
         },
-        "7": {
+        "8": {
           "metadata": {
             "filters": {
               "MsPortalFx_TimeRange": {
@@ -665,7 +793,7 @@
             "y": 4
           }
         },
-        "8": {
+        "9": {
           "metadata": {
             "inputs": [
               {
@@ -735,6 +863,14 @@
                 "isOptional": true,
                 "name": "PartSubTitle",
                 "value": "${resource_group}-loganalytics"
+              },
+              {
+                "isOptional": true,
+                "name": "LegendOptions"
+              },
+              {
+                "isOptional": true,
+                "name": "IsQueryContainTimeRange"
               }
             ],
             "settings": {
@@ -758,108 +894,6 @@
             "x": 0,
             "y": 6
           }
-        },
-        "9": {
-          "metadata": {
-            "deepLink": "#blade/Microsoft_Azure_CostManagement/Menu/costanalysis",
-            "inputs": [
-              {
-                "name": "scope",
-                "value": "/subscriptions/${subscription_guid}"
-              },
-              {
-                "name": "scopeName",
-                "value": "Resources tagged 'repository'='azure-minecraft-docker'"
-              },
-              {
-                "isOptional": true,
-                "name": "view",
-                "value": {
-                  "accumulated": "true",
-                  "chart": "Area",
-                  "currency": "USD",
-                  "dateRange": "ThisMonth",
-                  "displayName": "Cost Consumption",
-                  "kpis": [
-                    {
-                      "enabled": true,
-                      "extendedProperties": {
-                        "amount": 2500,
-                        "name": "NormalBudget",
-                        "timeGrain": "Monthly",
-                        "type": "${subscription_guid}"
-                      },
-                      "id": "${subscription_id}/providers/Microsoft.Consumption/budgets/NormalBudget",
-                      "type": "Budget"
-                    },
-                    {
-                      "enabled": true,
-                      "type": "Forecast"
-                    }
-                  ],
-                  "pivots": [
-                    {
-                      "name": "ServiceName",
-                      "type": "Dimension"
-                    },
-                    {
-                      "name": "ResourceLocation",
-                      "type": "Dimension"
-                    },
-                    {
-                      "name": "ResourceGroupName",
-                      "type": "Dimension"
-                    }
-                  ],
-                  "query": {
-                    "dataSet": {
-                      "aggregation": {
-                        "totalCost": {
-                          "function": "Sum",
-                          "name": "Cost"
-                        },
-                        "totalCostUSD": {
-                          "function": "Sum",
-                          "name": "CostUSD"
-                        }
-                      },
-                      "filter": {
-                        "Tags": {
-                          "Name": "repository",
-                          "Operator": "In",
-                          "Values": [
-                            "azure-minecraft-docker"
-                          ]
-                        }
-                      },
-                      "granularity": "Daily",
-                      "sorting": [
-                        {
-                          "direction": "ascending",
-                          "name": "UsageDate"
-                        }
-                      ]
-                    },
-                    "timeframe": "None",
-                    "type": "ActualCost"
-                  },
-                  "scope": "subscriptions/${subscription_guid}"
-                }
-              },
-              {
-                "isOptional": true,
-                "name": "externalState"
-              }
-            ],
-            "type": "Extension/Microsoft_Azure_CostManagement/PartType/CostAnalysisPinPart"
-          },
-          "position": {
-            "colSpan": 6,
-            "metadata": null,
-            "rowSpan": 4,
-            "x": 6,
-            "y": 6
-          }
         }
       }
     }
@@ -878,12 +912,12 @@
               "value": "Past 30 days"
             },
             "filteredPartIds": [
-              "StartboardPart-MonitorChartPart-88cd0059-456c-41b3-8c28-7ad1fb3e5102",
-              "StartboardPart-LogsDashboardPart-88cd0059-456c-41b3-8c28-7ad1fb3e5104",
-              "StartboardPart-MonitorChartPart-88cd0059-456c-41b3-8c28-7ad1fb3e5108",
-              "StartboardPart-LogsDashboardPart-88cd0059-456c-41b3-8c28-7ad1fb3e510a",
-              "StartboardPart-MonitorChartPart-88cd0059-456c-41b3-8c28-7ad1fb3e510e",
-              "StartboardPart-MonitorChartPart-88cd0059-456c-41b3-8c28-7ad1fb3e5112"
+              "StartboardPart-MonitorChartPart-9281c0f9-8170-4507-8176-a2d28dbe361d",
+              "StartboardPart-MonitorChartPart-9281c0f9-8170-4507-8176-a2d28dbe3621",
+              "StartboardPart-MonitorChartPart-9281c0f9-8170-4507-8176-a2d28dbe3627",
+              "StartboardPart-LogsDashboardPart-9281c0f9-8170-4507-8176-a2d28dbe3629",
+              "StartboardPart-MonitorChartPart-9281c0f9-8170-4507-8176-a2d28dbe362d",
+              "StartboardPart-LogsDashboardPart-9281c0f9-8170-4507-8176-a2d28dbe362f"
             ],
             "model": {
               "format": "local",

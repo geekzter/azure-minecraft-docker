@@ -1,7 +1,8 @@
 # Minecraft Server powered by Docker & Azure Container Instance
 This repo deploys [itzg/minecraft-server](https://hub.docker.com/r/itzg/minecraft-server) as [Azure Container Instance](https://azure.microsoft.com/en-us/services/container-instances/), using Terraform.
 
-![ci-vanilla](https://github.com/geekzter/azure-minecraft-docker/workflows/ci-vanilla/badge.svg)
+[![ci-vanilla](https://github.com/geekzter/azure-minecraft-docker/actions/workflows/ci-vanilla.yml/badge.svg)](https://github.com/geekzter/azure-minecraft-docker/actions/workflows/ci-vanilla.yml)
+[![ci-dotnet](https://github.com/geekzter/azure-minecraft-docker/actions/workflows/ci-dotnet.yml/badge.svg)](https://github.com/geekzter/azure-minecraft-docker/actions/workflows/ci-dotnet.yml)
 
 ![alt text](./visuals/diagram.png "Diagram")
 

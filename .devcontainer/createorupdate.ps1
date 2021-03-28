@@ -4,6 +4,9 @@
 # Update relevant packages
 sudo apt-get update
 #sudo apt-get install --only-upgrade -y azure-cli powershell
+if (!(Get-Command func -ErrorAction SilentlyContinue)) {
+    sudo apt-get install -y azure-functions-core-tools
+}
 if (!(Get-Command tmux -ErrorAction SilentlyContinue)) {
     sudo apt-get install -y tmux
 }

@@ -1,3 +1,6 @@
+output container_group {
+  value       = azurerm_container_group.minecraft_server.name
+}
 output container_group_id {
   value       = azurerm_container_group.minecraft_server.id  
 }
@@ -14,6 +17,10 @@ output dashboard_url {
 
 output environment {
   value       = local.environment
+}
+
+output function_name {
+  value        = [module.functions.function_name]
 }
 
 output location {

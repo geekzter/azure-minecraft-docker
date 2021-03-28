@@ -22,6 +22,9 @@ on:
 
 env:
   # ARM_SAS_TOKEN: ${{ secrets.ARM_SAS_TOKEN }}
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'functions'
+  DOTNET_VERSION: '3.1.x'  
+  FUNCTIONS_ARTIFACT_NAME: 'functions'
   # TF_VAR_backend_storage_container: ${{ secrets.TF_VAR_backend_storage_container }}
   # TF_VAR_backend_storage_account: ${{ secrets.TF_VAR_backend_storage_account }}
   # TF_VAR_backend_resource_group: ${{ secrets.TF_VAR_backend_resource_group }}
@@ -31,8 +34,41 @@ env:
 name: ci-vanilla
 
 jobs:
+  dotnet:
+    name: Build monitor function
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    - name: Restore dependencies
+      run: |
+        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+        dotnet restore
+        popd
+    - name: Build
+      run: |
+        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+        dotnet build --no-restore --output ./bin/publish
+        popd
+    - name: Test
+      run: |
+        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+        dotnet test --no-build --verbosity normal
+        popd
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.FUNCTIONS_ARTIFACT_NAME }}
+        path: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/bin/publish'
+
   terraform:
-    name: Provision solution and tear it down again
+    needs: dotnet
+    name: Provision solution, test it, and tear it down again
     defaults:
       run:
         working-directory: terraform
@@ -46,6 +82,12 @@ jobs:
     - name: Checkout source
       uses: actions/checkout@v2
 
+    - name: Download artifacts from previous job
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{ env.FUNCTIONS_ARTIFACT_NAME }}
+        path: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/bin/publish'
+    
     - name: Get Azure CLI
       uses: azure/login@v1
       with:
@@ -123,6 +165,12 @@ jobs:
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true
+        
+    - name: 'Publish Monitor Function'
+      uses: Azure/functions-action@v1
+      with:
+        app-name: ${{ steps.terraform-apply.outputs.function_name }}
+        package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/bin/publish'
 
     - name: Test connection to Minecraft Server (pwsh)
       if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
@@ -177,6 +225,12 @@ jobs:
         errorActionPreference: Stop
         failOnStandardError: true
 
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: terraform
+        path: 'terraform'
+      
     - name: Clean Up
       if: ${{ always() }}
       uses: Azure/powershell@v1
