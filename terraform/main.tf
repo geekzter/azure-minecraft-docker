@@ -22,6 +22,7 @@ locals {
       "application",             "Minecraft",
       "environment",             local.environment,
       "provisioner",             "terraform",
+      "provisoner-email",        var.provisoner_email_address,
       "repository" ,             "azure-minecraft-docker",
       "runid",                   var.run_id,
       "suffix",                  local.suffix,

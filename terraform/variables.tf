@@ -104,6 +104,10 @@ variable minecraft_version {
   default      = "LATEST"
 }
 
+variable provisoner_email_address {
+  type         = string
+  default      = ""
+}
 variable run_id {
   type         = string
   default      = ""

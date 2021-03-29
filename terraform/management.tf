@@ -194,6 +194,7 @@ resource azurerm_resource_group_template_deployment container_instance_api_conne
     tenant_id                  = data.azurerm_subscription.primary.tenant_id
   })
 
+  tags                         = local.tags
   count                        = var.enable_auto_startstop ? 1 : 0
 
   depends_on                   = [azurerm_role_assignment.minecraft_startstop]                                                                    
@@ -220,6 +221,7 @@ resource azurerm_resource_group_template_deployment start_workflow {
     workflow_name              = azurerm_logic_app_workflow.start.0.name
   })
 
+  tags                         = local.tags
   count                        = var.enable_auto_startstop && var.start_time != null && var.start_time != "" ? 1 : 0
 
   depends_on                   = [azurerm_resource_group_template_deployment.container_instance_api_connection]
@@ -243,6 +245,7 @@ resource azurerm_resource_group_template_deployment stop_workflow {
     workflow_name              = azurerm_logic_app_workflow.stop.0.name
   })
 
+  tags                         = local.tags
   count                        = var.enable_auto_startstop && var.stop_time != null && var.stop_time != "" ? 1 : 0
 
   depends_on                   = [
@@ -260,7 +263,7 @@ data azurerm_role_definition reader {
 }
 
 resource azurerm_monitor_action_group arm_roles {
-  name                         = "${azurerm_resource_group.minecraft.name}-alert-group"
+  name                         = "${azurerm_resource_group.minecraft.name}-arm-alert-group"
   resource_group_name          = azurerm_resource_group.minecraft.name
   short_name                   = "arm-roles"
 
@@ -275,6 +278,19 @@ resource azurerm_monitor_action_group arm_roles {
     role_id                    = split("/",data.azurerm_role_definition.reader.id)[4]
     use_common_alert_schema    = true
   }
+}
+
+resource azurerm_monitor_action_group push_notification {
+  name                         = "${azurerm_resource_group.minecraft.name}-push-alert-group"
+  resource_group_name          = azurerm_resource_group.minecraft.name
+  short_name                   = "provisioner"
+
+  azure_app_push_receiver {
+    name                       = "provisioner"
+    email_address              = var.provisoner_email_address
+  }
+
+  count                        = var.provisoner_email_address != "" ? 1 : 0
 }
 
 # Memory > 1.9 GB
@@ -406,13 +422,21 @@ resource azurerm_monitor_scheduled_query_rules_alert container_failed_alert {
     threshold                  = 0
   }
 }
+locals {
+  severity1_action_groups      = var.provisoner_email_address != "" ? [
+      azurerm_monitor_action_group.arm_roles.id,
+      azurerm_monitor_action_group.push_notification.0.id, # Severity 1, so sent push notification
+    ] : [
+      azurerm_monitor_action_group.arm_roles.id,
+    ]
+}
 resource azurerm_monitor_scheduled_query_rules_alert container_inaccessible_alert {
   name                         = "${azurerm_resource_group.minecraft.name}-container-inaccessible-alert"
   resource_group_name          = azurerm_resource_group.minecraft.name
   location                     = azurerm_resource_group.minecraft.location
 
   action {
-    action_group               = [azurerm_monitor_action_group.arm_roles.id]
+    action_group               = local.severity1_action_groups
     email_subject              = "Minecraft container inaccessible"
   }
   data_source_id               = azurerm_log_analytics_workspace.monitor.id

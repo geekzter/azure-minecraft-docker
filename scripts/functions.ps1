@@ -243,7 +243,8 @@ function Show-MinecraftLog (
 }
 
 function WaitFor-MinecraftServer (
-    [parameter(mandatory=$false)][int]$Timeout=120,
+    [parameter(mandatory=$false)][int]$Timeout=300
+    ,
     [parameter(mandatory=$false)][int]$MaxTries=50,
     [parameter(mandatory=$false)][int]$Interval=10,
     [parameter(mandatory=$false)][switch]$StartServer

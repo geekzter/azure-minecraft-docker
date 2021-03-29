@@ -120,13 +120,15 @@ try {
     if (!(Get-ChildItem Env:TF_VAR_* -Exclude TF_VAR_backend_*) -and (Test-Path $varsFile)) {
         # Load variables from file, if it exists and environment variables have not been set
         $varArgs = " -var-file='$varsFile'"
+        $userEmailAddress = $(az account show --query "user.name" -o tsv)
+        if ($userEmailAddress) {
+            $varArgs += " -var 'provisoner_email_address=${userEmailAddress}'"
+        }
     }
 
     if ($Plan -or $Apply) {
-        # Punch hole in PaaS Firewalls (placeholder)
-
         # Create plan
-        Invoke "terraform plan $varArgs -out='$planFile'" 
+        Invoke "terraform plan $varArgs -out='$planFile'"
     }
 
     if ($Apply) {
