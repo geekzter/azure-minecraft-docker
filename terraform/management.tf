@@ -164,7 +164,7 @@ resource azurerm_monitor_diagnostic_setting stop_workflow {
 #   logic_app_id                 = azurerm_logic_app_workflow.stop.0.id
 #   frequency                    = "Week"
 #   interval                     = 1
-#   start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T${var.start_time}:00Z"
+#   start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T${var.start_time}:00"
 #   schedule {
 #     on_these_days              = [
 #       "Monday",
@@ -216,7 +216,7 @@ resource azurerm_resource_group_template_deployment start_workflow {
     container_group_id         = azurerm_container_group.minecraft_server.id
     location                   = azurerm_resource_group.minecraft.location
     operation                  = "start"
-    start_time                 = "${formatdate("YYYY-MM-DD",timestamp())}T${var.start_time}Z"
+    start_time                 = "${formatdate("YYYY-MM-DD",timestamp())}T${var.start_time}"
     time_zone                  = var.timezone
     workflow_name              = azurerm_logic_app_workflow.start.0.name
   })
@@ -240,7 +240,7 @@ resource azurerm_resource_group_template_deployment stop_workflow {
     container_group_id         = azurerm_container_group.minecraft_server.id
     location                   = azurerm_resource_group.minecraft.location       
     operation                  = "stop"
-    start_time                 = "${formatdate("YYYY-MM-DD",timestamp())}T${var.stop_time}Z"
+    start_time                 = "${formatdate("YYYY-MM-DD",timestamp())}T${var.stop_time}"
     time_zone                  = var.timezone
     workflow_name              = azurerm_logic_app_workflow.stop.0.name
   })
@@ -253,7 +253,6 @@ resource azurerm_resource_group_template_deployment stop_workflow {
     # azurerm_logic_app_trigger_recurrence.stop_trigger
   ]
 }
-
 
 data azurerm_role_definition contributor {
   name                         = "Contributor"
