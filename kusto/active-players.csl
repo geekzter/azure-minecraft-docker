@@ -1,0 +1,7 @@
+ContainerInstanceLog_CL 
+| where Message contains "connect" or Message contains "[/" 
+| extend Player=extract(@'\]: *(\w+)',1, Message)
+| summarize JoinTime=maxif(TimeGenerated,Message contains "logged in with entity"), LeaveTime=maxif(TimeGenerated,Message contains "lost connection: ") by Player
+| where JoinTime > LeaveTime
+| order by JoinTime asc
+| project Player, JoinTime
