@@ -111,6 +111,25 @@ function Execute-MinecraftCommand (
     }
 }
 
+function Get-OnlineUsers (
+    [parameter(Mandatory=$false)][string]$Format="tsv"
+) {
+    $queryFile = (Join-Path (Get-Item $PSScriptRoot).Parent.FullName kusto ./online-players.csl)
+
+    $query = (Get-Content $queryFile -Raw)
+    $query = ($query -replace "`t|`n|`r","") # Remove linefeeds
+    $query = ($query -replace """","`'") # Replace double quotes for single quotes
+
+    Push-Location $(Join-Path (Get-Item $PSScriptRoot).Parent.FullName "terraform")
+    $workspaceGUID = Get-TerraformOutput "log_analytics_workspace_guid"
+    Pop-Location
+
+    Write-Information "Running query '${query}'..."
+    $result = (az monitor log-analytics query -w $workspaceGUID --analytics-query "${query}" --query "[].Player" -o $format)
+
+    return $result
+}
+
 function Get-TerraformDirectory() {
     $tfDirectory = (Join-Path (Get-Item $PSScriptRoot).Parent.FullName "terraform")
     Write-Debug "Get-TerraformDirectory: $tfDirectory"

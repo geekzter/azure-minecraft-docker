@@ -755,7 +755,7 @@
                 "GridColumnsWidth": {
                   "Player": "500px"
                 },
-                "PartTitle": "Online Players"
+                "PartTitle": "Online Players (5-10 minutes ago)"
               }
             },
             "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"

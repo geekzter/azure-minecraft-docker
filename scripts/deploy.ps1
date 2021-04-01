@@ -167,14 +167,21 @@ try {
 
         if (!$inAutomation) {
             if ($containerGroupReplaced) {
-                Write-Warning "You're about to replace the container instance group in workspace '${workspace}'! Inform users so they can bail out."
-                
-                Write-Host "Opening rcon-cli to send any last commands and messages (e.g. list, save-all, say):"
-                Execute-MinecraftCommand
-
-                # BUG: https://github.com/Azure/azure-cli/issues/8687
-                # rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused "exec: \"rcon-cli say hi\": executable file not found in $PATH"
-                # Send-MinecraftMessage -Message "Server will go down in ${GracePeriodSeconds} seconds" -SleepSeconds $GracePeriodSeconds
+                $containerGroupID = (Get-TerraformOutput "container_group_id")
+                $minecraftContainerState = (az container show --ids $containerGroupID --query "containers[?name=='minecraft'].instanceView.currentState.state" -o tsv)
+                if ($minecraftContainerState -ieq "Running") {
+                    Write-Warning "You're about to replace the running Minecraft container in workspace '${workspace}'! Inform users so they can bail out."
+                    $onlineUsers = Get-OnlineUsers
+                    if ($onlineUsers) {
+                        Write-Warning "These users were online 5-10 minutes ago: ${onlineUsers}"
+                    }
+                    Write-Host "Opening rcon-cli to send any last commands and messages (e.g. list, save-all, say):"
+                    Execute-MinecraftCommand
+    
+                    # BUG: https://github.com/Azure/azure-cli/issues/8687
+                    # rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused "exec: \"rcon-cli say hi\": executable file not found in $PATH"
+                    # Send-MinecraftMessage -Message "Server will go down in ${GracePeriodSeconds} seconds" -SleepSeconds $GracePeriodSeconds
+                }
             }
 
             if (!$Force -or $containerGroupReplaced -or $minecraftDataReplaced) {
