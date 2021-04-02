@@ -8,19 +8,6 @@ resource azurerm_log_analytics_workspace monitor {
   tags                         = local.tags
 }
 
-resource azurerm_log_analytics_solution log_analytics_solution {
-  solution_name                = "ContainerInsights" 
-  resource_group_name          = azurerm_resource_group.minecraft.name
-  location                     = azurerm_resource_group.minecraft.location
-  workspace_resource_id        = azurerm_log_analytics_workspace.monitor.id
-  workspace_name               = azurerm_log_analytics_workspace.monitor.name
-
-  plan {
-    publisher                  = "Microsoft"
-    product                    = "OMSGallery/ContainerInsights"
-  }
-} 
-
 resource azurerm_application_insights insights {
   name                         = "${azurerm_log_analytics_workspace.monitor.resource_group_name}-insights"
   location                     = azurerm_log_analytics_workspace.monitor.location

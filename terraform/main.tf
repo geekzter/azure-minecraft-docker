@@ -252,7 +252,6 @@ resource azurerm_container_group minecraft_server {
   depends_on                   = [
     azurerm_storage_share_file.log_filter_config,
     azurerm_storage_share_file.log_filter_jar,
-    azurerm_log_analytics_solution.log_analytics_solution
   ]
 }
 
