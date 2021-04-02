@@ -25,7 +25,8 @@ param (
     [parameter(Mandatory=$false,HelpMessage="Don't show prompts unless something get's deleted that should not be")][switch]$Force=$false,
     [parameter(Mandatory=$false,HelpMessage="Initialize Terraform backend, upgrade modules & provider")][switch]$Upgrade=$false,
     [parameter(mandatory=$false,HelpMessage="Follow Minecraft log that will be displayed after apply")][switch]$Follow,
-    [parameter(Mandatory=$false,HelpMessage="Don't deploy application artifacts (e.g. function used as Watchdog). Does not control Minecraft container pull")][switch]$NoCode=$false
+    [parameter(Mandatory=$false,HelpMessage="Don't deploy application artifacts (e.g. function used as Watchdog). Does not control Minecraft container pull")][switch]$NoCode=$false,
+    [parameter(Mandatory=$false,HelpMessage="Tear down infrastructure using Azure CLI")][switch]$TearDown=$false
 ) 
 
 ### Internal Functions
@@ -240,6 +241,47 @@ try {
         
         # Now let Terraform do it's work
         Invoke "terraform destroy $varArgs $forceArgs"
+    }
+
+    if ($TearDown) {
+        if ($env:TF_WORKSPACE -and $env:GITHUB_RUN_ID -and $env:GITHUB_REPOSITORY) {
+            # Remove resource locks first
+            $resourceLocksJSON = $(terraform output -json resource_locks 2>$null)
+            if ($resourceLocksJSON -and ($resourceLocksJSON -match "^\[.*\]$")) {
+                $resourceLocks = ($resourceLocksJSON | ConvertFrom-JSON)
+                az resource lock delete --ids $resourceLocks --verbose
+            }
+
+            # Build JMESPath expression
+            $repository = ($env:GITHUB_REPOSITORY).Split("/")[-1]
+            $tagQuery = "[?tags.repository == '${repository}' && tags.workspace == '${env:TF_WORKSPACE}' && tags.runid == '${env:GITHUB_RUN_ID}' && properties.provisioningState != 'Deleting'].id"
+
+            Write-Host "Removing resource group identified by `"$tagQuery`"..."
+            $resourceGroupIDs = $(az group list --query "$tagQuery" -o tsv)
+            if ($resourceGroupIDs) {
+              Write-Host "az resource delete --ids ${resourceGroupIDs}..."
+              az resource delete --ids $resourceGroupIDs --verbose
+            } else {
+              Write-Host "Nothing to remove"
+            }
+
+            if ($Init -or $Apply) {
+                # Run this only when we have performed other Terraform activities
+                $terraformState = (terraform state pull | ConvertFrom-Json)
+                if ($terraformState.resources) {
+                Write-Host "Clearing Terraform state in workspace ${env:TF_WORKSPACE}..."
+                $terraformState.outputs = New-Object PSObject # Empty output
+                $terraformState.resources = @() # No resources
+                $terraformState.serial++
+                $terraformState | ConvertTo-Json | terraform state push -
+                } else {
+                Write-Host "No resources in Terraform state in workspace ${env:TF_WORKSPACE}..."
+                }
+                terraform state pull  
+            }
+        } else {
+            Write-Warning "GITHUB_RUN_ID='${env:GITHUB_RUN_ID}'`GITHUB_REPOSITORY='${env:GITHUB_REPOSITORY}'`nTF_WORKSPACE='${env:TF_WORKSPACE}'`nall need to be set for teardown"
+        }
     }
 } finally {
     Pop-Location
