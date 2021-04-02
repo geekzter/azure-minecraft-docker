@@ -18,7 +18,8 @@ env:
   TF_STATE_backend_storage_account: ${{ secrets.TF_STATE_backend_storage_account }}
   TF_STATE_backend_resource_group: ${{ secrets.TF_STATE_backend_resource_group }}
   TF_IN_AUTOMATION: true
-  TF_WORKSPACE: cis
+  TF_INPUT: 0
+  TF_WORKSPACE: ci
 
 name: ci-scripted
 

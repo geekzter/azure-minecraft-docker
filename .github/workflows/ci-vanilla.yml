@@ -25,7 +25,7 @@ env:
   DOTNET_VERSION: '3.1.x'  
   FUNCTIONS_ARTIFACT_NAME: 'functions'
   TF_IN_AUTOMATION: true
-  TF_WORKSPACE: ci
+  TF_INPUT: 0
 
 name: ci-vanilla
 
