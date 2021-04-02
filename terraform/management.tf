@@ -279,7 +279,7 @@ resource azurerm_monitor_action_group arm_roles {
   }
 }
 
-resource azurerm_monitor_action_group push_notification {
+resource azurerm_monitor_action_group push_provisioner {
   name                         = "${azurerm_resource_group.minecraft.name}-push-alert-group"
   resource_group_name          = azurerm_resource_group.minecraft.name
   short_name                   = "provisioner"
@@ -422,9 +422,9 @@ resource azurerm_monitor_scheduled_query_rules_alert container_failed_alert {
   }
 }
 locals {
-  severity1_action_groups      = var.provisoner_email_address != "" ? [
+  all_action_groups            = var.provisoner_email_address != "" ? [
       azurerm_monitor_action_group.arm_roles.id,
-      azurerm_monitor_action_group.push_notification.0.id, # Severity 1, so sent push notification
+      azurerm_monitor_action_group.push_provisioner.0.id,
     ] : [
       azurerm_monitor_action_group.arm_roles.id,
     ]
@@ -435,7 +435,7 @@ resource azurerm_monitor_scheduled_query_rules_alert container_inaccessible_aler
   location                     = azurerm_resource_group.minecraft.location
 
   action {
-    action_group               = local.severity1_action_groups
+    action_group               = local.all_action_groups
     email_subject              = "Minecraft container inaccessible"
   }
   data_source_id               = azurerm_log_analytics_workspace.monitor.id
@@ -453,4 +453,27 @@ resource azurerm_monitor_scheduled_query_rules_alert container_inaccessible_aler
     operator                   = "GreaterThan"
     threshold                  = 2
   }
+}
+resource azurerm_monitor_scheduled_query_rules_alert custom_alert {
+  name                         = "${azurerm_resource_group.minecraft.name}-custom-alert"
+  resource_group_name          = azurerm_resource_group.minecraft.name
+  location                     = azurerm_resource_group.minecraft.location
+
+  action {
+    action_group               = local.all_action_groups
+    email_subject              = var.custom_alert_subject != "" ? var.custom_alert_subject : "Custom alert"
+  }
+  data_source_id               = azurerm_log_analytics_workspace.monitor.id
+  description                  = "Custom alert"
+  enabled                      = var.custom_alert_enabled
+  query                        = var.custom_alert_query
+  severity                     = 1
+  frequency                    = 5
+  time_window                  = 5
+  # throttling                   = 30
+  trigger {
+    operator                   = "GreaterThan"
+    threshold                  = 0
+  }
+  count                        = var.custom_alert_query != "" ? 1 : 0
 }
