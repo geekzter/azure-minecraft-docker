@@ -110,7 +110,7 @@ jobs:
 
           Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
           Get-Location
-          ./deploy.ps1 -Destroy
+          ./deploy.ps1 -Destroy -Force
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true

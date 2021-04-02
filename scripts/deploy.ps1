@@ -223,9 +223,9 @@ try {
         # Export Terraform output as step output
         $terraformOutput = (terraform output -json | ConvertFrom-Json -AsHashtable)     
         foreach ($key in $terraformOutput.Keys) {
-          $outputVariableValue = $terraformOutput[$key].value
-          Write-Output "::set-output name=${key}::${outputVariableValue}"
-          Write-Output "TF_OUT_${key}=${outputVariableValue}" >> $env:GITHUB_ENV
+            $outputVariableValue = $terraformOutput[$key].value
+            Write-Output "::set-output name=${key}::${outputVariableValue}"
+            Write-Output "TF_OUT_${key}=${outputVariableValue}" >> $env:GITHUB_ENV
         } 
     }
     
@@ -245,40 +245,47 @@ try {
 
     if ($TearDown) {
         if ($env:TF_WORKSPACE -and $env:GITHUB_RUN_ID -and $env:GITHUB_REPOSITORY) {
-            # Remove resource locks first
-            $resourceLocksJSON = $(terraform output -json resource_locks 2>$null)
-            if ($resourceLocksJSON -and ($resourceLocksJSON -match "^\[.*\]$")) {
-                $resourceLocks = ($resourceLocksJSON | ConvertFrom-JSON)
-                az resource lock delete --ids $resourceLocks --verbose
-            }
+            Invoke-Command -ScriptBlock {
+                $private:ErrorActionPreference = "Continue" # Try to complete as much as possible
 
-            # Build JMESPath expression
-            $repository = ($env:GITHUB_REPOSITORY).Split("/")[-1]
-            $tagQuery = "[?tags.repository == '${repository}' && tags.workspace == '${env:TF_WORKSPACE}' && tags.runid == '${env:GITHUB_RUN_ID}' && properties.provisioningState != 'Deleting'].id"
-
-            Write-Host "Removing resource group identified by `"$tagQuery`"..."
-            $resourceGroupIDs = $(az group list --query "$tagQuery" -o tsv)
-            if ($resourceGroupIDs) {
-                Write-Host "az resource delete --ids ${resourceGroupIDs}..."
-                az resource delete --ids $resourceGroupIDs --verbose
-            } else {
-                Write-Host "Nothing to remove"
-            }
-
-            if ($Init -or $Apply) {
-                # Run this only when we have performed other Terraform activities
-                $terraformState = (terraform state pull | ConvertFrom-Json)
-                if ($terraformState.resources) {
-                    Write-Host "Clearing Terraform state in workspace ${env:TF_WORKSPACE}..."
-                    $terraformState.outputs = New-Object PSObject # Empty output
-                    $terraformState.resources = @() # No resources
-                    $terraformState.serial++
-                    $terraformState | ConvertTo-Json | terraform state push -
-                } else {
-                    Write-Host "No resources in Terraform state in workspace ${env:TF_WORKSPACE}..."
+                # Remove resource locks first
+                $resourceLocksJSON = $(terraform output -json resource_locks 2>$null)
+                if ($resourceLocksJSON -and ($resourceLocksJSON -match "^\[.*\]$")) {
+                    $resourceLocks = ($resourceLocksJSON | ConvertFrom-JSON)
+                    az resource lock delete --ids $resourceLocks --verbose
                 }
-                terraform state pull  
+
+                # Build JMESPath expression
+                $repository = ($env:GITHUB_REPOSITORY).Split("/")[-1]
+                $tagQuery = "[?tags.repository == '${repository}' && tags.workspace == '${env:TF_WORKSPACE}' && tags.runid == '${env:GITHUB_RUN_ID}' && properties.provisioningState != 'Deleting'].id"
+
+                Write-Host "Removing resource group identified by `"$tagQuery`"..."
+                $resourceGroupIDs = $(az group list --query "$tagQuery" -o tsv)
+                if ($resourceGroupIDs) {
+                    Write-Host "az resource delete --ids ${resourceGroupIDs}..."
+                    az resource delete --ids $resourceGroupIDs --verbose
+                } else {
+                    Write-Host "Nothing to remove"
+                }
+
+                # if ($Init -or $Apply) {
+                    # Run this only when we have performed other Terraform activities
+                    $terraformState = (terraform state pull | ConvertFrom-Json)
+                    if ($terraformState.resources) {
+                        Write-Host "Clearing Terraform state in workspace ${env:TF_WORKSPACE}..."
+                        $terraformState.outputs = New-Object PSObject # Empty output
+                        $terraformState.resources = @() # No resources
+                        $terraformState.serial++
+                        $terraformState | ConvertTo-Json | terraform state push -
+                    } else {
+                        Write-Host "No resources in Terraform state in workspace ${env:TF_WORKSPACE}..."
+                    }
+                    terraform state pull  
+                # } else {
+                #     Write-Warning "Terraform not initialized, not clearing state"
+                # }
             }
+
         } else {
             Write-Warning "The following environment variables need to be set for teardown. Current values are:`nGITHUB_REPOSITORY='${env:GITHUB_REPOSITORY}'`nGITHUB_RUN_ID='${env:GITHUB_RUN_ID}'`nTF_WORKSPACE='${env:TF_WORKSPACE}'"
         }
