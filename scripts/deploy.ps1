@@ -259,28 +259,28 @@ try {
             Write-Host "Removing resource group identified by `"$tagQuery`"..."
             $resourceGroupIDs = $(az group list --query "$tagQuery" -o tsv)
             if ($resourceGroupIDs) {
-              Write-Host "az resource delete --ids ${resourceGroupIDs}..."
-              az resource delete --ids $resourceGroupIDs --verbose
+                Write-Host "az resource delete --ids ${resourceGroupIDs}..."
+                az resource delete --ids $resourceGroupIDs --verbose
             } else {
-              Write-Host "Nothing to remove"
+                Write-Host "Nothing to remove"
             }
 
             if ($Init -or $Apply) {
                 # Run this only when we have performed other Terraform activities
                 $terraformState = (terraform state pull | ConvertFrom-Json)
                 if ($terraformState.resources) {
-                Write-Host "Clearing Terraform state in workspace ${env:TF_WORKSPACE}..."
-                $terraformState.outputs = New-Object PSObject # Empty output
-                $terraformState.resources = @() # No resources
-                $terraformState.serial++
-                $terraformState | ConvertTo-Json | terraform state push -
+                    Write-Host "Clearing Terraform state in workspace ${env:TF_WORKSPACE}..."
+                    $terraformState.outputs = New-Object PSObject # Empty output
+                    $terraformState.resources = @() # No resources
+                    $terraformState.serial++
+                    $terraformState | ConvertTo-Json | terraform state push -
                 } else {
-                Write-Host "No resources in Terraform state in workspace ${env:TF_WORKSPACE}..."
+                    Write-Host "No resources in Terraform state in workspace ${env:TF_WORKSPACE}..."
                 }
                 terraform state pull  
             }
         } else {
-            Write-Warning "GITHUB_RUN_ID='${env:GITHUB_RUN_ID}'`GITHUB_REPOSITORY='${env:GITHUB_REPOSITORY}'`nTF_WORKSPACE='${env:TF_WORKSPACE}'`nall need to be set for teardown"
+            Write-Warning "The following environment variables need to be set for teardown. Current values are:`nGITHUB_REPOSITORY='${env:GITHUB_REPOSITORY}'`nGITHUB_RUN_ID='${env:GITHUB_RUN_ID}'`nTF_WORKSPACE='${env:TF_WORKSPACE}'"
         }
     }
 } finally {
