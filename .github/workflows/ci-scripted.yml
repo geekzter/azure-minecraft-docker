@@ -1,12 +1,4 @@
-# Controls when the action will run. 
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
-  push:
-    branches: [ main ]
-    paths-ignore:
-    - '**/README.md'
-    - '**/LICENSE'
-    - 'visuals/**'
   pull_request:
     branches: [ main ]
     paths-ignore:
@@ -96,7 +88,6 @@ jobs:
         failOnStandardError: true
 
     - name: Test connection to Minecraft Server (pwsh)
-      if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
       uses: Azure/powershell@v1
       env:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
