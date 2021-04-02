@@ -64,7 +64,7 @@ jobs:
       run: 
         npm i -g azure-functions-core-tools@3 --unsafe-perm true
         
-    - name: Terraform Provisioning inc. Azure Function
+    - name: Terraform Apply + Azure Function deployment
       id: terraform-apply
       uses: Azure/powershell@v1
       env:
@@ -92,6 +92,25 @@ jobs:
           Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
           Get-Location
           ./deploy.ps1 -Init -Apply -Force
+        azPSVersion: latest
+        errorActionPreference: Stop
+        failOnStandardError: true
+
+    - name: Terraform Destroy
+      id: terraform-destrpy
+      uses: Azure/powershell@v1
+      env:
+        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      with:
+        inlineScript: | 
+          # List environment variables
+          Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
+          # Save environment variable setup for subsequent steps
+          Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
+
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
+          Get-Location
+          ./deploy.ps1 -Destroy
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true
