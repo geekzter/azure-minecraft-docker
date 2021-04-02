@@ -218,6 +218,16 @@ try {
         Invoke "terraform output"
     }
 
+    if (($Apply -or $Output) -and ${env:GITHUB_WORKFLOW}) {
+        # Export Terraform output as step output
+        $terraformOutput = (terraform output -json | ConvertFrom-Json -AsHashtable)     
+        foreach ($key in $terraformOutput.Keys) {
+          $outputVariableValue = $terraformOutput[$key].value
+          Write-Output "::set-output name=${key}::${outputVariableValue}"
+          Write-Output "TF_OUT_${key}=${outputVariableValue}" >> $env:GITHUB_ENV
+        } 
+    }
+    
     if ($Destroy) {
         if ($workspace -ieq "prod") {
             Write-Error "You're about to delete Minecraft world data in workspace 'prod'!!! Please figure out another way of doing so, exiting..."
