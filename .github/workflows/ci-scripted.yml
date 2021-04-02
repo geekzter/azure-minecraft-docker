@@ -14,8 +14,9 @@ on:
 
 env:
   # ARM_SAS_TOKEN: ${{ secrets.ARM_SAS_TOKEN }}
+  # NODE_VERSION: '12.x' 
   TF_IN_AUTOMATION: true
-  TF_WORKSPACE: ci
+  TF_WORKSPACE: cis
 
 name: ci-scripted
 
@@ -52,6 +53,10 @@ jobs:
         terraform_version: ${{ steps.terraform-version-check.outputs.TERRAFORM_VERSION }}
         terraform_wrapper: false
 
+    - name: Use Node.js ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v1
+      # with:
+      #   node-version: ${{ env.NODE_VERSION }}
     - name: Install Azure Functions Core Tools
       run: 
         npm i -g azure-functions-core-tools@3 --unsafe-perm true
