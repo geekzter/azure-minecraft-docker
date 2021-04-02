@@ -165,12 +165,8 @@ jobs:
           $env:ARM_CLIENT_SECRET = $servicePrincipal.clientSecret
           $env:ARM_SUBSCRIPTION_ID = $servicePrincipal.subscriptionId
           $env:ARM_TENANT_ID = $servicePrincipal.tenantId
-          Copy-Item backend.tf.sample backend.tf
-          terraform version
-          terraform init -reconfigure `
-                         -backend-config="resource_group_name=${env:TF_STATE_resource_group_name}" `
-                         -backend-config="storage_account_name=${env:TF_STATE_storage_account_name}" `
-                         -backend-config="container_name=${env:TF_STATE_container_name}" 
+          ./deploy.ps1 -Init 
+
           $terraformState = (terraform state pull | ConvertFrom-Json)
           if ($terraformState.resources) {
             Write-Host "Clearing Terraform state in workspace ${env:TF_WORKSPACE}..."
