@@ -196,7 +196,7 @@ jobs:
           # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "rcon-cli say hello from ci" --container-name minecraft
         azPSVersion: latest
         errorActionPreference: Stop
-        failOnStandardError: true # BUG: setting not honored!
+        failOnStandardError: true # BUG: setting not honored! https://github.com/Azure/powershell/issues/33
 
     - name: Test connection to Minecraft Server (bash)
       if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
