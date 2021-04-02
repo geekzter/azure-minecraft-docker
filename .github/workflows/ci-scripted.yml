@@ -13,8 +13,10 @@ on:
   workflow_dispatch:
 
 env:
-  # ARM_SAS_TOKEN: ${{ secrets.ARM_SAS_TOKEN }}
-  # NODE_VERSION: '12.x' 
+  ARM_SAS_TOKEN: ${{ secrets.ARM_SAS_TOKEN }}
+  TF_STATE_backend_storage_container: ${{ secrets.TF_STATE_backend_storage_container }}
+  TF_STATE_backend_storage_account: ${{ secrets.TF_STATE_backend_storage_account }}
+  TF_STATE_backend_resource_group: ${{ secrets.TF_STATE_backend_resource_group }}
   TF_IN_AUTOMATION: true
   TF_WORKSPACE: cis
 
@@ -22,7 +24,7 @@ name: ci-scripted
 
 jobs:
   integrated:
-    name: Provision solution, test it, and tear it down again
+    name: The whole shebang
     defaults:
       run:
         working-directory: terraform
@@ -36,7 +38,7 @@ jobs:
     - name: Checkout source
       uses: actions/checkout@v2
 
-    - name: Get Azure CLI
+    - name: Use Azure CLI
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -47,7 +49,7 @@ jobs:
         $terraformVersion = (Get-Content .terraform-version)
         Write-Output "::set-output name=TERRAFORM_VERSION::${terraformVersion}"
       shell: pwsh
-    - name: Get Terraform
+    - name: Use Terraform
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: ${{ steps.terraform-version-check.outputs.TERRAFORM_VERSION }}
