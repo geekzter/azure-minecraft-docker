@@ -14,9 +14,9 @@ on:
 
 env:
   ARM_SAS_TOKEN: ${{ secrets.ARM_SAS_TOKEN }}
-  TF_STATE_backend_storage_container: ${{ secrets.TF_STATE_backend_storage_container }}
-  TF_STATE_backend_storage_account: ${{ secrets.TF_STATE_backend_storage_account }}
-  TF_STATE_backend_resource_group: ${{ secrets.TF_STATE_backend_resource_group }}
+  TF_STATE_backend_storage_container: ${{ secrets.TF_STATE_BACKEND_STORAGE_CONTAINER }}
+  TF_STATE_backend_storage_account: ${{ secrets.TF_STATE_BACKEND_STORAGE_ACCOUNT }}
+  TF_STATE_backend_resource_group: ${{ secrets.TF_STATE_BACKEND_RESOURCE_GROUP }}
   TF_IN_AUTOMATION: true
   TF_INPUT: 0
   TF_WORKSPACE: ci
@@ -96,7 +96,7 @@ jobs:
         errorActionPreference: Stop
         failOnStandardError: true
 
-    - name: Test connection to Minecraft Server (pwsh)
+    - name: Test connection to Minecraft Server
       uses: Azure/powershell@v1
       env:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
