@@ -159,6 +159,108 @@
         },
         "11": {
           "metadata": {
+            "inputs": [
+              {
+                "isOptional": true,
+                "name": "ComponentId",
+                "value": {
+                  "Name": "${resource_group}-loganalytics",
+                  "ResourceGroup": "${resource_group}",
+                  "ResourceId": "${resource_group_id}/providers/microsoft.operationalinsights/workspaces/${resource_group}-loganalytics",
+                  "SubscriptionId": "${subscription_guid}"
+                }
+              },
+              {
+                "isOptional": true,
+                "name": "Dimensions"
+              },
+              {
+                "isOptional": true,
+                "name": "PartId",
+                "value": "11a37614-4dbc-4fe6-a814-91aee9a148a9"
+              },
+              {
+                "isOptional": true,
+                "name": "Version",
+                "value": "1.0"
+              },
+              {
+                "isOptional": true,
+                "name": "resourceTypeMode",
+                "value": "workspace"
+              },
+              {
+                "isOptional": true,
+                "name": "TimeRange",
+                "value": "P1D"
+              },
+              {
+                "isOptional": true,
+                "name": "DashboardId"
+              },
+              {
+                "isOptional": true,
+                "name": "DraftRequestParameters"
+              },
+              {
+                "isOptional": true,
+                "name": "Query",
+                "value": "ContainerEvent_CL \n| project TimeGenerated, Message\n| order by TimeGenerated desc\n"
+              },
+              {
+                "isOptional": true,
+                "name": "ControlType",
+                "value": "AnalyticsGrid"
+              },
+              {
+                "isOptional": true,
+                "name": "SpecificChart"
+              },
+              {
+                "isOptional": true,
+                "name": "PartTitle",
+                "value": "Analytics"
+              },
+              {
+                "isOptional": true,
+                "name": "PartSubTitle",
+                "value": "${resource_group}-loganalytics"
+              },
+              {
+                "isOptional": true,
+                "name": "Scope"
+              },
+              {
+                "isOptional": true,
+                "name": "LegendOptions"
+              },
+              {
+                "isOptional": true,
+                "name": "IsQueryContainTimeRange"
+              }
+            ],
+            "settings": {
+              "content": {
+                "GridColumnsWidth": {
+                  "Message": "362px",
+                  "TimeGenerated": "138px"
+                },
+                "PartSubTitle": "${resource_group}-loganalytics",
+                "PartTitle": "Events"
+              }
+            },
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
+          },
+          "position": {
+            "colSpan": 6,
+            "metadata": null,
+            "rowSpan": 3,
+            "x": 0,
+            "y": 7
+          }
+        },
+        "12": {
+          "metadata": {
             "filters": {
               "MsPortalFx_TimeRange": {
                 "model": {
@@ -258,7 +360,7 @@
             "y": 8
           }
         },
-        "12": {
+        "13": {
           "metadata": {
             "inputs": [
               {
@@ -360,7 +462,7 @@
             "y": 10
           }
         },
-        "13": {
+        "14": {
           "metadata": {
             "deepLink": "#@/resource${resource_group_id}/overview",
             "inputs": [
@@ -384,7 +486,7 @@
             "y": 10
           }
         },
-        "14": {
+        "15": {
           "metadata": {
             "filters": {
               "MsPortalFx_TimeRange": {
@@ -763,7 +865,7 @@
           "position": {
             "colSpan": 6,
             "metadata": null,
-            "rowSpan": 4,
+            "rowSpan": 3,
             "x": 0,
             "y": 1
           }
@@ -792,6 +894,106 @@
           }
         },
         "8": {
+          "metadata": {
+            "inputs": [
+              {
+                "isOptional": true,
+                "name": "resourceTypeMode"
+              },
+              {
+                "isOptional": true,
+                "name": "ComponentId"
+              },
+              {
+                "isOptional": true,
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "${resource_group_id}/providers/microsoft.operationalinsights/workspaces/${resource_group}-loganalytics"
+                  ]
+                }
+              },
+              {
+                "isOptional": true,
+                "name": "PartId",
+                "value": "13df2070-1295-4372-8ad7-22f499615b8e"
+              },
+              {
+                "isOptional": true,
+                "name": "Version",
+                "value": "2.0"
+              },
+              {
+                "isOptional": true,
+                "name": "TimeRange",
+                "value": "PT43200M"
+              },
+              {
+                "isOptional": true,
+                "name": "DashboardId"
+              },
+              {
+                "isOptional": true,
+                "name": "DraftRequestParameters"
+              },
+              {
+                "isOptional": true,
+                "name": "Query",
+                "value": "ContainerInstanceLog_CL \n| where Message contains \"lost connection: you are not whitelisted\" \n| extend MessageWithoutTimestamp=replace(@'\\[[^\\]]* (\\w+)\\]: ', @'[\\1] ', Message)\n| extend User=extract(@'name=(\\w+)',1, Message)\n| order by TimeGenerated desc\n| project TimeGenerated, User //, Message=tolower(MessageWithoutTimestamp)\n"
+              },
+              {
+                "isOptional": true,
+                "name": "ControlType",
+                "value": "AnalyticsGrid"
+              },
+              {
+                "isOptional": true,
+                "name": "SpecificChart"
+              },
+              {
+                "isOptional": true,
+                "name": "PartTitle",
+                "value": "Analytics"
+              },
+              {
+                "isOptional": true,
+                "name": "PartSubTitle",
+                "value": "${resource_group}-loganalytics"
+              },
+              {
+                "isOptional": true,
+                "name": "Dimensions"
+              },
+              {
+                "isOptional": true,
+                "name": "LegendOptions"
+              },
+              {
+                "isOptional": true,
+                "name": "IsQueryContainTimeRange",
+                "value": false
+              }
+            ],
+            "settings": {
+              "content": {
+                "GridColumnsWidth": {
+                  "TimeGenerated": "138px",
+                  "User": "362px"
+                },
+                "PartTitle": "Failed Logins"
+              }
+            },
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
+          },
+          "position": {
+            "colSpan": 6,
+            "metadata": null,
+            "rowSpan": 3,
+            "x": 0,
+            "y": 4
+          }
+        },
+        "9": {
           "metadata": {
             "filters": {
               "MsPortalFx_TimeRange": {
@@ -891,108 +1093,6 @@
             "x": 12,
             "y": 4
           }
-        },
-        "9": {
-          "metadata": {
-            "inputs": [
-              {
-                "isOptional": true,
-                "name": "ComponentId",
-                "value": {
-                  "Name": "${resource_group}-loganalytics",
-                  "ResourceGroup": "${resource_group}",
-                  "ResourceId": "${resource_group_id}/providers/microsoft.operationalinsights/workspaces/${resource_group}-loganalytics",
-                  "SubscriptionId": "${subscription_guid}"
-                }
-              },
-              {
-                "isOptional": true,
-                "name": "Dimensions"
-              },
-              {
-                "isOptional": true,
-                "name": "PartId",
-                "value": "11a37614-4dbc-4fe6-a814-91aee9a148a9"
-              },
-              {
-                "isOptional": true,
-                "name": "Version",
-                "value": "1.0"
-              },
-              {
-                "isOptional": true,
-                "name": "resourceTypeMode",
-                "value": "workspace"
-              },
-              {
-                "isOptional": true,
-                "name": "TimeRange",
-                "value": "P1D"
-              },
-              {
-                "isOptional": true,
-                "name": "DashboardId"
-              },
-              {
-                "isOptional": true,
-                "name": "DraftRequestParameters"
-              },
-              {
-                "isOptional": true,
-                "name": "Query",
-                "value": "ContainerEvent_CL \n| project TimeGenerated, Message\n| order by TimeGenerated desc\n"
-              },
-              {
-                "isOptional": true,
-                "name": "ControlType",
-                "value": "AnalyticsGrid"
-              },
-              {
-                "isOptional": true,
-                "name": "SpecificChart"
-              },
-              {
-                "isOptional": true,
-                "name": "PartTitle",
-                "value": "Analytics"
-              },
-              {
-                "isOptional": true,
-                "name": "PartSubTitle",
-                "value": "${resource_group}-loganalytics"
-              },
-              {
-                "isOptional": true,
-                "name": "Scope"
-              },
-              {
-                "isOptional": true,
-                "name": "LegendOptions"
-              },
-              {
-                "isOptional": true,
-                "name": "IsQueryContainTimeRange"
-              }
-            ],
-            "settings": {
-              "content": {
-                "GridColumnsWidth": {
-                  "Message": "362px",
-                  "TimeGenerated": "138px"
-                },
-                "PartSubTitle": "${resource_group}-loganalytics",
-                "PartTitle": "Events"
-              }
-            },
-            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
-          },
-          "position": {
-            "colSpan": 6,
-            "metadata": null,
-            "rowSpan": 5,
-            "x": 0,
-            "y": 5
-          }
         }
       }
     }
@@ -1011,13 +1111,14 @@
               "value": "Past 30 days"
             },
             "filteredPartIds": [
-              "StartboardPart-MonitorChartPart-c74657fb-30c7-43af-bc59-6a5351381118",
-              "StartboardPart-LogsDashboardPart-c74657fb-30c7-43af-bc59-6a535138111a",
-              "StartboardPart-MonitorChartPart-c74657fb-30c7-43af-bc59-6a535138111e",
-              "StartboardPart-LogsDashboardPart-c74657fb-30c7-43af-bc59-6a5351381120",
-              "StartboardPart-MonitorChartPart-c74657fb-30c7-43af-bc59-6a5351381124",
-              "StartboardPart-MonitorChartPart-c74657fb-30c7-43af-bc59-6a5351381128",
-              "StartboardPart-LogsDashboardPart-c74657fb-30c7-43af-bc59-6a535138112a"
+              "StartboardPart-MonitorChartPart-5ef70a5f-3860-400f-a485-dd3ad9d3698a",
+              "StartboardPart-LogsDashboardPart-5ef70a5f-3860-400f-a485-dd3ad9d3698c",
+              "StartboardPart-MonitorChartPart-5ef70a5f-3860-400f-a485-dd3ad9d36990",
+              "StartboardPart-LogsDashboardPart-5ef70a5f-3860-400f-a485-dd3ad9d36992",
+              "StartboardPart-MonitorChartPart-5ef70a5f-3860-400f-a485-dd3ad9d36996",
+              "StartboardPart-LogsDashboardPart-5ef70a5f-3860-400f-a485-dd3ad9d36998",
+              "StartboardPart-MonitorChartPart-5ef70a5f-3860-400f-a485-dd3ad9d3699c",
+              "StartboardPart-LogsDashboardPart-5ef70a5f-3860-400f-a485-dd3ad9d3699e"
             ],
             "model": {
               "format": "local",
