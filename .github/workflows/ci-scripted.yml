@@ -164,7 +164,6 @@ jobs:
           $env:ARM_TENANT_ID = $servicePrincipal.tenantId
           Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
           Get-Location
-          ./deploy.ps1 -Teardown
           ./deploy.ps1 -Init -Teardown
         azPSVersion: latest
         errorActionPreference: Continue
