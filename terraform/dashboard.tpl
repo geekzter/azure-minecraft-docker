@@ -246,7 +246,7 @@
                   "TimeGenerated": "138px"
                 },
                 "PartSubTitle": "${resource_group}-loganalytics",
-                "PartTitle": "Events"
+                "PartTitle": "Container Events"
               }
             },
             "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
@@ -855,9 +855,11 @@
             "settings": {
               "content": {
                 "GridColumnsWidth": {
-                  "Player": "500px"
+                  "JoinTime": "138px",
+                  "Player": "362px"
                 },
-                "PartTitle": "Online Players (5-10 minutes ago)"
+                "PartTitle": "Online Players (5-10 minutes ago)",
+                "Query": "ContainerInstanceLog_CL \n| where Message contains \"connect\" or Message contains \"[/\" \n| extend Player=extract(@'\\]: *(\\w+)',1, Message)\n| summarize JoinTime=maxif(TimeGenerated,Message contains \"logged in with entity\"), LeaveTime=maxif(TimeGenerated,Message contains \"lost connection: \") by Player\n| where JoinTime > LeaveTime\n| order by JoinTime desc\n| project JoinTime, Player\n"
               }
             },
             "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
@@ -1111,14 +1113,14 @@
               "value": "Past 30 days"
             },
             "filteredPartIds": [
-              "StartboardPart-MonitorChartPart-5ef70a5f-3860-400f-a485-dd3ad9d3698a",
-              "StartboardPart-LogsDashboardPart-5ef70a5f-3860-400f-a485-dd3ad9d3698c",
-              "StartboardPart-MonitorChartPart-5ef70a5f-3860-400f-a485-dd3ad9d36990",
-              "StartboardPart-LogsDashboardPart-5ef70a5f-3860-400f-a485-dd3ad9d36992",
-              "StartboardPart-MonitorChartPart-5ef70a5f-3860-400f-a485-dd3ad9d36996",
-              "StartboardPart-LogsDashboardPart-5ef70a5f-3860-400f-a485-dd3ad9d36998",
-              "StartboardPart-MonitorChartPart-5ef70a5f-3860-400f-a485-dd3ad9d3699c",
-              "StartboardPart-LogsDashboardPart-5ef70a5f-3860-400f-a485-dd3ad9d3699e"
+              "StartboardPart-MonitorChartPart-5ef70a5f-3860-400f-a485-dd3ad9d36bc3",
+              "StartboardPart-LogsDashboardPart-5ef70a5f-3860-400f-a485-dd3ad9d36bc5",
+              "StartboardPart-LogsDashboardPart-5ef70a5f-3860-400f-a485-dd3ad9d36bc9",
+              "StartboardPart-MonitorChartPart-5ef70a5f-3860-400f-a485-dd3ad9d36bcb",
+              "StartboardPart-LogsDashboardPart-5ef70a5f-3860-400f-a485-dd3ad9d36bcf",
+              "StartboardPart-MonitorChartPart-5ef70a5f-3860-400f-a485-dd3ad9d36bd1",
+              "StartboardPart-LogsDashboardPart-5ef70a5f-3860-400f-a485-dd3ad9d36bd3",
+              "StartboardPart-MonitorChartPart-5ef70a5f-3860-400f-a485-dd3ad9d36bd7"
             ],
             "model": {
               "format": "local",
