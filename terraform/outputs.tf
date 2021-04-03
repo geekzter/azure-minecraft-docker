@@ -27,6 +27,10 @@ output location {
   value       = azurerm_resource_group.minecraft.location
 }
 
+output log_analytics_workspace_guid {
+  value       = azurerm_log_analytics_workspace.monitor.workspace_id
+}
+
 output minecraft_server_fqdn {
   value       = local.minecraft_server_fqdn
 }

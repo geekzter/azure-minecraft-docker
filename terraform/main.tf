@@ -22,6 +22,7 @@ locals {
       "application",             "Minecraft",
       "environment",             local.environment,
       "provisioner",             "terraform",
+      "provisoner-email",        var.provisoner_email_address,
       "repository" ,             "azure-minecraft-docker",
       "runid",                   var.run_id,
       "suffix",                  local.suffix,
@@ -251,7 +252,6 @@ resource azurerm_container_group minecraft_server {
   depends_on                   = [
     azurerm_storage_share_file.log_filter_config,
     azurerm_storage_share_file.log_filter_jar,
-    azurerm_log_analytics_solution.log_analytics_solution
   ]
 }
 

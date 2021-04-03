@@ -25,7 +25,8 @@ param (
     [parameter(Mandatory=$false,HelpMessage="Don't show prompts unless something get's deleted that should not be")][switch]$Force=$false,
     [parameter(Mandatory=$false,HelpMessage="Initialize Terraform backend, upgrade modules & provider")][switch]$Upgrade=$false,
     [parameter(mandatory=$false,HelpMessage="Follow Minecraft log that will be displayed after apply")][switch]$Follow,
-    [parameter(Mandatory=$false,HelpMessage="Don't deploy application artifacts (e.g. function used as Watchdog). Does not control Minecraft container pull")][switch]$NoCode=$false
+    [parameter(Mandatory=$false,HelpMessage="Don't deploy application artifacts (e.g. function used as Watchdog). Does not control Minecraft container pull")][switch]$NoCode=$false,
+    [parameter(Mandatory=$false,HelpMessage="Tear down infrastructure using Azure CLI")][switch]$TearDown=$false
 ) 
 
 ### Internal Functions
@@ -68,12 +69,12 @@ try {
             $newBackend = (!(Test-Path $backendFile))
             $tfbackendArgs = ""
             if ($newBackend) {
-                if (!$env:TF_VAR_backend_storage_account -or !$env:TF_VAR_backend_storage_container) {
-                    Write-Warning "Environment variables TF_VAR_backend_storage_account and TF_VAR_backend_storage_container must be set when creating a new backend from $backendTemplate"
+                if (!$env:TF_STATE_backend_storage_account -or !$env:TF_STATE_backend_storage_container) {
+                    Write-Warning "Environment variables TF_STATE_backend_storage_account and TF_STATE_backend_storage_container must be set when creating a new backend from $backendTemplate"
                     $fail = $true
                 }
-                if (!($env:TF_VAR_backend_resource_group -or $env:ARM_ACCESS_KEY -or $env:ARM_SAS_TOKEN)) {
-                    Write-Warning "Environment variables ARM_ACCESS_KEY or ARM_SAS_TOKEN or TF_VAR_backend_resource_group (with $identity granted 'Storage Blob Data Contributor' role) must be set when creating a new backend from $backendTemplate"
+                if (!($env:TF_STATE_backend_resource_group -or $env:ARM_ACCESS_KEY -or $env:ARM_SAS_TOKEN)) {
+                    Write-Warning "Environment variables ARM_ACCESS_KEY or ARM_SAS_TOKEN or TF_STATE_backend_resource_group (with $identity granted 'Storage Blob Data Contributor' role) must be set when creating a new backend from $backendTemplate"
                     $fail = $true
                 }
                 if ($fail) {
@@ -90,14 +91,14 @@ try {
                 $tfbackendArgs += " -reconfigure"
             }
 
-            if ($env:TF_VAR_backend_resource_group) {
-                $tfbackendArgs += " -backend-config=`"resource_group_name=${env:TF_VAR_backend_resource_group}`""
+            if ($env:TF_STATE_backend_resource_group) {
+                $tfbackendArgs += " -backend-config=`"resource_group_name=${env:TF_STATE_backend_resource_group}`""
             }
-            if ($env:TF_VAR_backend_storage_account) {
-                $tfbackendArgs += " -backend-config=`"storage_account_name=${env:TF_VAR_backend_storage_account}`""
+            if ($env:TF_STATE_backend_storage_account) {
+                $tfbackendArgs += " -backend-config=`"storage_account_name=${env:TF_STATE_backend_storage_account}`""
             }
-            if ($env:TF_VAR_backend_storage_container) {
-                $tfbackendArgs += " -backend-config=`"container_name=${env:TF_VAR_backend_storage_container}`""
+            if ($env:TF_STATE_backend_storage_container) {
+                $tfbackendArgs += " -backend-config=`"container_name=${env:TF_STATE_backend_storage_container}`""
             }
         }
 
@@ -120,13 +121,15 @@ try {
     if (!(Get-ChildItem Env:TF_VAR_* -Exclude TF_VAR_backend_*) -and (Test-Path $varsFile)) {
         # Load variables from file, if it exists and environment variables have not been set
         $varArgs = " -var-file='$varsFile'"
+        $userEmailAddress = $(az account show --query "user.name" -o tsv)
+        if ($userEmailAddress) {
+            $varArgs += " -var 'provisoner_email_address=${userEmailAddress}'"
+        }
     }
 
     if ($Plan -or $Apply) {
-        # Punch hole in PaaS Firewalls (placeholder)
-
         # Create plan
-        Invoke "terraform plan $varArgs -out='$planFile'" 
+        Invoke "terraform plan $varArgs -out='$planFile'"
     }
 
     if ($Apply) {
@@ -165,14 +168,21 @@ try {
 
         if (!$inAutomation) {
             if ($containerGroupReplaced) {
-                Write-Warning "You're about to replace the container instance group in workspace '${workspace}'! Inform users so they can bail out."
-                
-                Write-Host "Opening rcon-cli to send any last commands and messages (e.g. list, save-all, say):"
-                Execute-MinecraftCommand
-
-                # BUG: https://github.com/Azure/azure-cli/issues/8687
-                # rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused "exec: \"rcon-cli say hi\": executable file not found in $PATH"
-                # Send-MinecraftMessage -Message "Server will go down in ${GracePeriodSeconds} seconds" -SleepSeconds $GracePeriodSeconds
+                $containerGroupID = (Get-TerraformOutput "container_group_id")
+                $minecraftContainerState = (az container show --ids $containerGroupID --query "containers[?name=='minecraft'].instanceView.currentState.state" -o tsv)
+                if ($minecraftContainerState -ieq "Running") {
+                    Write-Warning "You're about to replace the running Minecraft container in workspace '${workspace}'! Inform users so they can bail out."
+                    $onlineUsers = Get-OnlineUsers
+                    if ($onlineUsers) {
+                        Write-Warning "These users were online 5-10 minutes ago: ${onlineUsers}"
+                    }
+                    Write-Host "Opening rcon-cli to send any last commands and messages (e.g. list, save-all, say):"
+                    Execute-MinecraftCommand
+    
+                    # BUG: https://github.com/Azure/azure-cli/issues/8687
+                    # rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused "exec: \"rcon-cli say hi\": executable file not found in $PATH"
+                    # Send-MinecraftMessage -Message "Server will go down in ${GracePeriodSeconds} seconds" -SleepSeconds $GracePeriodSeconds
+                }
             }
 
             if (!$Force -or $containerGroupReplaced -or $minecraftDataReplaced) {
@@ -209,6 +219,16 @@ try {
         Invoke "terraform output"
     }
 
+    if (($Apply -or $Output) -and ${env:GITHUB_WORKFLOW}) {
+        # Export Terraform output as step output
+        $terraformOutput = (terraform output -json | ConvertFrom-Json -AsHashtable)     
+        foreach ($key in $terraformOutput.Keys) {
+            $outputVariableValue = $terraformOutput[$key].value
+            Write-Output "::set-output name=${key}::${outputVariableValue}"
+            Write-Output "TF_OUT_${key}=${outputVariableValue}" >> $env:GITHUB_ENV
+        } 
+    }
+    
     if ($Destroy) {
         if ($workspace -ieq "prod") {
             Write-Error "You're about to delete Minecraft world data in workspace 'prod'!!! Please figure out another way of doing so, exiting..."
@@ -216,11 +236,61 @@ try {
         }
 
         Write-Warning "If it exists, this will delete the Minecraft Server in workspace '${workspace}'!"
-        Write-Host "Opening rcon-cli to send any last commands and messages (e.g. list, say):"
-        Execute-MinecraftCommand
+        if ($env:TF_IN_AUTOMATION -ine "true") {
+            Write-Host "Opening rcon-cli to send any last commands and messages (e.g. list, say):"
+            Execute-MinecraftCommand
+        }
         
         # Now let Terraform do it's work
         Invoke "terraform destroy $varArgs $forceArgs"
+    }
+
+    if ($TearDown) {
+        if ($env:TF_WORKSPACE -and $env:GITHUB_RUN_ID -and $env:GITHUB_REPOSITORY) {
+            Invoke-Command -ScriptBlock {
+                $private:ErrorActionPreference = "Continue" # Try to complete as much as possible
+
+                # Remove resource locks first
+                $resourceLocksJSON = $(terraform output -json resource_locks 2>$null)
+                if ($resourceLocksJSON -and ($resourceLocksJSON -match "^\[.*\]$")) {
+                    $resourceLocks = ($resourceLocksJSON | ConvertFrom-JSON)
+                    az resource lock delete --ids $resourceLocks --verbose
+                }
+
+                # Build JMESPath expression
+                $repository = ($env:GITHUB_REPOSITORY).Split("/")[-1]
+                $tagQuery = "[?tags.repository == '${repository}' && tags.workspace == '${env:TF_WORKSPACE}' && tags.runid == '${env:GITHUB_RUN_ID}' && properties.provisioningState != 'Deleting'].id"
+
+                Write-Host "Removing resource group identified by `"$tagQuery`"..."
+                $resourceGroupIDs = $(az group list --query "$tagQuery" -o tsv)
+                if ($resourceGroupIDs) {
+                    Write-Host "az resource delete --ids ${resourceGroupIDs}..."
+                    az resource delete --ids $resourceGroupIDs --verbose
+                } else {
+                    Write-Host "Nothing to remove"
+                }
+
+                # if ($Init -or $Apply) {
+                    # Run this only when we have performed other Terraform activities
+                    $terraformState = (terraform state pull | ConvertFrom-Json)
+                    if ($terraformState.resources) {
+                        Write-Host "Clearing Terraform state in workspace ${env:TF_WORKSPACE}..."
+                        $terraformState.outputs = New-Object PSObject # Empty output
+                        $terraformState.resources = @() # No resources
+                        $terraformState.serial++
+                        $terraformState | ConvertTo-Json | terraform state push -
+                    } else {
+                        Write-Host "No resources in Terraform state in workspace ${env:TF_WORKSPACE}..."
+                    }
+                    terraform state pull  
+                # } else {
+                #     Write-Warning "Terraform not initialized, not clearing state"
+                # }
+            }
+
+        } else {
+            Write-Warning "The following environment variables need to be set for teardown. Current values are:`nGITHUB_REPOSITORY='${env:GITHUB_REPOSITORY}'`nGITHUB_RUN_ID='${env:GITHUB_RUN_ID}'`nTF_WORKSPACE='${env:TF_WORKSPACE}'"
+        }
     }
 } finally {
     Pop-Location

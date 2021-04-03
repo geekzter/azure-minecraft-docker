@@ -1,0 +1,6 @@
+ContainerInstanceLog_CL 
+| where Message contains "lost connection: you are not whitelisted" 
+| extend MessageWithoutTimestamp=replace(@'\[[^\]]* (\w+)\]: ', @'[\1] ', Message)
+| extend User=extract(@'name=(\w+)',1, Message)
+| order by TimeGenerated desc
+| project TimeGenerated, User, Message=tolower(MessageWithoutTimestamp)

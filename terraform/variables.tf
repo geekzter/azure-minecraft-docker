@@ -3,6 +3,19 @@ variable container_image_tag {
   default      = ""
 }
 
+variable custom_alert_enabled {
+  type         = bool
+  default      = false
+}
+variable custom_alert_query {
+  type         = string
+  default      = ""
+}
+variable custom_alert_subject {
+  type         = string
+  default      = ""
+}
+
 variable location {
   type         = string
   default      = "westeurope" # Amsterdam
@@ -104,6 +117,10 @@ variable minecraft_version {
   default      = "LATEST"
 }
 
+variable provisoner_email_address {
+  type         = string
+  default      = ""
+}
 variable run_id {
   type         = string
   default      = ""

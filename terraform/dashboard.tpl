@@ -159,6 +159,108 @@
         },
         "11": {
           "metadata": {
+            "inputs": [
+              {
+                "isOptional": true,
+                "name": "ComponentId",
+                "value": {
+                  "Name": "${resource_group}-loganalytics",
+                  "ResourceGroup": "${resource_group}",
+                  "ResourceId": "${resource_group_id}/providers/microsoft.operationalinsights/workspaces/${resource_group}-loganalytics",
+                  "SubscriptionId": "${subscription_guid}"
+                }
+              },
+              {
+                "isOptional": true,
+                "name": "Dimensions"
+              },
+              {
+                "isOptional": true,
+                "name": "PartId",
+                "value": "11a37614-4dbc-4fe6-a814-91aee9a148a9"
+              },
+              {
+                "isOptional": true,
+                "name": "Version",
+                "value": "1.0"
+              },
+              {
+                "isOptional": true,
+                "name": "resourceTypeMode",
+                "value": "workspace"
+              },
+              {
+                "isOptional": true,
+                "name": "TimeRange",
+                "value": "P1D"
+              },
+              {
+                "isOptional": true,
+                "name": "DashboardId"
+              },
+              {
+                "isOptional": true,
+                "name": "DraftRequestParameters"
+              },
+              {
+                "isOptional": true,
+                "name": "Query",
+                "value": "ContainerEvent_CL \n| project TimeGenerated, Message\n| order by TimeGenerated desc\n"
+              },
+              {
+                "isOptional": true,
+                "name": "ControlType",
+                "value": "AnalyticsGrid"
+              },
+              {
+                "isOptional": true,
+                "name": "SpecificChart"
+              },
+              {
+                "isOptional": true,
+                "name": "PartTitle",
+                "value": "Analytics"
+              },
+              {
+                "isOptional": true,
+                "name": "PartSubTitle",
+                "value": "${resource_group}-loganalytics"
+              },
+              {
+                "isOptional": true,
+                "name": "Scope"
+              },
+              {
+                "isOptional": true,
+                "name": "LegendOptions"
+              },
+              {
+                "isOptional": true,
+                "name": "IsQueryContainTimeRange"
+              }
+            ],
+            "settings": {
+              "content": {
+                "GridColumnsWidth": {
+                  "Message": "362px",
+                  "TimeGenerated": "138px"
+                },
+                "PartSubTitle": "${resource_group}-loganalytics",
+                "PartTitle": "Container Events"
+              }
+            },
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
+          },
+          "position": {
+            "colSpan": 6,
+            "metadata": null,
+            "rowSpan": 3,
+            "x": 0,
+            "y": 7
+          }
+        },
+        "12": {
+          "metadata": {
             "filters": {
               "MsPortalFx_TimeRange": {
                 "model": {
@@ -258,7 +360,109 @@
             "y": 8
           }
         },
-        "12": {
+        "13": {
+          "metadata": {
+            "inputs": [
+              {
+                "isOptional": true,
+                "name": "resourceTypeMode"
+              },
+              {
+                "isOptional": true,
+                "name": "ComponentId"
+              },
+              {
+                "isOptional": true,
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "${resource_group_id}/providers/microsoft.operationalinsights/workspaces/${resource_group}-loganalytics"
+                  ]
+                }
+              },
+              {
+                "isOptional": true,
+                "name": "Dimensions"
+              },
+              {
+                "isOptional": true,
+                "name": "PartId",
+                "value": "15a53e10-286d-4b38-ac93-bd98b26c8546"
+              },
+              {
+                "isOptional": true,
+                "name": "Version",
+                "value": "2.0"
+              },
+              {
+                "isOptional": true,
+                "name": "TimeRange",
+                "value": "P1D"
+              },
+              {
+                "isOptional": true,
+                "name": "DashboardId"
+              },
+              {
+                "isOptional": true,
+                "name": "DraftRequestParameters"
+              },
+              {
+                "isOptional": true,
+                "name": "Query",
+                "value": "ContainerInstanceLog_CL \n| where Message contains \"connect\" or Message contains \"[/\" \n| order by TimeGenerated desc\n| project Message\n\n"
+              },
+              {
+                "isOptional": true,
+                "name": "ControlType",
+                "value": "AnalyticsGrid"
+              },
+              {
+                "isOptional": true,
+                "name": "SpecificChart"
+              },
+              {
+                "isOptional": true,
+                "name": "PartTitle",
+                "value": "Analytics"
+              },
+              {
+                "isOptional": true,
+                "name": "PartSubTitle",
+                "value": "${resource_group}-loganalytics"
+              },
+              {
+                "isOptional": true,
+                "name": "LegendOptions"
+              },
+              {
+                "isOptional": true,
+                "name": "IsQueryContainTimeRange"
+              }
+            ],
+            "settings": {
+              "content": {
+                "GridColumnsWidth": {
+                  "Message": "362px",
+                  "MessageWithoutTimestamp": "362px",
+                  "TimeGenerated": "138px"
+                },
+                "PartSubTitle": "${resource_group}-loganalytics",
+                "PartTitle": "Connection Events",
+                "Query": "ContainerInstanceLog_CL \n| where Message contains \"connect\" or Message contains \"[/\" \n| extend MessageWithoutTimestamp=replace(@'\\[[^\\]]* (\\w+)\\]: ', @'[\\1] ', Message)\n| order by TimeGenerated desc\n| project TimeGenerated, Message=tolower(MessageWithoutTimestamp)"
+              }
+            },
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
+          },
+          "position": {
+            "colSpan": 6,
+            "metadata": null,
+            "rowSpan": 6,
+            "x": 0,
+            "y": 10
+          }
+        },
+        "14": {
           "metadata": {
             "deepLink": "#@/resource${resource_group_id}/overview",
             "inputs": [
@@ -282,7 +486,7 @@
             "y": 10
           }
         },
-        "13": {
+        "15": {
           "metadata": {
             "filters": {
               "MsPortalFx_TimeRange": {
@@ -572,32 +776,30 @@
             "inputs": [
               {
                 "isOptional": true,
-                "name": "ComponentId",
+                "name": "resourceTypeMode"
+              },
+              {
+                "isOptional": true,
+                "name": "ComponentId"
+              },
+              {
+                "isOptional": true,
+                "name": "Scope",
                 "value": {
-                  "Name": "${resource_group}-loganalytics",
-                  "ResourceGroup": "${resource_group}",
-                  "ResourceId": "${resource_group_id}/providers/microsoft.operationalinsights/workspaces/${resource_group}-loganalytics",
-                  "SubscriptionId": "${subscription_guid}"
+                  "resourceIds": [
+                    "${resource_group_id}/providers/microsoft.operationalinsights/workspaces/${resource_group}-loganalytics"
+                  ]
                 }
               },
               {
                 "isOptional": true,
-                "name": "Dimensions"
-              },
-              {
-                "isOptional": true,
                 "name": "PartId",
-                "value": "11a37614-4dbc-4fe6-a814-91aee9a148a9"
+                "value": "124593ba-0d3b-472c-b48a-eb7d2064245b"
               },
               {
                 "isOptional": true,
                 "name": "Version",
-                "value": "1.0"
-              },
-              {
-                "isOptional": true,
-                "name": "resourceTypeMode",
-                "value": "workspace"
+                "value": "2.0"
               },
               {
                 "isOptional": true,
@@ -615,7 +817,7 @@
               {
                 "isOptional": true,
                 "name": "Query",
-                "value": "ContainerEvent_CL \n| project TimeGenerated, Message\n| order by TimeGenerated desc\n"
+                "value": "ContainerInstanceLog_CL \n| where Message contains \"connect\" or Message contains \"[/\" \n| extend Player=extract(@'\\]: *(\\w+)',1, Message)\n| summarize JoinTime=maxif(TimeGenerated,Message contains \"logged in with entity\"), LeaveTime=maxif(TimeGenerated,Message contains \"lost connection: \") by Player\n| where JoinTime > LeaveTime\n| order by JoinTime asc\n| project Player//, JoinTime\n"
               },
               {
                 "isOptional": true,
@@ -638,7 +840,7 @@
               },
               {
                 "isOptional": true,
-                "name": "Scope"
+                "name": "Dimensions"
               },
               {
                 "isOptional": true,
@@ -646,17 +848,18 @@
               },
               {
                 "isOptional": true,
-                "name": "IsQueryContainTimeRange"
+                "name": "IsQueryContainTimeRange",
+                "value": false
               }
             ],
             "settings": {
               "content": {
                 "GridColumnsWidth": {
-                  "Message": "362px",
-                  "TimeGenerated": "138px"
+                  "JoinTime": "138px",
+                  "Player": "362px"
                 },
-                "PartSubTitle": "${resource_group}-loganalytics",
-                "PartTitle": "Events"
+                "PartTitle": "Online Players (5-10 minutes ago)",
+                "Query": "ContainerInstanceLog_CL \n| where Message contains \"connect\" or Message contains \"[/\" \n| extend Player=extract(@'\\]: *(\\w+)',1, Message)\n| summarize JoinTime=maxif(TimeGenerated,Message contains \"logged in with entity\"), LeaveTime=maxif(TimeGenerated,Message contains \"lost connection: \") by Player\n| where JoinTime > LeaveTime\n| order by JoinTime desc\n| project JoinTime, Player\n"
               }
             },
             "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
@@ -664,7 +867,7 @@
           "position": {
             "colSpan": 6,
             "metadata": null,
-            "rowSpan": 5,
+            "rowSpan": 3,
             "x": 0,
             "y": 1
           }
@@ -693,6 +896,106 @@
           }
         },
         "8": {
+          "metadata": {
+            "inputs": [
+              {
+                "isOptional": true,
+                "name": "resourceTypeMode"
+              },
+              {
+                "isOptional": true,
+                "name": "ComponentId"
+              },
+              {
+                "isOptional": true,
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "${resource_group_id}/providers/microsoft.operationalinsights/workspaces/${resource_group}-loganalytics"
+                  ]
+                }
+              },
+              {
+                "isOptional": true,
+                "name": "PartId",
+                "value": "13df2070-1295-4372-8ad7-22f499615b8e"
+              },
+              {
+                "isOptional": true,
+                "name": "Version",
+                "value": "2.0"
+              },
+              {
+                "isOptional": true,
+                "name": "TimeRange",
+                "value": "PT43200M"
+              },
+              {
+                "isOptional": true,
+                "name": "DashboardId"
+              },
+              {
+                "isOptional": true,
+                "name": "DraftRequestParameters"
+              },
+              {
+                "isOptional": true,
+                "name": "Query",
+                "value": "ContainerInstanceLog_CL \n| where Message contains \"lost connection: you are not whitelisted\" \n| extend MessageWithoutTimestamp=replace(@'\\[[^\\]]* (\\w+)\\]: ', @'[\\1] ', Message)\n| extend User=extract(@'name=(\\w+)',1, Message)\n| order by TimeGenerated desc\n| project TimeGenerated, User //, Message=tolower(MessageWithoutTimestamp)\n"
+              },
+              {
+                "isOptional": true,
+                "name": "ControlType",
+                "value": "AnalyticsGrid"
+              },
+              {
+                "isOptional": true,
+                "name": "SpecificChart"
+              },
+              {
+                "isOptional": true,
+                "name": "PartTitle",
+                "value": "Analytics"
+              },
+              {
+                "isOptional": true,
+                "name": "PartSubTitle",
+                "value": "${resource_group}-loganalytics"
+              },
+              {
+                "isOptional": true,
+                "name": "Dimensions"
+              },
+              {
+                "isOptional": true,
+                "name": "LegendOptions"
+              },
+              {
+                "isOptional": true,
+                "name": "IsQueryContainTimeRange",
+                "value": false
+              }
+            ],
+            "settings": {
+              "content": {
+                "GridColumnsWidth": {
+                  "TimeGenerated": "138px",
+                  "User": "362px"
+                },
+                "PartTitle": "Failed Logins"
+              }
+            },
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
+          },
+          "position": {
+            "colSpan": 6,
+            "metadata": null,
+            "rowSpan": 3,
+            "x": 0,
+            "y": 4
+          }
+        },
+        "9": {
           "metadata": {
             "filters": {
               "MsPortalFx_TimeRange": {
@@ -792,108 +1095,6 @@
             "x": 12,
             "y": 4
           }
-        },
-        "9": {
-          "metadata": {
-            "inputs": [
-              {
-                "isOptional": true,
-                "name": "resourceTypeMode"
-              },
-              {
-                "isOptional": true,
-                "name": "ComponentId"
-              },
-              {
-                "isOptional": true,
-                "name": "Scope",
-                "value": {
-                  "resourceIds": [
-                    "${resource_group_id}/providers/microsoft.operationalinsights/workspaces/${resource_group}-loganalytics"
-                  ]
-                }
-              },
-              {
-                "isOptional": true,
-                "name": "Dimensions"
-              },
-              {
-                "isOptional": true,
-                "name": "PartId",
-                "value": "15a53e10-286d-4b38-ac93-bd98b26c8546"
-              },
-              {
-                "isOptional": true,
-                "name": "Version",
-                "value": "2.0"
-              },
-              {
-                "isOptional": true,
-                "name": "TimeRange",
-                "value": "P1D"
-              },
-              {
-                "isOptional": true,
-                "name": "DashboardId"
-              },
-              {
-                "isOptional": true,
-                "name": "DraftRequestParameters"
-              },
-              {
-                "isOptional": true,
-                "name": "Query",
-                "value": "ContainerInstanceLog_CL \n| where Message contains \"connect\" or Message contains \"[/\" \n| order by TimeGenerated desc\n| project Message\n\n"
-              },
-              {
-                "isOptional": true,
-                "name": "ControlType",
-                "value": "AnalyticsGrid"
-              },
-              {
-                "isOptional": true,
-                "name": "SpecificChart"
-              },
-              {
-                "isOptional": true,
-                "name": "PartTitle",
-                "value": "Analytics"
-              },
-              {
-                "isOptional": true,
-                "name": "PartSubTitle",
-                "value": "${resource_group}-loganalytics"
-              },
-              {
-                "isOptional": true,
-                "name": "LegendOptions"
-              },
-              {
-                "isOptional": true,
-                "name": "IsQueryContainTimeRange"
-              }
-            ],
-            "settings": {
-              "content": {
-                "GridColumnsWidth": {
-                  "Message": "362px",
-                  "MessageWithoutTimestamp": "362px",
-                  "TimeGenerated": "138px"
-                },
-                "PartSubTitle": "${resource_group}-loganalytics",
-                "PartTitle": "Connection Events",
-                "Query": "ContainerInstanceLog_CL \n| where Message contains \"connect\" or Message contains \"[/\" \n| extend MessageWithoutTimestamp=replace(@'\\[[^\\]]* (\\w+)\\]: ', @'[\\1] ', Message)\n| order by TimeGenerated desc\n| project TimeGenerated, Message=tolower(MessageWithoutTimestamp)"
-              }
-            },
-            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
-          },
-          "position": {
-            "colSpan": 6,
-            "metadata": null,
-            "rowSpan": 10,
-            "x": 0,
-            "y": 6
-          }
         }
       }
     }
@@ -912,12 +1113,14 @@
               "value": "Past 30 days"
             },
             "filteredPartIds": [
-              "StartboardPart-MonitorChartPart-9281c0f9-8170-4507-8176-a2d28dbe361d",
-              "StartboardPart-MonitorChartPart-9281c0f9-8170-4507-8176-a2d28dbe3621",
-              "StartboardPart-MonitorChartPart-9281c0f9-8170-4507-8176-a2d28dbe3627",
-              "StartboardPart-LogsDashboardPart-9281c0f9-8170-4507-8176-a2d28dbe3629",
-              "StartboardPart-MonitorChartPart-9281c0f9-8170-4507-8176-a2d28dbe362d",
-              "StartboardPart-LogsDashboardPart-9281c0f9-8170-4507-8176-a2d28dbe362f"
+              "StartboardPart-MonitorChartPart-5ef70a5f-3860-400f-a485-dd3ad9d36bc3",
+              "StartboardPart-LogsDashboardPart-5ef70a5f-3860-400f-a485-dd3ad9d36bc5",
+              "StartboardPart-LogsDashboardPart-5ef70a5f-3860-400f-a485-dd3ad9d36bc9",
+              "StartboardPart-MonitorChartPart-5ef70a5f-3860-400f-a485-dd3ad9d36bcb",
+              "StartboardPart-LogsDashboardPart-5ef70a5f-3860-400f-a485-dd3ad9d36bcf",
+              "StartboardPart-MonitorChartPart-5ef70a5f-3860-400f-a485-dd3ad9d36bd1",
+              "StartboardPart-LogsDashboardPart-5ef70a5f-3860-400f-a485-dd3ad9d36bd3",
+              "StartboardPart-MonitorChartPart-5ef70a5f-3860-400f-a485-dd3ad9d36bd7"
             ],
             "model": {
               "format": "local",
@@ -945,6 +1148,7 @@
     "environment": "${workspace}",
     "hidden-title": "Minecraft ({environment})",
     "provisioner": "terraform",
+    "provisoner-email": "ericvan@microsoft.com",
     "repository": "azure-minecraft-docker",
     "runid": "",
     "suffix": "${suffix}",

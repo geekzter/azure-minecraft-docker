@@ -21,15 +21,12 @@ on:
   workflow_dispatch:
 
 env:
-  # ARM_SAS_TOKEN: ${{ secrets.ARM_SAS_TOKEN }}
   AZURE_FUNCTIONAPP_PACKAGE_PATH: 'functions'
   DOTNET_VERSION: '3.1.x'  
   FUNCTIONS_ARTIFACT_NAME: 'functions'
-  # TF_VAR_backend_storage_container: ${{ secrets.TF_VAR_backend_storage_container }}
-  # TF_VAR_backend_storage_account: ${{ secrets.TF_VAR_backend_storage_account }}
-  # TF_VAR_backend_resource_group: ${{ secrets.TF_VAR_backend_resource_group }}
   TF_IN_AUTOMATION: true
-  TF_WORKSPACE: ci
+  TF_INPUT: 0
+  TF_WORKSPACE: default # Not using Terraform backend
 
 name: ci-vanilla
 
@@ -88,7 +85,7 @@ jobs:
         name: ${{ env.FUNCTIONS_ARTIFACT_NAME }}
         path: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/bin/publish'
     
-    - name: Get Azure CLI
+    - name: Use Azure CLI
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -99,7 +96,7 @@ jobs:
         $terraformVersion = (Get-Content .terraform-version)
         Write-Output "::set-output name=TERRAFORM_VERSION::${terraformVersion}"
       shell: pwsh
-    - name: Get Terraform
+    - name: Use Terraform
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: ${{ steps.terraform-version-check.outputs.TERRAFORM_VERSION }}
@@ -167,6 +164,7 @@ jobs:
         failOnStandardError: true
         
     - name: 'Publish Monitor Function'
+      if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
       uses: Azure/functions-action@v1
       with:
         app-name: ${{ steps.terraform-apply.outputs.function_name }}
@@ -198,7 +196,7 @@ jobs:
           # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "rcon-cli say hello from ci" --container-name minecraft
         azPSVersion: latest
         errorActionPreference: Stop
-        failOnStandardError: true # BUG: setting not honored!
+        failOnStandardError: true # BUG: setting not honored! https://github.com/Azure/powershell/issues/33
 
     - name: Test connection to Minecraft Server (bash)
       if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}

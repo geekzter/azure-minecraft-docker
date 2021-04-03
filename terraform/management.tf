@@ -8,19 +8,6 @@ resource azurerm_log_analytics_workspace monitor {
   tags                         = local.tags
 }
 
-resource azurerm_log_analytics_solution log_analytics_solution {
-  solution_name                = "ContainerInsights" 
-  resource_group_name          = azurerm_resource_group.minecraft.name
-  location                     = azurerm_resource_group.minecraft.location
-  workspace_resource_id        = azurerm_log_analytics_workspace.monitor.id
-  workspace_name               = azurerm_log_analytics_workspace.monitor.name
-
-  plan {
-    publisher                  = "Microsoft"
-    product                    = "OMSGallery/ContainerInsights"
-  }
-} 
-
 resource azurerm_application_insights insights {
   name                         = "${azurerm_log_analytics_workspace.monitor.resource_group_name}-insights"
   location                     = azurerm_log_analytics_workspace.monitor.location
@@ -164,7 +151,7 @@ resource azurerm_monitor_diagnostic_setting stop_workflow {
 #   logic_app_id                 = azurerm_logic_app_workflow.stop.0.id
 #   frequency                    = "Week"
 #   interval                     = 1
-#   start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T${var.start_time}:00Z"
+#   start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T${var.start_time}:00"
 #   schedule {
 #     on_these_days              = [
 #       "Monday",
@@ -194,6 +181,7 @@ resource azurerm_resource_group_template_deployment container_instance_api_conne
     tenant_id                  = data.azurerm_subscription.primary.tenant_id
   })
 
+  tags                         = local.tags
   count                        = var.enable_auto_startstop ? 1 : 0
 
   depends_on                   = [azurerm_role_assignment.minecraft_startstop]                                                                    
@@ -215,11 +203,12 @@ resource azurerm_resource_group_template_deployment start_workflow {
     container_group_id         = azurerm_container_group.minecraft_server.id
     location                   = azurerm_resource_group.minecraft.location
     operation                  = "start"
-    start_time                 = "${formatdate("YYYY-MM-DD",timestamp())}T${var.start_time}Z"
+    start_time                 = "${formatdate("YYYY-MM-DD",timestamp())}T${var.start_time}"
     time_zone                  = var.timezone
     workflow_name              = azurerm_logic_app_workflow.start.0.name
   })
 
+  tags                         = local.tags
   count                        = var.enable_auto_startstop && var.start_time != null && var.start_time != "" ? 1 : 0
 
   depends_on                   = [azurerm_resource_group_template_deployment.container_instance_api_connection]
@@ -238,11 +227,12 @@ resource azurerm_resource_group_template_deployment stop_workflow {
     container_group_id         = azurerm_container_group.minecraft_server.id
     location                   = azurerm_resource_group.minecraft.location       
     operation                  = "stop"
-    start_time                 = "${formatdate("YYYY-MM-DD",timestamp())}T${var.stop_time}Z"
+    start_time                 = "${formatdate("YYYY-MM-DD",timestamp())}T${var.stop_time}"
     time_zone                  = var.timezone
     workflow_name              = azurerm_logic_app_workflow.stop.0.name
   })
 
+  tags                         = local.tags
   count                        = var.enable_auto_startstop && var.stop_time != null && var.stop_time != "" ? 1 : 0
 
   depends_on                   = [
@@ -250,7 +240,6 @@ resource azurerm_resource_group_template_deployment stop_workflow {
     # azurerm_logic_app_trigger_recurrence.stop_trigger
   ]
 }
-
 
 data azurerm_role_definition contributor {
   name                         = "Contributor"
@@ -260,7 +249,7 @@ data azurerm_role_definition reader {
 }
 
 resource azurerm_monitor_action_group arm_roles {
-  name                         = "${azurerm_resource_group.minecraft.name}-alert-group"
+  name                         = "${azurerm_resource_group.minecraft.name}-arm-alert-group"
   resource_group_name          = azurerm_resource_group.minecraft.name
   short_name                   = "arm-roles"
 
@@ -275,6 +264,19 @@ resource azurerm_monitor_action_group arm_roles {
     role_id                    = split("/",data.azurerm_role_definition.reader.id)[4]
     use_common_alert_schema    = true
   }
+}
+
+resource azurerm_monitor_action_group push_provisioner {
+  name                         = "${azurerm_resource_group.minecraft.name}-push-alert-group"
+  resource_group_name          = azurerm_resource_group.minecraft.name
+  short_name                   = "provisioner"
+
+  azure_app_push_receiver {
+    name                       = "provisioner"
+    email_address              = var.provisoner_email_address
+  }
+
+  count                        = var.provisoner_email_address != "" ? 1 : 0
 }
 
 # Memory > 1.9 GB
@@ -406,13 +408,21 @@ resource azurerm_monitor_scheduled_query_rules_alert container_failed_alert {
     threshold                  = 0
   }
 }
+locals {
+  all_action_groups            = var.provisoner_email_address != "" ? [
+      azurerm_monitor_action_group.arm_roles.id,
+      azurerm_monitor_action_group.push_provisioner.0.id,
+    ] : [
+      azurerm_monitor_action_group.arm_roles.id,
+    ]
+}
 resource azurerm_monitor_scheduled_query_rules_alert container_inaccessible_alert {
   name                         = "${azurerm_resource_group.minecraft.name}-container-inaccessible-alert"
   resource_group_name          = azurerm_resource_group.minecraft.name
   location                     = azurerm_resource_group.minecraft.location
 
   action {
-    action_group               = [azurerm_monitor_action_group.arm_roles.id]
+    action_group               = local.all_action_groups
     email_subject              = "Minecraft container inaccessible"
   }
   data_source_id               = azurerm_log_analytics_workspace.monitor.id
@@ -430,4 +440,27 @@ resource azurerm_monitor_scheduled_query_rules_alert container_inaccessible_aler
     operator                   = "GreaterThan"
     threshold                  = 2
   }
+}
+resource azurerm_monitor_scheduled_query_rules_alert custom_alert {
+  name                         = "${azurerm_resource_group.minecraft.name}-custom-alert"
+  resource_group_name          = azurerm_resource_group.minecraft.name
+  location                     = azurerm_resource_group.minecraft.location
+
+  action {
+    action_group               = local.all_action_groups
+    email_subject              = var.custom_alert_subject != "" ? var.custom_alert_subject : "Custom alert"
+  }
+  data_source_id               = azurerm_log_analytics_workspace.monitor.id
+  description                  = "Custom alert"
+  enabled                      = var.custom_alert_enabled
+  query                        = var.custom_alert_query
+  severity                     = 1
+  frequency                    = 5
+  time_window                  = 5
+  # throttling                   = 30
+  trigger {
+    operator                   = "GreaterThan"
+    threshold                  = 0
+  }
+  count                        = var.custom_alert_query != "" ? 1 : 0
 }
