@@ -96,25 +96,6 @@ jobs:
         errorActionPreference: Stop
         failOnStandardError: true
 
-    - name: Terraform Destroy
-      id: terraform-destrpy
-      uses: Azure/powershell@v1
-      env:
-        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-      with:
-        inlineScript: | 
-          # List environment variables
-          Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
-          # Save environment variable setup for subsequent steps
-          Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
-
-          Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
-          Get-Location
-          ./deploy.ps1 -Destroy -Force
-        azPSVersion: latest
-        errorActionPreference: Stop
-        failOnStandardError: true
-
     - name: Test connection to Minecraft Server
       uses: Azure/powershell@v1
       env:
@@ -141,6 +122,25 @@ jobs:
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true # BUG: setting not honored! https://github.com/Azure/powershell/issues/33
+
+    - name: Terraform Destroy
+      id: terraform-destrpy
+      uses: Azure/powershell@v1
+      env:
+        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      with:
+        inlineScript: | 
+          # List environment variables
+          Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
+          # Save environment variable setup for subsequent steps
+          Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
+
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
+          Get-Location
+          ./deploy.ps1 -Destroy -Force
+        azPSVersion: latest
+        errorActionPreference: Stop
+        failOnStandardError: true
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
