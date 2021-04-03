@@ -1,18 +1,18 @@
 # Controls when the action will run. 
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
-  # push:
-  #   branches: [ main ]
-  #   paths-ignore:
-  #   - '**/README.md'
-  #   - '**/LICENSE'
-  #   - 'visuals/**'
-  # pull_request:
-  #   branches: [ main ]
-  #   paths-ignore:
-  #   - '**/README.md'
-  #   - '**/LICENSE'
-  #   - 'visuals/**'
+  push:
+    branches: [ main ]
+    paths-ignore:
+    - '**/README.md'
+    - '**/LICENSE'
+    - 'visuals/**'
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+    - '**/README.md'
+    - '**/LICENSE'
+    - 'visuals/**'
 
   schedule:
   - cron:  '0 3 * * *'
