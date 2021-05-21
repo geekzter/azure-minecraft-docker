@@ -24,17 +24,42 @@ env:
 name: ci-scripted
 
 jobs:
+  prepare:
+    name: Prepare strategy
+    runs-on: ubuntu-latest
+    steps:
+    - name: Detect desired Terraform version
+      id: terraform-version-check
+      run: | 
+        $terraformVersion = (Get-Content .terraform-version)
+        Write-Output "::set-output name=TERRAFORM_VERSION::${terraformVersion}"
+      shell: pwsh
+    outputs:
+      terraform_version: ${{ steps.terraform-version-check.outputs.TERRAFORM_VERSION }}
+
   integrated:
     name: The whole shebang
+    needs: prepare
     defaults:
       run:
         working-directory: terraform
-    # runs-on: ${{ matrix.os }}
-    # strategy:
-    #     matrix:
-    #       os: [windows-latest, ubuntu-latest, macos-latest]
-    #       terraform-versions: [0.13.6, latest]
-    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        pin_provider_versions: [true, false]
+        pin_terraform_version: [true, false]
+        include:
+        - pin_terraform_version: true
+          terraform_plan: true
+          terraform_version: ${{needs.prepare.outputs.terraform_version}}
+        - pin_terraform_version: false
+          terraform_plan: false
+          terraform_version: latest
+
+    runs-on: ubuntu-latest # ${{ matrix.os }}
+
     steps:
     - name: Checkout source
       uses: actions/checkout@v2
@@ -44,27 +69,31 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Detect desired Terraform version
-      id: terraform-version-check
-      run: | 
-        $terraformVersion = (Get-Content .terraform-version)
-        Write-Output "::set-output name=TERRAFORM_VERSION::${terraformVersion}"
-      shell: pwsh
     - name: Use Terraform
       uses: hashicorp/setup-terraform@v1
       with:
-        terraform_version: ${{ steps.terraform-version-check.outputs.TERRAFORM_VERSION }}
+        terraform_version: ${{matrix.terraform_version}}
         terraform_wrapper: false
+
+    - name: Unpin Terraform provider versions
+      id: terraform-version-check
+      if: ${{ matrix.pin_provider_versions }}
+      run: | 
+        (Get-Content ./provider.tf) -replace " = `" *= +",' = "~> ' | Out-File provider.tf
+        Get-Content ./provider.tf
+        if (Test-Path .terraform.lock.hcl) {
+          Remove-Item .terraform.lock.hcl -Force
+        }
+      shell: pwsh
 
     - name: Use Node.js
       uses: actions/setup-node@v1
-      # with:
-      #   node-version: ${{ env.NODE_VERSION }}
+
     - name: Install Azure Functions Core Tools
       run: 
         npm i -g azure-functions-core-tools@3 --unsafe-perm true
         
-    - name: Terraform Apply + Azure Function deployment
+    - name: Terraform Init & Plan
       id: terraform-apply
       uses: Azure/powershell@v1
       env:
@@ -91,12 +120,28 @@ jobs:
 
           Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
           Get-Location
-          ./deploy.ps1 -Init -Apply -Force
+          ./deploy.ps1 -Init -Plan
+        azPSVersion: latest
+        errorActionPreference: Stop
+        failOnStandardError: true
+        
+    - name: Terraform Apply + Azure Function deployment
+      id: terraform-apply
+      if: ${{ matrix.terraform_apply }}
+      uses: Azure/powershell@v1
+      env:
+        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      with:
+        inlineScript: | 
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
+          Get-Location
+          ./deploy.ps1 -Apply -Force
         azPSVersion: latest
         errorActionPreference: Stop
         failOnStandardError: true
 
     - name: Test connection to Minecraft Server
+      if: ${{ matrix.terraform_apply }}
       uses: Azure/powershell@v1
       env:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
