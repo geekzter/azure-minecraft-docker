@@ -31,10 +31,11 @@ jobs:
         working-directory: terraform
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout source
+      uses: actions/checkout@v2
     - name: Detect desired Terraform version
       id: terraform-version-check
       run: | 
-        pwd
         $terraformVersion = (Get-Content .terraform-version)
         Write-Output "::set-output name=TERRAFORM_VERSION::${terraformVersion}"
       shell: pwsh
