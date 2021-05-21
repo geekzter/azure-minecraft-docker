@@ -7,7 +7,7 @@ terraform {
     random                     = "~> 3.1"
     time                       = "~> 0.7"
   }
-  required_version             = "~> 0.14.0"
+  required_version             = ">= 0.14.0"
 }
 
 # Microsoft Azure Resource Manager Provider
