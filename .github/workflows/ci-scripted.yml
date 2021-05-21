@@ -94,7 +94,7 @@ jobs:
         npm i -g azure-functions-core-tools@3 --unsafe-perm true
         
     - name: Terraform Init & Plan
-      id: terraform-apply
+      id: terraform-plan
       uses: Azure/powershell@v1
       env:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
