@@ -26,6 +26,9 @@ name: ci-scripted
 jobs:
   prepare:
     name: Prepare strategy
+    defaults:
+      run:
+        working-directory: terraform
     runs-on: ubuntu-latest
     steps:
     - name: Detect desired Terraform version
