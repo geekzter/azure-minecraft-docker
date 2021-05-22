@@ -57,19 +57,20 @@ jobs:
       max-parallel: 1
       matrix:
         os: [ubuntu-latest]
-        pin_terraform_version: [true, false]
+        # pin_terraform_version: [true, false]
         pin_provider_versions: [true, false]
-        include:
-        - pin_terraform_version: true
-          terraform_apply: true
-          terraform_version: ${{ needs.prepare.outputs.terraform_preferred_version }}
-        - pin_terraform_version: false
-          terraform_apply: false
-          terraform_version: ${{ needs.prepare.outputs.terraform_latest_version }}
-        exclude:
-        - pin_terraform_version: false
-          terraform_apply: true
-          terraform_version: ${{ needs.prepare.outputs.terraform_preferred_version }}
+        terraform_version: [${{ needs.prepare.outputs.terraform_preferred_version }}, ${{ needs.prepare.outputs.terraform_latest_version }}]
+        # include:
+        # - pin_terraform_version: true
+        #   terraform_apply: true
+        #   terraform_version: ${{ needs.prepare.outputs.terraform_preferred_version }}
+        # - pin_terraform_version: false
+        #   terraform_apply: false
+        #   terraform_version: ${{ needs.prepare.outputs.terraform_latest_version }}
+        # exclude:
+        # - pin_terraform_version: false
+        #   terraform_apply: true
+        #   terraform_version: ${{ needs.prepare.outputs.terraform_preferred_version }}
 
     name: Pin providers = ${{ matrix.pin_provider_versions }} - Terraform ${{ matrix.terraform_version }}
     runs-on: ${{ matrix.os }}
