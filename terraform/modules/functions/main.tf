@@ -50,6 +50,7 @@ resource azurerm_function_app ping_test {
   location                     = var.location
   app_service_plan_id          = azurerm_app_service_plan.functions.id
   app_settings                 = local.app_service_settings
+  https_only                   = true
   storage_account_name         = azurerm_storage_account.functions.name
   storage_account_access_key   = azurerm_storage_account.functions.primary_access_key
   version                      = "~3"

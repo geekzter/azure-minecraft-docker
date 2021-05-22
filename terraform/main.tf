@@ -16,33 +16,31 @@ locals {
   minecraft_server_fqdn        = var.vanity_dns_zone_id != "" ? replace(try(azurerm_dns_cname_record.vanity_hostname.0.fqdn,""),"/\\W*$/","") : azurerm_container_group.minecraft_server.fqdn
   minecraft_server_port        = 25565
   # subscription_guid            = split("/",azurerm_resource_group.minecraft.id)[1]
-  suffix                       = random_string.suffix.result
-  tags                         = merge(
-    map(
-      "application",             "Minecraft",
-      "environment",             local.environment,
-      "provisioner",             "terraform",
-      "provisoner-email",        var.provisoner_email_address,
-      "repository" ,             "azure-minecraft-docker",
-      "runid",                   var.run_id,
-      "suffix",                  local.suffix,
-      "workspace",               terraform.workspace,
-    )
-  )
+  suffix                       = var.resource_suffix != "" ? lower(var.resource_suffix) : random_string.suffix.result
+  tags                         = {
+    application                = "Minecraft"
+    environment                = local.environment
+    provisioner                = "terraform"
+    provisoner-email           = var.provisoner_email_address
+    repository                 = "azure-minecraft-docker"
+    runid                      = var.run_id
+    suffix                     = local.suffix
+    workspace                  = terraform.workspace
+  }
 
   config                       = merge(
     local.tags,
-    map(
-      "container_group_id",      azurerm_container_group.minecraft_server.id,
-      "minecraft_allow_nether",  tostring(var.minecraft_allow_nether),
-      "minecraft_announce_player_achievements", tostring(var.minecraft_announce_player_achievements),
-      "minecraft_enable_command_blocks", tostring(var.minecraft_enable_command_blocks),
-      "minecraft_ops",           join(",",var.minecraft_ops),
-      "minecraft_type",          var.minecraft_type,
-      "minecraft_version",       var.minecraft_version,
-      "vanity_dns_zone_id",      var.vanity_dns_zone_id,
-      "vanity_hostname_prefix",  var.vanity_hostname_prefix,
-    )
+    {
+      container_group_id       = azurerm_container_group.minecraft_server.id
+      minecraft_allow_nether   = tostring(var.minecraft_allow_nether)
+      minecraft_announce_player_achievements = tostring(var.minecraft_announce_player_achievements)
+      minecraft_enable_command_blocks = tostring(var.minecraft_enable_command_blocks)
+      minecraft_ops            = join(",",var.minecraft_ops)
+      minecraft_type           = var.minecraft_type
+      minecraft_version        = var.minecraft_version
+      vanity_dns_zone_id       = var.vanity_dns_zone_id
+      vanity_hostname_prefix   = var.vanity_hostname_prefix
+    }
   )
 
   lifecycle                    = {

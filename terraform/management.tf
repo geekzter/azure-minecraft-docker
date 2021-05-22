@@ -44,9 +44,9 @@ resource azurerm_dashboard minecraft_dashboard {
 
   tags                         = merge(
     local.tags,
-    map(
-      "hidden-title",           "Minecraft (${local.environment})",
-    )
+    {
+      hidden-title             = "Minecraft (${local.environment})"
+    }
   )
 }
 
