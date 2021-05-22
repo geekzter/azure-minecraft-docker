@@ -67,6 +67,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+    - name: Checkout source
+      uses: actions/checkout@v2
+
     - name: Dump strategy context
       env:
         STRATEGY_CONTEXT: ${{ toJSON(strategy) }}
@@ -75,9 +78,6 @@ jobs:
       env:
         MATRIX_CONTEXT: ${{ toJSON(matrix) }}
       run: echo "$MATRIX_CONTEXT"
-
-    - name: Checkout source
-      uses: actions/checkout@v2
 
     - name: Use Azure CLI
       uses: azure/login@v1
