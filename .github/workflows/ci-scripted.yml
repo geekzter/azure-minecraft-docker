@@ -57,20 +57,15 @@ jobs:
       max-parallel: 1
       matrix:
         os: [ubuntu-latest]
-        # pin_terraform_version: [true, false]
+        pin_terraform_version: [true, false]
         pin_provider_versions: [true, false]
-        terraform_version: [${{ needs.prepare.outputs.terraform_preferred_version }}, ${{ needs.prepare.outputs.terraform_latest_version }}]
-        # include:
-        # - pin_terraform_version: true
-        #   terraform_apply: true
-        #   terraform_version: ${{ needs.prepare.outputs.terraform_preferred_version }}
-        # - pin_terraform_version: false
-        #   terraform_apply: false
-        #   terraform_version: ${{ needs.prepare.outputs.terraform_latest_version }}
-        # exclude:
-        # - pin_terraform_version: false
-        #   terraform_apply: true
-        #   terraform_version: ${{ needs.prepare.outputs.terraform_preferred_version }}
+        include:
+        - pin_terraform_version: true
+          terraform_apply: true
+          terraform_version: ${{ needs.prepare.outputs.terraform_preferred_version }}
+        - pin_terraform_version: false
+          terraform_apply: false
+          terraform_version: ${{ needs.prepare.outputs.terraform_latest_version }}
 
     name: Pin providers = ${{ matrix.pin_provider_versions }} - Terraform ${{ matrix.terraform_version }}
     runs-on: ${{ matrix.os }}
@@ -141,87 +136,87 @@ jobs:
         errorActionPreference: Stop
         failOnStandardError: true
         
-    # - name: Use Node.js
-    #   if: ${{ matrix.terraform_apply }}
-    #   uses: actions/setup-node@v1
-    # - name: Install Azure Functions Core Tools
-    #   if: ${{ matrix.terraform_apply }}
-    #   run: 
-    #     npm i -g azure-functions-core-tools@3 --unsafe-perm true
+    - name: Use Node.js
+      if: ${{ matrix.terraform_apply }}
+      uses: actions/setup-node@v1
+    - name: Install Azure Functions Core Tools
+      if: ${{ matrix.terraform_apply }}
+      run: 
+        npm i -g azure-functions-core-tools@3 --unsafe-perm true
         
-    # - name: Terraform Apply
-    #   if: ${{ matrix.terraform_apply }}
-    #   uses: Azure/powershell@v1
-    #   env:
-    #     AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-    #   with:
-    #     inlineScript: | 
-    #       Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
-    #       ./deploy.ps1 -Apply -Force -NoCode
-    #     azPSVersion: latest
-    #     errorActionPreference: Stop
-    #     failOnStandardError: true
+    - name: Terraform Apply
+      if: ${{ matrix.terraform_apply }}
+      uses: Azure/powershell@v1
+      env:
+        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      with:
+        inlineScript: | 
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
+          ./deploy.ps1 -Apply -Force -NoCode
+        azPSVersion: latest
+        errorActionPreference: Stop
+        failOnStandardError: true
 
-    # - name: Deploy Azure Function
-    #   if: ${{ matrix.terraform_apply }}
-    #   uses: Azure/powershell@v1
-    #   env:
-    #     AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-    #   with:
-    #     inlineScript: | 
-    #       Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
-    #       ./deploy_functions.ps1
-    #     azPSVersion: latest
-    #     errorActionPreference: Stop
-    #     failOnStandardError: true
+    - name: Deploy Azure Function
+      if: ${{ matrix.terraform_apply }}
+      uses: Azure/powershell@v1
+      env:
+        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      with:
+        inlineScript: | 
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
+          ./deploy_functions.ps1
+        azPSVersion: latest
+        errorActionPreference: Stop
+        failOnStandardError: true
 
-    # - name: Test connection to Minecraft Server
-    #   if: ${{ matrix.terraform_apply }}
-    #   uses: Azure/powershell@v1
-    #   env:
-    #     AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-    #   with:
-    #     inlineScript: | 
-    #       # Wait for Minecraft to boot up
-    #       $connectionAttempts = 0
-    #       do {
-    #         Start-Sleep -Seconds 10
-    #         Write-Host "Pinging ${env:TF_OUT_minecraft_server_fqdn} on port ${env:TF_OUT_minecraft_server_port}..."
-    #         try {
-    #           $connectionAttempts++
-    #           $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($env:TF_OUT_minecraft_server_fqdn, $env:TF_OUT_minecraft_server_port) -ErrorAction SilentlyContinue
-    #         } catch [System.Management.Automation.MethodInvocationException] {
-    #           Write-Warning $_
-    #         }
-    #       } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
+    - name: Test connection to Minecraft Server
+      if: ${{ matrix.terraform_apply }}
+      uses: Azure/powershell@v1
+      env:
+        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      with:
+        inlineScript: | 
+          # Wait for Minecraft to boot up
+          $connectionAttempts = 0
+          do {
+            Start-Sleep -Seconds 10
+            Write-Host "Pinging ${env:TF_OUT_minecraft_server_fqdn} on port ${env:TF_OUT_minecraft_server_port}..."
+            try {
+              $connectionAttempts++
+              $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($env:TF_OUT_minecraft_server_fqdn, $env:TF_OUT_minecraft_server_port) -ErrorAction SilentlyContinue
+            } catch [System.Management.Automation.MethodInvocationException] {
+              Write-Warning $_
+            }
+          } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
           
-    #       az container show --ids ${{ steps.terraform-apply.outputs.container_group_id }} --query instanceView
-    #       az container logs --ids ${{ steps.terraform-apply.outputs.container_group_id }}
-    #       # BUG: no tty
-    #       # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "rcon-cli say hello from ci" --container-name minecraft
-    #     azPSVersion: latest
-    #     errorActionPreference: Stop
-    #     failOnStandardError: true # BUG: setting not honored! https://github.com/Azure/powershell/issues/33
+          az container show --ids ${{ steps.terraform-apply.outputs.container_group_id }} --query instanceView
+          az container logs --ids ${{ steps.terraform-apply.outputs.container_group_id }}
+          # BUG: no tty
+          # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "rcon-cli say hello from ci" --container-name minecraft
+        azPSVersion: latest
+        errorActionPreference: Stop
+        failOnStandardError: true # BUG: setting not honored! https://github.com/Azure/powershell/issues/33
 
-    # - name: Terraform Destroy
-    #   id: terraform-destroy
-    #   if: ${{ matrix.terraform_apply }}
-    #   uses: Azure/powershell@v1
-    #   env:
-    #     AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-    #   with:
-    #     inlineScript: | 
-    #       # List environment variables
-    #       Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
-    #       # Save environment variable setup for subsequent steps
-    #       Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
+    - name: Terraform Destroy
+      id: terraform-destroy
+      if: ${{ matrix.terraform_apply }}
+      uses: Azure/powershell@v1
+      env:
+        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      with:
+        inlineScript: | 
+          # List environment variables
+          Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
+          # Save environment variable setup for subsequent steps
+          Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
 
-    #       Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
-    #       Get-Location
-    #       ./deploy.ps1 -Destroy -Force
-    #     azPSVersion: latest
-    #     errorActionPreference: Stop
-    #     failOnStandardError: true
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
+          Get-Location
+          ./deploy.ps1 -Destroy -Force
+        azPSVersion: latest
+        errorActionPreference: Stop
+        failOnStandardError: true
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
