@@ -145,6 +145,7 @@ jobs:
         npm i -g azure-functions-core-tools@3 --unsafe-perm true
         
     - name: Terraform Apply
+      id: terraform-apply
       if: ${{ matrix.terraform_apply }}
       uses: Azure/powershell@v1
       env:
