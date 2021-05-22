@@ -121,6 +121,12 @@ variable provisoner_email_address {
   type         = string
   default      = ""
 }
+
+variable resource_suffix {
+  description  = "The suffix to put at the of resource names created"
+  default      = "" # Empty string triggers a random suffix
+}
+
 variable run_id {
   type         = string
   default      = ""

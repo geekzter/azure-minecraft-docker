@@ -16,7 +16,7 @@ locals {
   minecraft_server_fqdn        = var.vanity_dns_zone_id != "" ? replace(try(azurerm_dns_cname_record.vanity_hostname.0.fqdn,""),"/\\W*$/","") : azurerm_container_group.minecraft_server.fqdn
   minecraft_server_port        = 25565
   # subscription_guid            = split("/",azurerm_resource_group.minecraft.id)[1]
-  suffix                       = random_string.suffix.result
+  suffix                       = var.resource_suffix != "" ? lower(var.resource_suffix) : random_string.suffix.result
   tags                         = {
     application                = "Minecraft"
     environment                = local.environment
