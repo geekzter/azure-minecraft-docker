@@ -43,7 +43,6 @@ jobs:
       terraform_version: ${{ steps.terraform-version-check.outputs.TERRAFORM_VERSION }}
 
   integrated:
-    name: The whole shebang
     needs: prepare
     defaults:
       run:
@@ -53,8 +52,9 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        pin_provider_versions: [true, false]
+        os: [ubuntu-latest]
         pin_terraform_version: [true, false]
+        pin_provider_versions: [true, false]
         include:
         - pin_terraform_version: true
           terraform_plan: true
@@ -63,9 +63,19 @@ jobs:
           terraform_plan: false
           terraform_version: latest
 
-    runs-on: ubuntu-latest # ${{ matrix.os }}
+    name: Pin providers = ${{ matrix.pin_provider_versions }} - Terraform ${{ matrix.terraform_version }}
+    runs-on: ${{ matrix.os }}
 
     steps:
+    - name: Dump strategy context
+      env:
+        STRATEGY_CONTEXT: ${{ toJSON(strategy) }}
+      run: echo "$STRATEGY_CONTEXT"
+    - name: Dump matrix context
+      env:
+        MATRIX_CONTEXT: ${{ toJSON(matrix) }}
+      run: echo "$MATRIX_CONTEXT"
+
     - name: Checkout source
       uses: actions/checkout@v2
 
@@ -82,7 +92,7 @@ jobs:
 
     - name: Unpin Terraform provider versions
       id: terraform-version-check
-      if: ${{ matrix.pin_provider_versions }}
+      if: ${{ !matrix.pin_provider_versions }}
       run: | 
         (Get-Content ./provider.tf) -replace " = `" *= +",' = "~> ' | Out-File provider.tf
         Get-Content ./provider.tf
@@ -93,7 +103,6 @@ jobs:
 
     - name: Use Node.js
       uses: actions/setup-node@v1
-
     - name: Install Azure Functions Core Tools
       run: 
         npm i -g azure-functions-core-tools@3 --unsafe-perm true
@@ -132,7 +141,7 @@ jobs:
         
     - name: Terraform Apply + Azure Function deployment
       id: terraform-apply
-      if: ${{ matrix.terraform_apply }}
+      if: ${{ matrix.terraform_apply == 'true' }}
       uses: Azure/powershell@v1
       env:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
@@ -146,7 +155,7 @@ jobs:
         failOnStandardError: true
 
     - name: Test connection to Minecraft Server
-      if: ${{ matrix.terraform_apply }}
+      if: ${{ matrix.terraform_apply == 'true' }}
       uses: Azure/powershell@v1
       env:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
@@ -174,7 +183,7 @@ jobs:
         failOnStandardError: true # BUG: setting not honored! https://github.com/Azure/powershell/issues/33
 
     - name: Terraform Destroy
-      id: terraform-destrpy
+      id: terraform-destroy
       uses: Azure/powershell@v1
       env:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
