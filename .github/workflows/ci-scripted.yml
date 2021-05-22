@@ -57,10 +57,10 @@ jobs:
         pin_provider_versions: [true, false]
         include:
         - pin_terraform_version: true
-          terraform_plan: true
+          terraform_apply: true
           terraform_version: ${{needs.prepare.outputs.terraform_version}}
         - pin_terraform_version: false
-          terraform_plan: false
+          terraform_apply: false
           terraform_version: latest
 
     name: Pin providers = ${{ matrix.pin_provider_versions }} - Terraform ${{ matrix.terraform_version }}
@@ -101,12 +101,6 @@ jobs:
         }
       shell: pwsh
 
-    - name: Use Node.js
-      uses: actions/setup-node@v1
-    - name: Install Azure Functions Core Tools
-      run: 
-        npm i -g azure-functions-core-tools@3 --unsafe-perm true
-        
     - name: Terraform Init & Plan
       id: terraform-plan
       uses: Azure/powershell@v1
@@ -139,9 +133,17 @@ jobs:
         errorActionPreference: Stop
         failOnStandardError: true
         
+    - name: Use Node.js
+      if: ${{ matrix.terraform_apply }}
+      uses: actions/setup-node@v1
+    - name: Install Azure Functions Core Tools
+      if: ${{ matrix.terraform_apply }}
+      run: 
+        npm i -g azure-functions-core-tools@3 --unsafe-perm true
+        
     - name: Terraform Apply + Azure Function deployment
       id: terraform-apply
-      if: ${{ matrix.terraform_apply == 'true' }}
+      if: ${{ matrix.terraform_apply }}
       uses: Azure/powershell@v1
       env:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
@@ -155,7 +157,7 @@ jobs:
         failOnStandardError: true
 
     - name: Test connection to Minecraft Server
-      if: ${{ matrix.terraform_apply == 'true' }}
+      if: ${{ matrix.terraform_apply }}
       uses: Azure/powershell@v1
       env:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
@@ -184,6 +186,7 @@ jobs:
 
     - name: Terraform Destroy
       id: terraform-destroy
+      if: ${{ matrix.terraform_apply }}
       uses: Azure/powershell@v1
       env:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
@@ -203,6 +206,7 @@ jobs:
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
+      if: ${{ matrix.terraform_apply }}
       with:
         name: terraform
         path: 'terraform'
