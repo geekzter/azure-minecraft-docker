@@ -61,15 +61,15 @@ jobs:
         pin_provider_versions: [true, false]
         include:
         - pin_terraform_version: true
-          if: true
+          condition: true
           terraform_apply: true
           terraform_version: ${{ needs.prepare.outputs.terraform_preferred_version }}
         - pin_terraform_version: false
-          if: ${{ needs.prepare.outputs.terraform_preferred_version != needs.prepare.outputs.terraform_latest_version }}
+          condition: ${{ needs.prepare.outputs.terraform_preferred_version != needs.prepare.outputs.terraform_latest_version }}
           terraform_apply: false
           terraform_version: ${{ needs.prepare.outputs.terraform_latest_version }}
 
-    if: ${{ matrix.if }}
+    if: ${{ matrix.condition }}
     name: Pin providers = ${{ matrix.pin_provider_versions }} - Terraform ${{ matrix.terraform_version }}
     runs-on: ${{ matrix.os }}
 
