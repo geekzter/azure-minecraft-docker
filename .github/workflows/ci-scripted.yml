@@ -87,6 +87,7 @@ jobs:
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
+        enable-AzPSSession: false
 
     - name: Use Terraform
       uses: hashicorp/setup-terraform@v1
