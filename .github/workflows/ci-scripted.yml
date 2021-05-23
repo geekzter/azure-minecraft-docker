@@ -28,7 +28,7 @@ jobs:
     name: Prepare strategy
     defaults:
       run:
-        working-directory: terraform
+        working-directory: scripts
     runs-on: ubuntu-latest
     steps:
     - name: Checkout source
@@ -99,6 +99,7 @@ jobs:
       id: terraform-version-check
       if: ${{ !matrix.pin_provider_versions }}
       run: | 
+        Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
         (Get-Content ./provider.tf) -replace " = `" *= +",' = "~> ' | Out-File provider.tf
         Get-Content ./provider.tf
         if (Test-Path .terraform.lock.hcl) {
@@ -129,26 +130,11 @@ jobs:
         Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
       shell: pwsh
 
-    - name: Terraform Init & Plan (pwsh)
+    - name: Terraform Init & Plan
       run: | 
-        # List environment variables
-        Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
-
-        Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
+        # Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
         ./deploy.ps1 -Init -Plan
       shell: pwsh
-
-    # - name: Terraform Init & Plan (Azure/powershell@v1)
-    #   uses: Azure/powershell@v1
-    #   env:
-    #     AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-    #   with:
-    #     inlineScript: | 
-    #       Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
-    #       ./deploy.ps1 -Init -Plan
-    #     azPSVersion: latest
-    #     errorActionPreference: Stop
-    #     failOnStandardError: true
         
     - name: Use Node.js
       if: ${{ matrix.terraform_apply }}
@@ -158,80 +144,53 @@ jobs:
       run: 
         npm i -g azure-functions-core-tools@3 --unsafe-perm true
         
-    - name: Terraform Apply
-      id: terraform-apply
-      if: ${{ matrix.terraform_apply }}
-      uses: Azure/powershell@v1
-      env:
-        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-      with:
-        inlineScript: | 
-          Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
-          ./deploy.ps1 -Apply -Force -NoCode
-        azPSVersion: latest
-        errorActionPreference: Stop
-        failOnStandardError: true
+    # - name: Terraform Apply
+    #   id: terraform-apply
+    #   if: ${{ matrix.terraform_apply }}
+    #   run: | 
+    #       # Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
+    #       ./deploy.ps1 -Apply -Force -NoCode
+    #   shell: pwsh
 
-    - name: Deploy Azure Function
-      if: ${{ matrix.terraform_apply }}
-      uses: Azure/powershell@v1
-      env:
-        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-      with:
-        inlineScript: | 
-          Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
-          ./deploy_functions.ps1
-        azPSVersion: latest
-        errorActionPreference: Stop
-        failOnStandardError: true
+    # - name: Deploy Azure Function
+    #   if: ${{ matrix.terraform_apply }}
+    #   run: | 
+    #     # Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
+    #     ./deploy_functions.ps1
+    #   shell: pwsh
 
-    - name: Test connection to Minecraft Server
-      if: ${{ matrix.terraform_apply }}
-      uses: Azure/powershell@v1
-      env:
-        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-      with:
-        inlineScript: | 
-          # Wait for Minecraft to boot up
-          $connectionAttempts = 0
-          do {
-            Start-Sleep -Seconds 10
-            Write-Host "Pinging ${env:TF_OUT_minecraft_server_fqdn} on port ${env:TF_OUT_minecraft_server_port}..."
-            try {
-              $connectionAttempts++
-              $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($env:TF_OUT_minecraft_server_fqdn, $env:TF_OUT_minecraft_server_port) -ErrorAction SilentlyContinue
-            } catch [System.Management.Automation.MethodInvocationException] {
-              Write-Warning $_
-            }
-          } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
-          
-          az container show --ids ${{ steps.terraform-apply.outputs.container_group_id }} --query instanceView
-          az container logs --ids ${{ steps.terraform-apply.outputs.container_group_id }}
-          # BUG: no tty
-          # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "rcon-cli say hello from ci" --container-name minecraft
-        azPSVersion: latest
-        errorActionPreference: Stop
-        failOnStandardError: true # BUG: setting not honored! https://github.com/Azure/powershell/issues/33
+    # - name: Test connection to Minecraft Server
+    #   if: ${{ matrix.terraform_apply }}
+    #   run: | 
+    #     # Wait for Minecraft to boot up
+    #     $connectionAttempts = 0
+    #     do {
+    #       Start-Sleep -Seconds 10
+    #       Write-Host "Pinging ${env:TF_OUT_minecraft_server_fqdn} on port ${env:TF_OUT_minecraft_server_port}..."
+    #       try {
+    #         $connectionAttempts++
+    #         $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($env:TF_OUT_minecraft_server_fqdn, $env:TF_OUT_minecraft_server_port) -ErrorAction SilentlyContinue
+    #       } catch [System.Management.Automation.MethodInvocationException] {
+    #         Write-Warning $_
+    #       }
+    #     } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
+        
+    #     az container show --ids ${{ steps.terraform-apply.outputs.container_group_id }} --query instanceView
+    #     az container logs --ids ${{ steps.terraform-apply.outputs.container_group_id }}
+    #     # BUG: no tty
+    #     # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "rcon-cli say hello from ci" --container-name minecraft
+    #   shell: pwsh
 
-    - name: Terraform Destroy
-      id: terraform-destroy
-      if: ${{ matrix.terraform_apply }}
-      uses: Azure/powershell@v1
-      env:
-        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-      with:
-        inlineScript: | 
-          # List environment variables
-          Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
-          # Save environment variable setup for subsequent steps
-          Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
-
-          Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
-          Get-Location
-          ./deploy.ps1 -Destroy -Force
-        azPSVersion: latest
-        errorActionPreference: Stop
-        failOnStandardError: true
+    # - name: Terraform Destroy
+    #   id: terraform-destroy
+    #   if: ${{ matrix.terraform_apply }}
+    #   run: | 
+    #     # Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
+    #     Get-Location
+    #     ./deploy.ps1 -Destroy -Force
+    #     azPSVersion: latest
+    #     errorActionPreference: Stop
+    #   shell: pwsh
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
@@ -248,7 +207,7 @@ jobs:
       with:
         inlineScript: |
           # Clean up Terraform state
-          Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
+          # Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
           Get-Location
           ./deploy.ps1 -Init -Teardown
         azPSVersion: latest
