@@ -80,9 +80,9 @@ jobs:
         STRATEGY_CONTEXT: ${{ toJSON(strategy) }}
       run: |
         Write-Host "Strategy:"
-        $env:STRATEGY_CONTEXT | ConvertFrom-Json | Format-Table
+        $env:STRATEGY_CONTEXT | ConvertFrom-Json | Format-List
         Write-Host "Matrix:"
-        $env:MATRIX_CONTEXT   | ConvertFrom-Json | Format-Table
+        $env:MATRIX_CONTEXT   | ConvertFrom-Json | Format-List
       shell: pwsh
 
     # - name: Use Azure CLI
