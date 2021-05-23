@@ -79,9 +79,9 @@ jobs:
         MATRIX_CONTEXT: ${{ toJSON(matrix) }}
         STRATEGY_CONTEXT: ${{ toJSON(strategy) }}
       run: |
-        Write-Host "Strategy:"
+        Write-Host "Strategy context:"
         $env:STRATEGY_CONTEXT | ConvertFrom-Json | Format-List
-        Write-Host "Matrix:"
+        Write-Host "Matrix context:"
         $env:MATRIX_CONTEXT   | ConvertFrom-Json | Format-List
       shell: pwsh
 
