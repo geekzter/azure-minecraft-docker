@@ -114,17 +114,17 @@ jobs:
         # Use bash as this action doesn't support PowerShell
         inlineScript: |
           # Parse Azure secret into Terraform variables
-          export ARM_CLIENT_ID=$(echo $AZURE_CREDENTIALS | jq ".clientId")
-          export ARM_CLIENT_SECRET=$(echo $AZURE_CREDENTIALS | jq ".clientSecret")
-          export ARM_SUBSCRIPTION_ID=$(echo $AZURE_CREDENTIALS | jq ".subscriptionId")
-          export ARM_TENANT_ID=$(echo $AZURE_CREDENTIALS | jq ".tenantId")
+          export ARM_CLIENT_ID=$(echo $AZURE_CREDENTIALS | jq -r .clientId)
+          export ARM_CLIENT_SECRET=$(echo $AZURE_CREDENTIALS | jq -r .clientSecret)
+          export ARM_SUBSCRIPTION_ID=$(echo $AZURE_CREDENTIALS | jq -r .subscriptionId)
+          export ARM_TENANT_ID=$(echo $AZURE_CREDENTIALS | jq -r .tenantId)
 
           # Set Terraform input variables
           export TF_VAR_run_id=$GITHUB_RUN_ID
           # We may not be able to create a Service Principal with a Service Principal, reuse Terraform SP for Logic App:
           export TF_VAR_workflow_sp_application_id=$ARM_CLIENT_ID
           export TF_VAR_workflow_sp_application_secret=$ARM_CLIENT_SECRET
-          export TF_VAR_workflow_sp_object_id=$(echo $AZURE_CREDENTIALS | jq ".objectId")
+          export TF_VAR_workflow_sp_object_id=$(echo $AZURE_CREDENTIALS | jq -r .objectId)
 
           # List environment variables
           env | sort
