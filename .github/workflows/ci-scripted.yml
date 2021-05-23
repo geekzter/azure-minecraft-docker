@@ -114,6 +114,7 @@ jobs:
         # Use bash as this action doesn't support PowerShell
         inlineScript: |
           # Parse Azure secret into Terraform variables
+          echo $AZURE_CREDENTIALS | jq
           export ARM_CLIENT_ID=`echo $AZURE_CREDENTIALS | jq -r -c ".clientId"`
           export ARM_CLIENT_SECRET=`echo $AZURE_CREDENTIALS | jq -r -c ".clientSecret"`
           export ARM_SUBSCRIPTION_ID=`echo $AZURE_CREDENTIALS | jq -r -c ".subscriptionId"`
