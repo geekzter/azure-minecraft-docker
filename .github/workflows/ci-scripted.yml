@@ -28,7 +28,7 @@ jobs:
     name: Prepare strategy
     defaults:
       run:
-        working-directory: scripts
+        working-directory: terraform
     runs-on: ubuntu-latest
     steps:
     - name: Checkout source
@@ -50,7 +50,7 @@ jobs:
     needs: prepare
     defaults:
       run:
-        working-directory: terraform
+        working-directory: scripts
 
     strategy:
       fail-fast: false
