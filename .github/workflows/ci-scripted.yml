@@ -106,14 +106,45 @@ jobs:
         }
       shell: pwsh
 
-    - name: Terraform Init & Plan (azure/CLI@v1)
+    - name: Prepare environment variables
       uses: azure/CLI@v1
       env:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       with:
+        # Use bash as this action doesn't support PowerShell
         inlineScript: |
-          $GITHUB_WORKSPACE/scripts/prepare_github_action.ps1
-          $GITHUB_WORKSPACE/scripts/deploy.ps1 -Init -Plan
+          # Parse Azure secret into Terraform variables
+          export ARM_CLIENT_ID=$(echo $AZURE_CREDENTIALS | jq ".clientId")
+          export ARM_CLIENT_SECRET=$(echo $AZURE_CREDENTIALS | jq ".clientSecret")
+          export ARM_SUBSCRIPTION_ID=$(echo $AZURE_CREDENTIALS | jq ".subscriptionId")
+          export ARM_TENANT_ID=$(echo $AZURE_CREDENTIALS | jq ".tenantId")
+
+          # Set Terraform input variables
+          export TF_VAR_run_id=$GITHUB_RUN_ID
+          # We may not be able to create a Service Principal with a Service Principal, reuse Terraform SP for Logic App:
+          export TF_VAR_workflow_sp_application_id=$ARM_CLIENT_ID
+          export TF_VAR_workflow_sp_application_secret=$ARM_CLIENT_SECRET
+          export TF_VAR_workflow_sp_object_id=$(echo $AZURE_CREDENTIALS | jq ".objectId")
+
+          # List environment variables
+          env | sort
+
+          # Save environment variable setup for subsequent steps
+          for var in "${!ARM_@}"; do
+            printf '%s=%s\n' "$var" "${!var}" >> $GITHUB_ENV
+          done          
+          for var in "${!TF_VAR_@}"; do
+            printf '%s=%s\n' "$var" "${!var}" >> $GITHUB_ENV
+          done          
+
+    - name: Terraform Init & Plan (pwsh)
+      run: | 
+        # List environment variables
+        Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
+
+        Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
+        ./deploy.ps1 -Init -Plan
+      shell: pwsh
 
     # - name: Terraform Init & Plan (Azure/powershell@v1)
     #   uses: Azure/powershell@v1
