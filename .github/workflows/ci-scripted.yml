@@ -76,87 +76,83 @@ jobs:
 
     - name: Dump strategy context
       env:
-        STRATEGY_CONTEXT: ${{ toJSON(strategy) }}
-      run: echo "$STRATEGY_CONTEXT"
-    - name: Dump matrix context
-      env:
         MATRIX_CONTEXT: ${{ toJSON(matrix) }}
-      run: echo "$MATRIX_CONTEXT"
-
-    - name: Use Azure CLI
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-        enable-AzPSSession: false
-
-    - name: Use Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: ${{matrix.terraform_version}}
-        terraform_wrapper: false
-
-    - name: Unpin Terraform provider versions
-      id: terraform-version-check
-      if: ${{ !matrix.pin_provider_versions }}
-      run: | 
-        Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
-        (Get-Content ./provider.tf) -replace " = `" *= +",' = "~> ' | Out-File provider.tf
-        Get-Content ./provider.tf
-        if (Test-Path .terraform.lock.hcl) {
-          Remove-Item .terraform.lock.hcl -Force
-        }
+        STRATEGY_CONTEXT: ${{ toJSON(strategy) }}
+      run: |
+        Write-Host "Strategy:"
+        $env:STRATEGY_CONTEXT | ConvertFrom-Json | Format-Table
+        Write-Host "Matrix:"
+        $env:MATRIX_CONTEXT   | ConvertFrom-Json | Format-Table
       shell: pwsh
 
-    - name: Prepare environment variables
-      env:
-        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-      run: | 
-        # Parse Azure secret into Terraform variables
-        $servicePrincipal = ($env:AZURE_CREDENTIALS | ConvertFrom-Json)
-        $env:ARM_CLIENT_ID = $servicePrincipal.clientId
-        $env:ARM_CLIENT_SECRET = $servicePrincipal.clientSecret
-        $env:ARM_SUBSCRIPTION_ID = $servicePrincipal.subscriptionId
-        $env:ARM_TENANT_ID = $servicePrincipal.tenantId
+    # - name: Use Azure CLI
+    #   uses: azure/login@v1
+    #   with:
+    #     creds: ${{ secrets.AZURE_CREDENTIALS }}
+    #     enable-AzPSSession: false
 
-        $env:TF_VAR_run_id=$env:GITHUB_RUN_ID
-        # We may not be able to create a Service Principal with a Service Principal, reuse Terraform SP for Logic App:
-        $env:TF_VAR_workflow_sp_application_id = $servicePrincipal.clientId
-        $env:TF_VAR_workflow_sp_application_secret = $servicePrincipal.clientSecret
-        $env:TF_VAR_workflow_sp_object_id = $servicePrincipal.objectId
+    # - name: Use Terraform
+    #   uses: hashicorp/setup-terraform@v1
+    #   with:
+    #     terraform_version: ${{matrix.terraform_version}}
+    #     terraform_wrapper: false
+
+    # - name: Unpin Terraform provider versions
+    #   id: terraform-version-check
+    #   if: ${{ !matrix.pin_provider_versions }}
+    #   run: | 
+    #     Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
+    #     (Get-Content ./provider.tf) -replace " = `" *= +",' = "~> ' | Out-File provider.tf
+    #     Get-Content ./provider.tf
+    #     if (Test-Path .terraform.lock.hcl) {
+    #       Remove-Item .terraform.lock.hcl -Force
+    #     }
+    #   shell: pwsh
+
+    # - name: Prepare environment variables
+    #   env:
+    #     AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+    #   run: | 
+    #     # Parse Azure secret into Terraform variables
+    #     $servicePrincipal = ($env:AZURE_CREDENTIALS | ConvertFrom-Json)
+    #     $env:ARM_CLIENT_ID = $servicePrincipal.clientId
+    #     $env:ARM_CLIENT_SECRET = $servicePrincipal.clientSecret
+    #     $env:ARM_SUBSCRIPTION_ID = $servicePrincipal.subscriptionId
+    #     $env:ARM_TENANT_ID = $servicePrincipal.tenantId
+
+    #     $env:TF_VAR_run_id=$env:GITHUB_RUN_ID
+    #     # We may not be able to create a Service Principal with a Service Principal, reuse Terraform SP for Logic App:
+    #     $env:TF_VAR_workflow_sp_application_id = $servicePrincipal.clientId
+    #     $env:TF_VAR_workflow_sp_application_secret = $servicePrincipal.clientSecret
+    #     $env:TF_VAR_workflow_sp_object_id = $servicePrincipal.objectId
         
-        # List environment variables
-        Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
-        # Save environment variable setup for subsequent steps
-        Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
-      shell: pwsh
+    #     # List environment variables
+    #     Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
+    #     # Save environment variable setup for subsequent steps
+    #     Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
+    #   shell: pwsh
 
-    - name: Terraform Init & Plan
-      run: | 
-        # Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
-        ./deploy.ps1 -Init -Plan
-      shell: pwsh
+    # - name: Terraform Init & Plan
+    #   run: ./deploy.ps1 -Init -Plan
+    #   shell: pwsh
         
-    - name: Use Node.js
-      if: ${{ matrix.terraform_apply }}
-      uses: actions/setup-node@v1
-    - name: Install Azure Functions Core Tools
-      if: ${{ matrix.terraform_apply }}
-      run: 
-        npm i -g azure-functions-core-tools@3 --unsafe-perm true
+    # - name: Use Node.js
+    #   if: ${{ matrix.terraform_apply }}
+    #   uses: actions/setup-node@v1
+    # - name: Install Azure Functions Core Tools
+    #   if: ${{ matrix.terraform_apply }}
+    #   run: 
+    #     npm i -g azure-functions-core-tools@3 --unsafe-perm true
         
     # - name: Terraform Apply
     #   id: terraform-apply
     #   if: ${{ matrix.terraform_apply }}
-    #   run: | 
-    #       # Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
-    #       ./deploy.ps1 -Apply -Force -NoCode
+    #   run: ./deploy.ps1 -Apply -Force -NoCode
     #   shell: pwsh
 
     # - name: Deploy Azure Function
     #   if: ${{ matrix.terraform_apply }}
-    #   run: | 
-    #     # Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
-    #     ./deploy_functions.ps1
+    #   run: ./deploy_functions.ps1
     #   shell: pwsh
 
     # - name: Test connection to Minecraft Server
@@ -182,34 +178,18 @@ jobs:
     #   shell: pwsh
 
     # - name: Terraform Destroy
-    #   id: terraform-destroy
     #   if: ${{ matrix.terraform_apply }}
-    #   run: | 
-    #     # Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
-    #     Get-Location
-    #     ./deploy.ps1 -Destroy -Force
-    #     azPSVersion: latest
-    #     errorActionPreference: Stop
+    #   run: ./deploy.ps1 -Destroy -Force
     #   shell: pwsh
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v2
-      if: ${{ matrix.terraform_apply }}
-      with:
-        name: terraform
-        path: 'terraform'
+    # - name: Upload artifacts
+    #   uses: actions/upload-artifact@v2
+    #   if: ${{ matrix.terraform_apply }}
+    #   with:
+    #     name: terraform
+    #     path: 'terraform'
       
-    - name: Teardown
-      if: ${{ always() }}
-      uses: Azure/powershell@v1
-      env:
-        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-      with:
-        inlineScript: |
-          # Clean up Terraform state
-          # Set-Location (Join-Path $env:GITHUB_WORKSPACE scripts) # Task does not support 'working-directory' property
-          Get-Location
-          ./deploy.ps1 -Init -Teardown
-        azPSVersion: latest
-        errorActionPreference: Continue
-        failOnStandardError: true
+    # - name: Teardown
+    #   if: ${{ always() }}
+    #   run: ./deploy.ps1 -Init -Teardown
+    #   shell: pwsh
