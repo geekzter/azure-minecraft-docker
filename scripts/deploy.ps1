@@ -270,22 +270,18 @@ try {
                     Write-Host "Nothing to remove"
                 }
 
-                # if ($Init -or $Apply) {
-                    # Run this only when we have performed other Terraform activities
-                    $terraformState = (terraform state pull | ConvertFrom-Json)
-                    if ($terraformState.resources) {
-                        Write-Host "Clearing Terraform state in workspace ${env:TF_WORKSPACE}..."
-                        $terraformState.outputs = New-Object PSObject # Empty output
-                        $terraformState.resources = @() # No resources
-                        $terraformState.serial++
-                        $terraformState | ConvertTo-Json | terraform state push -
-                    } else {
-                        Write-Host "No resources in Terraform state in workspace ${env:TF_WORKSPACE}..."
-                    }
-                    terraform state pull  
-                # } else {
-                #     Write-Warning "Terraform not initialized, not clearing state"
-                # }
+                # Run this only when we have performed other Terraform activities
+                $terraformState = (terraform state pull | ConvertFrom-Json)
+                if ($terraformState.resources) {
+                    Write-Host "Clearing Terraform state in workspace ${env:TF_WORKSPACE}..."
+                    $terraformState.outputs = New-Object PSObject # Empty output
+                    $terraformState.resources = @() # No resources
+                    $terraformState.serial++
+                    $terraformState | ConvertTo-Json | terraform state push -
+                } else {
+                    Write-Host "No resources in Terraform state in workspace ${env:TF_WORKSPACE}..."
+                }
+                terraform state pull  
             }
 
         } else {
