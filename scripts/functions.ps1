@@ -1,11 +1,23 @@
 function AzLogin (
     [parameter(Mandatory=$false)][switch]$DisplayMessages=$false
 ) {
-    # Azure CLI
+    # Are we logged into the wrong tenant?
+    Invoke-Command -ScriptBlock {
+        $Private:ErrorActionPreference = "Continue"
+        if ($env:ARM_TENANT_ID) {
+            $script:loggedInTenantId = $(az account show --query tenantId -o tsv 2>$null)
+        }
+    }
+    if ($loggedInTenantId -and ($loggedInTenantId -ine $env:ARM_TENANT_ID)) {
+        Write-Warning "Logged into tenant $loggedInTenantId instead of $env:ARM_TENANT_ID (`$env:ARM_TENANT_ID), logging off az session"
+        az logout -o none
+    }
+
+    # Are we logged in?
     Invoke-Command -ScriptBlock {
         $Private:ErrorActionPreference = "Continue"
         # Test whether we are logged in
-        $Script:loginError = $(az account show -o none 2>&1)
+        $script:loginError = $(az account show -o none 2>&1)
         if (!$loginError) {
             $Script:userType = $(az account show --query "user.type" -o tsv)
             if ($userType -ieq "user") {
