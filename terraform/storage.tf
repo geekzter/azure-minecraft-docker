@@ -23,68 +23,6 @@ resource azurerm_storage_share minecraft_share {
   storage_account_name         = azurerm_storage_account.minecraft.name
   quota                        = 50
 }
-# https://www.spigotmc.org/resources/console-spam-fix.18410/download?version=366123
-resource azurerm_storage_share_directory plugins {
-  name                         = "plugins"
-  share_name                   = azurerm_storage_share.minecraft_share.name
-  storage_account_name         = azurerm_storage_account.minecraft.name
-
-  count                        = var.enable_log_filter ? 1 : 0
-}
-resource azurerm_storage_share_directory bstats {
-  name                         = "${azurerm_storage_share_directory.plugins.0.name}/bStats"
-  share_name                   = azurerm_storage_share.minecraft_share.name
-  storage_account_name         = azurerm_storage_account.minecraft.name
-
-  count                        = var.enable_log_filter ? 1 : 0
-}
-resource azurerm_storage_share_file bstats_config {
-  name                         = "config.yml"
-  path                         = azurerm_storage_share_directory.bstats.0.name
-  storage_share_id             = azurerm_storage_share.minecraft_share.id
-  source                       = "${path.root}/../minecraft/bstats/config.yml"
-  content_type                 = "application/yaml"
-
-  count                        = var.enable_log_filter ? 1 : 0
-}
-resource azurerm_storage_share_directory log_filter {
-  name                         = "${azurerm_storage_share_directory.plugins.0.name}/ConsoleSpamFix"
-  share_name                   = azurerm_storage_share.minecraft_share.name
-  storage_account_name         = azurerm_storage_account.minecraft.name
-
-  count                        = var.enable_log_filter ? 1 : 0
-}
-resource azurerm_storage_share_file log_filter_config {
-  name                         = "config.yml"
-  path                         = azurerm_storage_share_directory.log_filter.0.name
-  storage_share_id             = azurerm_storage_share.minecraft_share.id
-  source                       = "${path.root}/../minecraft/log-filter/config.yml"
-  content_type                 = "application/yaml"
-
-  count                        = var.enable_log_filter ? 1 : 0
-}
-resource null_resource log_filter_jar {
-  provisioner local-exec {
-    command                    = "../scripts/download_plugins.ps1 -Url ${var.log_filter_jar}"
-    interpreter                = ["pwsh","-nop","-c"]
-  }
-
-  count                        = var.enable_log_filter && !fileexists("${path.root}/../minecraft/plugins/${basename(var.log_filter_jar)}") ? 1 : 0
-}
-resource azurerm_storage_share_file log_filter_jar {
-  name                         = basename(var.log_filter_jar)
-  path                         = azurerm_storage_share_directory.plugins.0.name
-  storage_share_id             = azurerm_storage_share.minecraft_share.id
-  source                       = "${path.root}/../minecraft/plugins/${basename(var.log_filter_jar)}"
-  content_type                 = "application/java-archive"
-
-  count                        = var.enable_log_filter ? 1 : 0
-
-  depends_on                   = [
-    azurerm_storage_share_file.log_filter_config,
-    null_resource.log_filter_jar
-  ]
-}
 
 resource azurerm_storage_share minecraft_modpacks {
   name                         = "minecraft-aci-modpacks-${local.suffix}"
@@ -104,36 +42,6 @@ resource azurerm_role_assignment terraform_storage_owner {
   principal_id                 = each.value
 
   for_each                     = toset(var.solution_contributors)
-}
-
-resource azurerm_storage_blob minecraft_configuration {
-  name                         = "${local.config_directory}/config.json"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  storage_container_name       = azurerm_storage_container.configuration.name
-  type                         = "Block"
-  source_content               = jsonencode(local.config)
-
-  depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
-}
-
-resource azurerm_storage_blob minecraft_environment {
-  name                         = "${local.config_directory}/environment.json"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  storage_container_name       = azurerm_storage_container.configuration.name
-  type                         = "Block"
-  source_content               = jsonencode(azurerm_container_group.minecraft_server.container.0.environment_variables)
-
-  depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
-}
-
-resource azurerm_storage_blob minecraft_user_configuration {
-  name                         = "${local.config_directory}/users.json"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  storage_container_name       = azurerm_storage_container.configuration.name
-  type                         = "Block"
-  source_content               = jsonencode(var.minecraft_users)
-
-  depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
 }
 
 resource azurerm_storage_blob minecraft_backend_configuration {

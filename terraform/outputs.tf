@@ -1,11 +1,11 @@
 output container_group {
-  value       = azurerm_container_group.minecraft_server.name
+  value       = module.minecraft.container_group_name
 }
 output container_group_id {
-  value       = azurerm_container_group.minecraft_server.id  
+  value       = module.minecraft.container_group_id
 }
 output container_log_command {
-  value       = "az container logs --ids ${azurerm_container_group.minecraft_server.id} --follow"
+  value       = "az container logs --ids ${module.minecraft.container_group_id} --follow"
 }
 
 output dashboard_id {
@@ -32,16 +32,16 @@ output log_analytics_workspace_guid {
 }
 
 output minecraft_server_fqdn {
-  value       = local.minecraft_server_fqdn
+  value       = module.minecraft.minecraft_server_fqdn
 }
 output minecraft_server_ip {
-  value       = azurerm_container_group.minecraft_server.ip_address
+  value       = module.minecraft.minecraft_server_ip
 }
 output minecraft_server_connection {
-  value       = "${var.vanity_dns_zone_id != "" ? replace(try(azurerm_dns_cname_record.vanity_hostname.0.fqdn,""),"/\\W*$/","") : azurerm_container_group.minecraft_server.fqdn}:${local.minecraft_server_port}"
+  value       = module.minecraft.minecraft_server_connection
 }
 output minecraft_server_port {
-  value       = local.minecraft_server_port
+  value       = module.minecraft.minecraft_server_port
 }
 output minecraft_users {
   value       = var.minecraft_users

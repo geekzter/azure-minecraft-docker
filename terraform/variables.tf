@@ -37,8 +37,24 @@ variable enable_log_filter {
   description  = "Enable log filter (bukkit/paper/spigot) that is configured to hide chat messages for improved privacy, and hide plugin stats"
 }
 
-variable log_filter_jar {
-  default      = "https://media.forgecdn.net/files/3106/184/ConsoleSpamFix-1.8.5.jar"
+variable minecraft_environment_variables {
+  type                         = map
+  default                      = {
+    ALLOW_NETHER               = true
+    ANNOUNCE_PLAYER_ACHIEVEMENTS = "true"
+    DIFFICULTY                 = "easy"
+    ENABLE_COMMAND_BLOCK       = true
+    EULA                       = true
+    ICON                       = null # "https://raw.githubusercontent.com/geekzter/azure-minecraft-docker/main/visuals/aci.png"
+    MAX_PLAYERS                = 10
+    MODS                       = null
+    MODE                       = "survival"
+    MOTD                       = "Minecraft Server powered by Docker and Azure Container Instance"
+    OVERRIDE_SERVER_PROPERTIES = true # Use these settings over server.roperties every time the container starts
+    SNOOPER_ENABLED            = "false"
+    TYPE                       = "PAPER"
+    VERSION                    = "LATEST"
+  }
 }
 
 # https://github.com/itzg/docker-minecraft-server#allow-nether
