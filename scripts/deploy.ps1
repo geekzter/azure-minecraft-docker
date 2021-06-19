@@ -29,6 +29,80 @@ param (
     [parameter(Mandatory=$false,HelpMessage="Tear down infrastructure using Azure CLI")][switch]$TearDown=$false
 ) 
 
+function Validate-Plan (
+    [parameter(Mandatory=$true)][string]$File
+) {
+    if (-not (Test-Path $File)) {
+        throw "Plan file '${File}' not found"
+    }
+    Write-Verbose "Converting $File into JSON so we can perform some inspection..."
+    $planJSON = (terraform show -json $File)
+
+    # Validation
+    # Check whether key resources will be replaced
+    if (Get-Command jq -ErrorAction SilentlyContinue) {
+        $containerGroupIDsToReplace = $planJSON | jq '.resource_changes[] | select(.address|endswith(\"azurerm_container_group.minecraft_server\")) | select(.change.actions[]|contains(\"delete\")) | .change.before.id' | ConvertFrom-Json
+        $serverFQDNIDsToReplace     = $planJSON | jq '.resource_changes[] | select(.address|endswith(\"azurerm_dns_cname_record.vanity_hostname[0]\")) | select(.change.actions[]|contains(\"delete\")) | .change.before.id' | ConvertFrom-Json
+        $minecraftDataActions       = $planJSON | jq '.resource_changes[] | select(.address == \"azurerm_storage_share.minecraft_share\") | .change.actions' | ConvertFrom-Json
+        $minecraftDataReplaced      = $minecraftDataActions.Contains("delete")
+    } else {
+        Write-Warning "jq not found, plan validation skipped. Look at the plan carefully before approving"
+        if ($Force) {
+            $Force = $false
+            Write-Warning "Ignoring -Force"
+        }
+    }
+
+    if ($serverFQDNIDsToReplace) {
+        if ($workspace -ieq "prod") {
+            Write-Error "You're about to change the Minecraft Server hostname in workspace '${workspace}'!!! Please figure out another way of doing so, exiting..."
+            exit 
+        }
+        Write-Warning "You're about to change the Minecraft Server hostname in workspace '${workspace}'!!!"
+    }
+
+    if ($minecraftDataReplaced) {
+        if ($workspace -ieq "prod") {
+            Write-Error "You're about to delete Minecraft world data in workspace '${workspace}'!!! Please figure out another way of doing so, exiting..."
+            exit 
+        }
+        Write-Warning "You're about to delete Minecraft world data in workspace '${workspace}'!!!"
+    }
+
+    if (!$inAutomation) {
+        Write-Debug "Container groups that will be replaced:`n${containerGroupIDsToReplace}"
+        if ($containerGroupIDsToReplace) {
+            Write-Verbose "Container groups that will be replaced:`n${containerGroupIDsToReplace}"
+            # --ids returns different JSON structure depending on the number of arguments, hence we need different JMESPath queries for single and multiple arguments
+            if ($containerGroupIDsToReplace -match " ") {
+                $runningContainerGroupIDsToReplace = $(az container show --ids $containerGroupIDsToReplace --query "[?containers[?name=='minecraft' && instanceView.currentState.state=='Running']].id" -o tsv)
+            } else {
+                $runningContainerGroupIDsToReplace = $(az container show --ids $containerGroupIDsToReplace --query "[{state:containers[?name=='minecraft'].instanceView.currentState.state | [0], id:id}] | @[?state=='Running'].id | [0]" -o tsv)
+            }
+            if ($runningContainerGroupIDsToReplace) {
+                Write-Warning "You're about to replace running Minecraft container(s) in workspace '${workspace}'!:`n${runningContainerGroupIDsToReplace}`nInform users so they can bail out."
+                if ($Force) {
+                    $Force = $false
+                    Write-Warning "Ignoring -Force"
+                }
+            }
+        } else {
+            Write-Verbose "Container groups will not be replaced"
+        }
+
+        if (!$Force -or $containerGroupReplaced -or $minecraftDataReplaced) {
+            # Prompt to continue
+            Write-Host "If you wish to proceed executing Terraform plan $planFile in workspace $workspace, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
+            $proceedanswer = Read-Host 
+
+            if ($proceedanswer -ne "yes") {
+                Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
+                exit
+            }
+        }
+    }
+}
+
 ### Internal Functions
 . (Join-Path (Split-Path $MyInvocation.MyCommand.Path -Parent) functions.ps1)
 
@@ -133,69 +207,7 @@ try {
     }
 
     if ($Apply) {
-        Write-Verbose "Converting $planFile into JSON so we can perform some inspection..."
-        $planJSON = (terraform show -json $planFile)
-
-        # Validation
-        # Check whether key resources will be replaced
-        if (Get-Command jq -ErrorAction SilentlyContinue) {
-            $containerGroupActions  = $planJSON | jq '.resource_changes[] | select(.address|endswith(\"azurerm_container_group.minecraft_server\")) | .change.actions' | ConvertFrom-Json
-            $containerGroupReplaced = $containerGroupActions.Contains("delete")
-            $serverFQDNActions      = $planJSON | jq '.resource_changes[] | select(.address|endswith(\"azurerm_dns_cname_record.vanity_hostname[0]\")) | .change.actions' | ConvertFrom-Json
-            $serverFQDNReplaced     = ($serverFQDNActions -and $serverFQDNActions.Contains("delete"))
-            $minecraftDataActions   = $planJSON | jq '.resource_changes[] | select(.address == \"azurerm_storage_share.minecraft_share\") | .change.actions' | ConvertFrom-Json
-            $minecraftDataReplaced  = $minecraftDataActions.Contains("delete")
-        } else {
-            Write-Warning "jq not found, plan validation skipped. Look at the plan carefully before approving"
-            $Force = $false
-        }
-
-        if ($serverFQDNReplaced) {
-            if ($workspace -ieq "prod") {
-                Write-Error "You're about to change the Minecraft Server hostname in workspace '${workspace}'!!! Please figure out another way of doing so, exiting..."
-                exit 
-            }
-            Write-Warning "You're about to change the Minecraft Server hostname in workspace '${workspace}'!!!"
-        }
-
-        if ($minecraftDataReplaced) {
-            if ($workspace -ieq "prod") {
-                Write-Error "You're about to delete Minecraft world data in workspace '${workspace}'!!! Please figure out another way of doing so, exiting..."
-                exit 
-            }
-            Write-Warning "You're about to delete Minecraft world data in workspace '${workspace}'!!!"
-        }
-
-        if (!$inAutomation) {
-            if ($containerGroupReplaced) {
-                $containerGroupID = (Get-TerraformOutput "container_group_id")
-                $minecraftContainerState = (az container show --ids $containerGroupID --query "containers[?name=='minecraft'].instanceView.currentState.state" -o tsv)
-                if ($minecraftContainerState -ieq "Running") {
-                    Write-Warning "You're about to replace the running Minecraft container in workspace '${workspace}'! Inform users so they can bail out."
-                    $onlineUsers = Get-OnlineUsers
-                    if ($onlineUsers) {
-                        Write-Warning "These users were online 5-10 minutes ago: ${onlineUsers}"
-                    }
-                    Write-Host "Opening rcon-cli to send any last commands and messages (e.g. list, save-all, say):"
-                    Execute-MinecraftCommand
-    
-                    # BUG: https://github.com/Azure/azure-cli/issues/8687
-                    # rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused "exec: \"rcon-cli say hi\": executable file not found in $PATH"
-                    # Send-MinecraftMessage -Message "Server will go down in ${GracePeriodSeconds} seconds" -SleepSeconds $GracePeriodSeconds
-                }
-            }
-
-            if (!$Force -or $containerGroupReplaced -or $minecraftDataReplaced) {
-                # Prompt to continue
-                Write-Host "If you wish to proceed executing Terraform plan $planFile in workspace $workspace, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
-                $proceedanswer = Read-Host 
-
-                if ($proceedanswer -ne "yes") {
-                    Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
-                    exit
-                }
-            }
-        }
+        Validate-Plan -File $planFile
 
         # Terraform Apply
         Invoke "terraform apply $forceArgs '$planFile'"

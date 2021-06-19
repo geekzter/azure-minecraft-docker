@@ -1,8 +1,8 @@
 locals {
   # TODO: check resource ID when multiple modules are created
   api_id                       = "/subscriptions/${data.azurerm_subscription.primary.subscription_id}/providers/Microsoft.Web/locations/${var.location}/managedApis/aci"
-  # connection_name              = "aci"
-  connection_name              = "aci-${local.suffix}"
+  # connection_name              = "aci-${local.suffix}"
+  connection_name              = var.name
   connection_name_json         = replace(local.connection_name,"-","_")
   connection_id                = "${var.resource_group_id}/providers/Microsoft.Web/connections/${local.connection_name}"
 
@@ -18,7 +18,7 @@ resource azurerm_role_assignment minecraft_startstop {
 }
 
 resource azurerm_logic_app_workflow start {
-  name                         = "${var.resource_group_name}-start"
+  name                         = "${var.name}-start"
   resource_group_name          = var.resource_group_name
   location                     = var.location
 
@@ -56,7 +56,7 @@ resource azurerm_monitor_diagnostic_setting start_workflow {
 }
 
 resource azurerm_logic_app_workflow stop {
-  name                         = "${var.resource_group_name}-stop"
+  name                         = "${var.name}-stop"
   resource_group_name          = var.resource_group_name
   location                     = var.location
 
@@ -113,13 +113,12 @@ resource azurerm_monitor_diagnostic_setting stop_workflow {
 # }
 
 resource azurerm_resource_group_template_deployment container_instance_api_connection {
-  name                         = "${var.resource_group_name}-aci-connection"
+  name                         = "${var.name}-aci-connection"
   resource_group_name          = var.resource_group_name
   deployment_mode              = "Incremental"
   template_content             = templatefile("${path.root}/arm/workflow-connection-template.json",
   {
     api_id                     = local.api_id
-    # connection_name            = "aci"
     connection_name            = local.connection_name
     connection_display_name    = local.connection_name
     client_id                  = var.workflow_sp_application_id

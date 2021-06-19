@@ -23,9 +23,19 @@ resource azurerm_storage_share minecraft_share {
   storage_account_name         = azurerm_storage_account.minecraft.name
   quota                        = 50
 }
+resource azurerm_storage_share minecraft_share2 {
+  name                         = "minecraft-aci2-data-${local.suffix}"
+  storage_account_name         = azurerm_storage_account.minecraft.name
+  quota                        = 50
+}
 
 resource azurerm_storage_share minecraft_modpacks {
   name                         = "minecraft-aci-modpacks-${local.suffix}"
+  storage_account_name         = azurerm_storage_account.minecraft.name
+  quota                        = 50
+}
+resource azurerm_storage_share minecraft_modpacks2 {
+  name                         = "minecraft-aci2-modpacks-${local.suffix}"
   storage_account_name         = azurerm_storage_account.minecraft.name
   quota                        = 50
 }
