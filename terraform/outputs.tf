@@ -46,9 +46,6 @@ output minecraft_server_port {
 output minecraft_users {
   value       = var.minecraft_users
 }
-output minecraft_version {
-  value       = var.minecraft_version
-}
 
 output resource_group {
   value       = azurerm_resource_group.minecraft.name

@@ -6,17 +6,6 @@ module service_principal {
   count                        = local.create_service_principal ? 1 : 0
 }
 
-module functions {
-  source                       = "./modules/functions"
-  appinsights_id               = azurerm_application_insights.insights.id
-  appinsights_instrumentation_key = azurerm_application_insights.insights.instrumentation_key
-  location                     = var.location
-  log_analytics_workspace_resource_id = azurerm_log_analytics_workspace.monitor.id
-  minecraft_fqdn               = module.minecraft.minecraft_server_fqdn
-  minecraft_port               = module.minecraft.minecraft_server_port
-  resource_group_name          = azurerm_resource_group.minecraft.name
-  suffix                       = local.suffix
-}
 
 module minecraft {
   source                       = "./modules/minecraft-instance"
@@ -62,6 +51,18 @@ module minecraft {
   workflow_sp_object_id        = local.workflow_sp_object_id
 
   depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
+}
+
+module functions {
+  source                       = "./modules/functions"
+  appinsights_id               = azurerm_application_insights.insights.id
+  appinsights_instrumentation_key = azurerm_application_insights.insights.instrumentation_key
+  location                     = var.location
+  log_analytics_workspace_resource_id = azurerm_log_analytics_workspace.monitor.id
+  minecraft_fqdn               = module.minecraft.minecraft_server_fqdn
+  minecraft_port               = module.minecraft.minecraft_server_port
+  resource_group_name          = azurerm_resource_group.minecraft.name
+  suffix                       = local.suffix
 }
 
 # module minecraft_duplicate_test {

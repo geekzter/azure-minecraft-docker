@@ -10,6 +10,7 @@ resource random_string suffix {
 }
 
 locals {
+ 
   environment                  = replace(terraform.workspace,"default","dev")
 # subscription_guid            = split("/",azurerm_resource_group.minecraft.id)[1]
   suffix                       = var.resource_suffix != "" ? lower(var.resource_suffix) : random_string.suffix.result
