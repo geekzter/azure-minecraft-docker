@@ -15,8 +15,7 @@ locals {
 }
 
 resource azurerm_storage_account functions {
-  # name                         = "${lower(substr(replace(var.resource_group_name,"/a|e|i|o|u|y|-/",""),0,17))}fnc${var.suffix}"
-  name                         = "min${lower(substr(replace(var.location,"/a|e|i|o|u|y|-/",""),0,13))}func${var.suffix}"
+  name                         = "min${lower(substr(replace(var.configuration_name,"/a|e|i|o|u|y|-/",""),0,13))}func${var.suffix}"
   resource_group_name          = var.resource_group_name
   location                     = var.location
   account_tier                 = "Standard"
@@ -25,7 +24,8 @@ resource azurerm_storage_account functions {
   tags                         = data.azurerm_resource_group.rg.tags
 }
 resource azurerm_app_service_plan functions {
-  name                         = "${var.resource_group_name}-${var.location}-functions"
+  # name                         = "${var.resource_group_name}-${replace(var.configuration_name,"/a|e|i|o|u|y|-/","")}-functions"
+  name                         = "${var.resource_group_name}-${var.configuration_name}-functions"
   resource_group_name          = var.resource_group_name
   location                     = var.location
   kind                         = "FunctionApp"

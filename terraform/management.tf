@@ -33,7 +33,7 @@ resource azurerm_dashboard minecraft_dashboard {
     {
       environment              = local.environment
       location                 = azurerm_resource_group.minecraft.location
-      minecraft_server_fqdn    = module.minecraft.minecraft_server_fqdn
+      minecraft_server_fqdn    = join(" ",[for minecraft in module.minecraft : minecraft.minecraft_server_fqdn])
       resource_group           = azurerm_resource_group.minecraft.name
       resource_group_id        = azurerm_resource_group.minecraft.id
       subscription_id          = data.azurerm_subscription.primary.id
@@ -95,112 +95,6 @@ resource azurerm_monitor_action_group push_provisioner {
   count                        = var.provisoner_email_address != "" ? 1 : 0
 }
 
-# Memory > 1.9 GB
-# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_metric_alert
-resource azurerm_monitor_metric_alert memory {
-  name                         = "${azurerm_resource_group.minecraft.name}-memory-alert"
-  resource_group_name          = azurerm_resource_group.minecraft.name
-  scopes                       = [module.minecraft.container_group_id]
-  description                  = "Action will be triggered when Memory usage is greater than 1.9 GB"
-
-  criteria {
-    metric_namespace           = "microsoft.containerinstance/containergroups"
-    metric_name                = "MemoryUsage"
-    aggregation                = "Average"
-    operator                   = "GreaterThan"
-    threshold                  = 1900000000 # 1.9 GB
-
-    dimension {
-      name                     = "containerName"
-      operator                 = "Include"
-      values                   = ["minecraft"]
-    }
-  }
-  frequency                    = "PT5M"
-  severity                     = 3
-  window_size                  = "PT15M"
-
-  action {
-    action_group_id            = azurerm_monitor_action_group.arm_roles.id
-  }
-}
-resource azurerm_monitor_metric_alert memory_dynamic {
-  name                         = "${azurerm_resource_group.minecraft.name}-memory-dynamic-alert"
-  resource_group_name          = azurerm_resource_group.minecraft.name
-  scopes                       = [module.minecraft.container_group_id]
-  description                  = "Action will be triggered when Memory usage is unusually high"
-
-  dynamic_criteria {
-    metric_namespace           = "microsoft.containerinstance/containergroups"
-    metric_name                = "MemoryUsage"
-    aggregation                = "Average"
-    operator                   = "GreaterThan"
-    alert_sensitivity          = "Low"
-
-    dimension {
-      name                     = "containerName"
-      operator                 = "Include"
-      values                   = ["minecraft"]
-    }
-  }
-  severity                     = 3
-
-  action {
-    action_group_id            = azurerm_monitor_action_group.arm_roles.id
-  }
-}
-# resource azurerm_monitor_metric_alert cpu {
-#   name                         = "${azurerm_resource_group.minecraft.name}-cpu-alert"
-#   resource_group_name          = azurerm_resource_group.minecraft.name
-#   scopes                       = [module.minecraft.container_group_id]
-#   description                  = "Action will be triggered when CPU usage is greater than 975 millicores"
-
-#   criteria {
-#     metric_namespace           = "microsoft.containerinstance/containergroups"
-#     metric_name                = "CpuUsage"
-#     aggregation                = "Average"
-#     operator                   = "GreaterThan"
-#     threshold                  = 975 # 975 millicores = 97.5% of 1 core
-
-#     dimension {
-#       name                     = "containerName"
-#       operator                 = "Include"
-#       values                   = ["minecraft"]
-#     }
-#   }
-#   frequency                    = "PT5M"
-#   severity                     = 2
-#   window_size                  = "PT15M"
-
-#   action {
-#     action_group_id            = azurerm_monitor_action_group.arm_roles.id
-#   }
-# }
-resource azurerm_monitor_metric_alert cpu_dynamic {
-  name                         = "${azurerm_resource_group.minecraft.name}-cpu-dynamic-alert"
-  resource_group_name          = azurerm_resource_group.minecraft.name
-  scopes                       = [module.minecraft.container_group_id]
-  description                  = "Action will be triggered when CPU usage is unusually high"
-
-  dynamic_criteria {
-    metric_namespace           = "microsoft.containerinstance/containergroups"
-    metric_name                = "CpuUsage"
-    aggregation                = "Average"
-    operator                   = "GreaterThan"
-    alert_sensitivity          = "Low"
-
-    dimension {
-      name                     = "containerName"
-      operator                 = "Include"
-      values                   = ["minecraft"]
-    }
-  }
-  severity                     = 3
-
-  action {
-    action_group_id            = azurerm_monitor_action_group.arm_roles.id
-  }
-}
 resource azurerm_monitor_scheduled_query_rules_alert container_failed_alert {
   name                         = "${azurerm_resource_group.minecraft.name}-container-failed-alert"
   resource_group_name          = azurerm_resource_group.minecraft.name
@@ -233,7 +127,7 @@ locals {
     ]
 }
 resource azurerm_monitor_scheduled_query_rules_alert container_inaccessible_alert {
-  name                         = "${azurerm_resource_group.minecraft.name}-container-inaccessible-alert"
+  name                         = "${azurerm_resource_group.minecraft.name}-${each.key}-inaccessible-alert"
   resource_group_name          = azurerm_resource_group.minecraft.name
   location                     = azurerm_resource_group.minecraft.location
 
@@ -245,8 +139,8 @@ resource azurerm_monitor_scheduled_query_rules_alert container_inaccessible_aler
   description                  = "Alert when Mincraft container is running but can't be connected to"
   enabled                      = true
   query                        = templatefile("${path.root}/../kusto/container-inaccessible.csl", { 
-    container_group_name       = module.minecraft.container_group_name
-    function_name              = module.functions.function_name
+    container_group_name       = module.minecraft[each.key].container_group_name
+    function_name              = module.functions[each.key].function_name
   })  
   severity                     = 1
   frequency                    = 5
@@ -256,6 +150,8 @@ resource azurerm_monitor_scheduled_query_rules_alert container_inaccessible_aler
     operator                   = "GreaterThan"
     threshold                  = 2
   }
+
+  for_each                     = var.minecraft_config
 }
 resource azurerm_monitor_scheduled_query_rules_alert custom_alert {
   name                         = "${azurerm_resource_group.minecraft.name}-custom-alert"

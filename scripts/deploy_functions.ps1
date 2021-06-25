@@ -32,8 +32,6 @@ try {
     $functionDirectory=$(Join-Path (Split-Path -Parent -Path $PSScriptRoot) "functions")
     Push-Location $functionDirectory
 
-    # Reverse the list, so we process the main region last and locally fetched settings point to that region
-    [array]::Reverse($functionNames)
     foreach ($functionName in $functionNames) {
         Write-Host "`nFetching settings for function ${functionName}..."
         func azure functionapp fetch-app-settings $functionName --subscription $subscriptionID

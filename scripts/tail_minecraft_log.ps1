@@ -17,11 +17,11 @@ try {
     Invoke-Command -ScriptBlock {
         $Private:ErrorActionPreference = "Continue"
 
-        $script:ContainerGroupID = (Get-TerraformOutput "container_group_id")
+        $script:ContainerGroupIDs = (terraform output -json container_group_id | convertfrom-json)
     }
 
-    if (![string]::IsNullOrEmpty($ContainerGroupID)) {
-        az container logs --ids $ContainerGroupID --follow
+    if (![string]::IsNullOrEmpty($ContainerGroupIDs)) {
+        az container logs --ids $ContainerGroupIDs --follow
     } else {
         Write-Warning "Container Instance has not been created, nothing to do"
         exit 

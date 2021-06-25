@@ -1,11 +1,11 @@
 output container_group {
-  value       = module.minecraft.container_group_name
+  value       = [for minecraft in module.minecraft : minecraft.container_group_name]
 }
 output container_group_id {
-  value       = module.minecraft.container_group_id
+  value       = [for minecraft in module.minecraft : minecraft.container_group_id]
 }
 output container_log_command {
-  value       = "az container logs --ids ${module.minecraft.container_group_id} --follow"
+  value       = "az container logs --ids ${join(" ",[for minecraft in module.minecraft : minecraft.container_group_id])} --follow"
 }
 
 output dashboard_id {
@@ -20,7 +20,7 @@ output environment {
 }
 
 output function_name {
-  value        = [module.functions.function_name]
+  value        = [for function in module.functions : function.function_name]
 }
 
 output location {
@@ -31,17 +31,21 @@ output log_analytics_workspace_guid {
   value       = azurerm_log_analytics_workspace.monitor.workspace_id
 }
 
+output minecraft {
+  value       = {for key in keys(module.minecraft) : key => merge(module.functions[key],module.minecraft[key])}
+}
+
 output minecraft_server_fqdn {
-  value       = module.minecraft.minecraft_server_fqdn
+  value       = [for minecraft in module.minecraft : minecraft.minecraft_server_fqdn]
 }
 output minecraft_server_ip {
-  value       = module.minecraft.minecraft_server_ip
+  value       = [for minecraft in module.minecraft : minecraft.minecraft_server_ip]
 }
 output minecraft_server_connection {
-  value       = module.minecraft.minecraft_server_connection
+  value       = [for minecraft in module.minecraft : minecraft.minecraft_server_connection]
 }
 output minecraft_server_port {
-  value       = module.minecraft.minecraft_server_port
+  value       = [for minecraft in module.minecraft : minecraft.minecraft_server_port]
 }
 output minecraft_users {
   value       = var.minecraft_users
@@ -73,10 +77,9 @@ output storage_account {
 output storage_account_id {
   value       = azurerm_storage_account.minecraft.id
 }
-# TODO: Update for manage_snapshots.ps1
-# output storage_data_share {
-#   value       = azurerm_storage_share.minecraft_share.name
-# }
+output storage_data_share {
+  value       = [for minecraft in module.minecraft : minecraft.container_data_share_name]
+}
 output storage_key {
   sensitive   = true
   value       = azurerm_storage_account.minecraft.primary_access_key

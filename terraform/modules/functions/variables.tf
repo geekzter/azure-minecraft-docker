@@ -2,6 +2,8 @@
 variable appinsights_id {}
 variable appinsights_instrumentation_key {}
 
+variable configuration_name {}
+
 variable location {}
 
 variable log_analytics_workspace_resource_id {}

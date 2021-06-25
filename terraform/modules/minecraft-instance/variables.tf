@@ -67,6 +67,8 @@ variable minecraft_users {
   default                      = []
 }
 
+variable monitor_action_group_id {}
+
 variable name {}
 
 variable resource_group_id {}

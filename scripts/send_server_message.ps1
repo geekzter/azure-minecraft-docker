@@ -9,8 +9,9 @@
 param ( 
     [parameter(mandatory=$true,position=0)][string]$Message,
     [parameter(mandatory=$false)][switch]$ShowLog,
-    [parameter(mandatory=$false)][int]$SleepSeconds=0
+    [parameter(mandatory=$false)][int]$SleepSeconds=0,
+    [parameter(mandatory=$false)][string]$ConfigurationName="primary"    
 )
 . (Join-Path $PSScriptRoot functions.ps1)
 
-Send-MinecraftMessage -Message $Message -ShowLog:$ShowLog -SleepSeconds $SleepSeconds
+Send-MinecraftMessage -Message $Message -ShowLog:$ShowLog -SleepSeconds $SleepSeconds -ConfigurationName $ConfigurationName

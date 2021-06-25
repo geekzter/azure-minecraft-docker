@@ -1,7 +1,5 @@
 locals {
-  # TODO: check resource ID when multiple modules are created
   api_id                       = "/subscriptions/${data.azurerm_subscription.primary.subscription_id}/providers/Microsoft.Web/locations/${var.location}/managedApis/aci"
-  # connection_name              = "aci-${local.suffix}"
   connection_name              = var.name
   connection_name_json         = replace(local.connection_name,"-","_")
   connection_id                = "${var.resource_group_id}/providers/Microsoft.Web/connections/${local.connection_name}"
