@@ -63,7 +63,7 @@ resource azurerm_container_group minecraft_server {
       mount_path               = "/data"
       name                     = "azurefile"
       read_only                = false
-      share_name               = var.container_data_share_name
+      share_name               = azurerm_storage_share.minecraft_share.name
       storage_account_name     = var.storage_account_name
       storage_account_key      = var.storage_account_key
     }
@@ -71,7 +71,7 @@ resource azurerm_container_group minecraft_server {
       mount_path               = "/modpacks"
       name                     = "modpacks"
       read_only                = false
-      share_name               = var.container_modpacks_share_name
+      share_name               = azurerm_storage_share.minecraft_modpacks.name
       storage_account_name     = var.storage_account_name
       storage_account_key      = var.storage_account_key
     }

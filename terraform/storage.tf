@@ -18,28 +18,6 @@ resource azurerm_storage_account minecraft {
   tags                         = local.tags
 }
 
-resource azurerm_storage_share minecraft_share {
-  name                         = "minecraft-aci-data-${local.suffix}"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  quota                        = 50
-}
-resource azurerm_storage_share minecraft_share2 {
-  name                         = "minecraft-aci2-data-${local.suffix}"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  quota                        = 50
-}
-
-resource azurerm_storage_share minecraft_modpacks {
-  name                         = "minecraft-aci-modpacks-${local.suffix}"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  quota                        = 50
-}
-resource azurerm_storage_share minecraft_modpacks2 {
-  name                         = "minecraft-aci2-modpacks-${local.suffix}"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  quota                        = 50
-}
-
 resource azurerm_storage_container configuration {
   name                         = "configuration"
   storage_account_name         = azurerm_storage_account.minecraft.name
@@ -94,8 +72,7 @@ resource azurerm_management_lock minecraft_data_lock {
   notes                        = "Do not accidentally delete Minecraft (world) data"
 
   depends_on                   = [
-    azurerm_storage_share.minecraft_share,
-    azurerm_storage_share.minecraft_modpacks,
+    module.minecraft
   ]
 }
 
@@ -214,10 +191,10 @@ resource azurerm_backup_protected_file_share minecraft_data {
   resource_group_name          = azurerm_resource_group.minecraft.name
   recovery_vault_name          = azurerm_recovery_services_vault.backup.0.name
   source_storage_account_id    = azurerm_storage_account.minecraft.id
-  source_file_share_name       = azurerm_storage_share.minecraft_share.name
+  source_file_share_name       = module.minecraft.container_data_share_name
   backup_policy_id             = azurerm_backup_policy_file_share.nightly.0.id
 
-  depends_on                   = [azurerm_backup_container_storage_account.minecraft]
+  depends_on                   = [module.minecraft]
 
   count                        = var.enable_backup ? 1 : 0
 }
@@ -231,8 +208,7 @@ resource azurerm_management_lock minecraft_backup_lock {
   count                        = var.enable_backup ? 1 : 0
 
   depends_on                   = [
-    azurerm_backup_protected_file_share.minecraft_data,
-    azurerm_storage_share.minecraft_modpacks,
+    module.minecraft,
     azurerm_monitor_diagnostic_setting.backup_vault
   ]
 }

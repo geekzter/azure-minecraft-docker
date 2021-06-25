@@ -3,7 +3,6 @@ variable container_image_tag {
   default                      = ""
 }
 
-variable container_data_share_id {}
 variable container_data_share_name {}
 variable container_modpacks_share_name {}
 

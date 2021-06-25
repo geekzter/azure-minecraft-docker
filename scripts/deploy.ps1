@@ -41,10 +41,9 @@ function Validate-Plan (
     # Validation
     # Check whether key resources will be replaced
     if (Get-Command jq -ErrorAction SilentlyContinue) {
-        $containerGroupIDsToReplace = $planJSON | jq '.resource_changes[] | select(.address|endswith(\"azurerm_container_group.minecraft_server\")) | select(.change.actions[]|contains(\"delete\")) | .change.before.id' | ConvertFrom-Json
+        $containerGroupIDsToReplace = $planJSON | jq '.resource_changes[] | select(.address|endswith(\"azurerm_container_group.minecraft_server\"))    | select(.change.actions[]|contains(\"delete\")) | .change.before.id' | ConvertFrom-Json
         $serverFQDNIDsToReplace     = $planJSON | jq '.resource_changes[] | select(.address|endswith(\"azurerm_dns_cname_record.vanity_hostname[0]\")) | select(.change.actions[]|contains(\"delete\")) | .change.before.id' | ConvertFrom-Json
-        $minecraftDataActions       = $planJSON | jq '.resource_changes[] | select(.address == \"azurerm_storage_share.minecraft_share\") | .change.actions' | ConvertFrom-Json
-        $minecraftDataReplaced      = $minecraftDataActions.Contains("delete")
+        $minecraftDataIDsToReplace  = $planJSON | jq '.resource_changes[] | select(.address|endswith(\"azurerm_storage_share.minecraft_share\"))       | select(.change.actions[]|contains(\"delete\")) | .change.before.id' | ConvertFrom-Json
     } else {
         Write-Warning "jq not found, plan validation skipped. Look at the plan carefully before approving"
         if ($Force) {
@@ -56,14 +55,16 @@ function Validate-Plan (
     if ($serverFQDNIDsToReplace) {
         if ($workspace -ieq "prod") {
             Write-Error "You're about to change the Minecraft Server hostname in workspace '${workspace}'!!! Please figure out another way of doing so, exiting..."
+            Write-Information $serverFQDNIDsToReplace
             exit 
         }
         Write-Warning "You're about to change the Minecraft Server hostname in workspace '${workspace}'!!!"
     }
 
-    if ($minecraftDataReplaced) {
+    if ($minecraftDataIDsToReplace) {
         if ($workspace -ieq "prod") {
             Write-Error "You're about to delete Minecraft world data in workspace '${workspace}'!!! Please figure out another way of doing so, exiting..."
+            Write-Information $minecraftDataIDsToReplace
             exit 
         }
         Write-Warning "You're about to delete Minecraft world data in workspace '${workspace}'!!!"
@@ -92,7 +93,7 @@ function Validate-Plan (
 
         if (!$Force -or $containerGroupReplaced -or $minecraftDataReplaced) {
             # Prompt to continue
-            Write-Host "If you wish to proceed executing Terraform plan $planFile in workspace $workspace, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
+            Write-Host "If you wish to proceed executing Terraform plan $File in workspace $workspace, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
             $proceedanswer = Read-Host 
 
             if ($proceedanswer -ne "yes") {
@@ -249,8 +250,8 @@ try {
 
         Write-Warning "If it exists, this will delete the Minecraft Server in workspace '${workspace}'!"
         if ($env:TF_IN_AUTOMATION -ine "true") {
-            Write-Host "Opening rcon-cli to send any last commands and messages (e.g. list, say):"
-            Execute-MinecraftCommand
+            Write-Host "Press any key to continue"
+            Read-Host
         }
         
         # Now let Terraform do it's work

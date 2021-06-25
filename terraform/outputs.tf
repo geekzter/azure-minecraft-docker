@@ -73,9 +73,10 @@ output storage_account {
 output storage_account_id {
   value       = azurerm_storage_account.minecraft.id
 }
-output storage_data_share {
-  value       = azurerm_storage_share.minecraft_share.name
-}
+# TODO: Update for manage_snapshots.ps1
+# output storage_data_share {
+#   value       = azurerm_storage_share.minecraft_share.name
+# }
 output storage_key {
   sensitive   = true
   value       = azurerm_storage_account.minecraft.primary_access_key

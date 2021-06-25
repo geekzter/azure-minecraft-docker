@@ -6,7 +6,6 @@ module service_principal {
   count                        = local.create_service_principal ? 1 : 0
 }
 
-
 module minecraft {
   source                       = "./modules/minecraft-instance"
   name                         = "${azurerm_resource_group.minecraft.name}-minecraft"
@@ -15,9 +14,8 @@ module minecraft {
   configuration_storage_container_name= azurerm_storage_container.configuration.name
 
   container_image_tag          = var.container_image_tag
-  container_data_share_id      = azurerm_storage_share.minecraft_share.id
-  container_data_share_name    = azurerm_storage_share.minecraft_share.name
-  container_modpacks_share_name= azurerm_storage_share.minecraft_modpacks.name
+  container_data_share_name    = "minecraft-aci-data-${local.suffix}"
+  container_modpacks_share_name= "minecraft-aci-modpacks-${local.suffix}"
   environment_variables        = var.minecraft_environment_variables
 
   environment                  = local.environment

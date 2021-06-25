@@ -41,6 +41,8 @@ variable enable_log_filter {
 #   type                         = map
 #   default                      = {
 #     primary                    = {
+#       container_image_tag      = ""
+#       data_share_name          = ""
 #       environment_variables    = {
 #         ALLOW_NETHER           = true
 #         ANNOUNCE_PLAYER_ACHIEVEMENTS = "true"
@@ -50,13 +52,18 @@ variable enable_log_filter {
 #         ICON                   = null # "https://raw.githubusercontent.com/geekzter/azure-minecraft-docker/main/visuals/aci.png"
 #         MAX_PLAYERS            = 10
 #         MODS                   = null
-#         MODE                   = "survival"
+#         MODE                   = "creative"
 #         MOTD                   = "Minecraft Server powered by Docker and Azure Container Instance"
 #         OVERRIDE_SERVER_PROPERTIES = true # Use these settings over server.roperties every time the container starts
 #         SNOOPER_ENABLED        = "false"
 #         TYPE                   = "PAPER"
 #         VERSION                = "LATEST"
 #       }
+#       minecraft_server_port    = 25565
+#       modpacks_share_name      = ""
+#       start_time               = ""
+#       stop_time                = "00:01"
+#       vanity_hostname_prefix   = "minecraft"
 #     }
 #   }
 # }

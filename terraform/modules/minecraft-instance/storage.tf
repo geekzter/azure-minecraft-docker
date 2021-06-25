@@ -26,17 +26,29 @@ resource azurerm_storage_blob minecraft_user_configuration {
   source_content               = jsonencode(var.minecraft_users)
 }
 
+resource azurerm_storage_share minecraft_share {
+  name                         = var.container_data_share_name
+  storage_account_name         = var.storage_account_name
+  quota                        = 50
+}
+
+resource azurerm_storage_share minecraft_modpacks {
+  name                         = var.container_modpacks_share_name
+  storage_account_name         = var.storage_account_name
+  quota                        = 50
+}
+
 # https://www.spigotmc.org/resources/console-spam-fix.18410/download?version=366123
 resource azurerm_storage_share_directory plugins {
   name                         = "plugins"
-  share_name                   = var.container_data_share_name
+  share_name                   = azurerm_storage_share.minecraft_share.name
   storage_account_name         = var.storage_account_name
 
   count                        = var.enable_log_filter ? 1 : 0
 }
 resource azurerm_storage_share_directory bstats {
   name                         = "${azurerm_storage_share_directory.plugins.0.name}/bStats"
-  share_name                   = var.container_data_share_name
+  share_name                   = azurerm_storage_share.minecraft_share.name
   storage_account_name         = var.storage_account_name
 
   count                        = var.enable_log_filter ? 1 : 0
@@ -44,7 +56,7 @@ resource azurerm_storage_share_directory bstats {
 resource azurerm_storage_share_file bstats_config {
   name                         = "config.yml"
   path                         = azurerm_storage_share_directory.bstats.0.name
-  storage_share_id             = var.container_data_share_id
+  storage_share_id             = azurerm_storage_share.minecraft_share.id
   source                       = "${path.root}/../minecraft/bstats/config.yml"
   content_type                 = "application/yaml"
 
@@ -52,7 +64,7 @@ resource azurerm_storage_share_file bstats_config {
 }
 resource azurerm_storage_share_directory log_filter {
   name                         = "${azurerm_storage_share_directory.plugins.0.name}/ConsoleSpamFix"
-  share_name                   = var.container_data_share_name
+  share_name                   = azurerm_storage_share.minecraft_share.name
   storage_account_name         = var.storage_account_name
 
   count                        = var.enable_log_filter ? 1 : 0
@@ -60,7 +72,7 @@ resource azurerm_storage_share_directory log_filter {
 resource azurerm_storage_share_file log_filter_config {
   name                         = "config.yml"
   path                         = azurerm_storage_share_directory.log_filter.0.name
-  storage_share_id             = var.container_data_share_id
+  storage_share_id             = azurerm_storage_share.minecraft_share.id
   source                       = "${path.root}/../minecraft/log-filter/config.yml"
   content_type                 = "application/yaml"
 
@@ -77,7 +89,7 @@ resource null_resource log_filter_jar {
 resource azurerm_storage_share_file log_filter_jar {
   name                         = basename(var.log_filter_jar)
   path                         = azurerm_storage_share_directory.plugins.0.name
-  storage_share_id             = var.container_data_share_id
+  storage_share_id             = azurerm_storage_share.minecraft_share.id
   source                       = "${path.root}/../minecraft/plugins/${basename(var.log_filter_jar)}"
   content_type                 = "application/java-archive"
 

@@ -1,3 +1,7 @@
+output container_data_share_name {
+  value       = azurerm_storage_share.minecraft_share.name
+}
+
 output container_group_name {
   value       = azurerm_container_group.minecraft_server.name
 }
