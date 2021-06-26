@@ -33,6 +33,8 @@ override.tf.json
 backend.tf
 *.tfvars
 *.tfvars_
+# Used for c-scripted.yml workflow
+!ci.tfvars 
 
 # Ignore temporary files
 *.*_
