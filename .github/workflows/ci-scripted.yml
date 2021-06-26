@@ -160,7 +160,8 @@ jobs:
       run: | 
         Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
         $minecraftConfig  = (terraform output -json minecraft | ConvertFrom-Json -AsHashtable)
-        foreach ($minecraftConfigName in $configurations) {
+        foreach ($minecraftConfigName in $minecraftConfig.Keys) {
+          Write-Host "Processing configuration '{$minecraftConfigName}''..."
           $containerGroupID = $minecraft.container_group_id
           $serverFQDN       = $minecraft.minecraft_server_fqdn
           $serverPort       = $minecraft.minecraft_server_port
