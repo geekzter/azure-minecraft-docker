@@ -32,7 +32,7 @@ output log_analytics_workspace_guid {
 }
 
 output minecraft {
-  value       = {for key in keys(module.minecraft) : key => merge(module.functions[key],module.minecraft[key])}
+  value       = {for key in keys(var.minecraft_config) : key => merge(var.minecraft_config[key],module.functions[key],module.minecraft[key])}
 }
 
 output minecraft_server_fqdn {
