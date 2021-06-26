@@ -193,16 +193,16 @@ try {
         $forceArgs = "-auto-approve"
     }
 
-    if (Test-Path $varsFile) {
-        # Load variables from file, if it exists and environment variables have not been set
-        $varArgs = " -var-file='$varsFile'"
-        $userEmailAddress = $(az account show --query "user.name" -o tsv)
+    if ($Plan -or $Apply) {
+        if (Test-Path $varsFile) {
+            # Load variables from file, if it exists and environment variables have not been set
+            $varArgs = " -var-file='$varsFile'"
+            $userEmailAddress = $(az account show --query "user.name" -o tsv)
+        }
         if ($userEmailAddress -match "@") {
             $varArgs += " -var 'provisoner_email_address=${userEmailAddress}'"
         }
-    }
 
-    if ($Plan -or $Apply) {
         # Create plan
         Invoke "terraform plan $varArgs -out='$planFile'"
     }
