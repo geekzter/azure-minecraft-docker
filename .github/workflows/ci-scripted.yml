@@ -158,23 +158,30 @@ jobs:
     - name: Test connection to Minecraft Server
       if: ${{ matrix.terraform_apply }}
       run: | 
-        # Wait for Minecraft to boot up
-        $connectionAttempts = 0
-        do {
-          Start-Sleep -Seconds 10
-          Write-Host "Pinging ${env:TF_OUT_minecraft_server_fqdn} on port ${env:TF_OUT_minecraft_server_port}..."
-          try {
-            $connectionAttempts++
-            $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($env:TF_OUT_minecraft_server_fqdn, $env:TF_OUT_minecraft_server_port) -ErrorAction SilentlyContinue
-          } catch [System.Management.Automation.MethodInvocationException] {
-            Write-Warning $_
-          }
-        } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
-        
-        az container show --ids ${{ steps.terraform-apply.outputs.container_group_id }} --query instanceView
-        az container logs --ids ${{ steps.terraform-apply.outputs.container_group_id }}
-        # BUG: no tty
-        # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "rcon-cli say hello from ci" --container-name minecraft
+        $minecraftConfig  = (terraform output -json minecraft | ConvertFrom-Json -AsHashtable)
+        foreach ($minecraftConfigName in $configurations) {
+          $containerGroupID = $minecraft.container_group_id
+          $serverFQDN       = $minecraft.minecraft_server_fqdn
+          $serverPort       = $minecraft.minecraft_server_port
+
+          # Wait for Minecraft to boot up
+          $connectionAttempts = 0
+          do {
+            Start-Sleep -Seconds 10
+            Write-Host "Pinging ${serverFQDN} on port ${serverPort}..."
+            try {
+              $connectionAttempts++
+              $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($serverFQDN, $serverPort) -ErrorAction SilentlyContinue
+            } catch [System.Management.Automation.MethodInvocationException] {
+              Write-Warning $_
+            }
+          } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
+          
+          az container show --ids $containerGroupID --query instanceView
+          az container logs --ids $containerGroupID
+          # BUG: no tty
+          # az container exec --ids $containerGroupID --exec-command "rcon-cli say hello from ci" --container-name minecraft
+        }
       shell: pwsh
 
     - name: Terraform Destroy
