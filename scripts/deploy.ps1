@@ -197,7 +197,7 @@ try {
         # Load variables from file, if it exists and environment variables have not been set
         $varArgs = " -var-file='$varsFile'"
         $userEmailAddress = $(az account show --query "user.name" -o tsv)
-        if ($userEmailAddress) {
+        if ($userEmailAddress -match "@") {
             $varArgs += " -var 'provisoner_email_address=${userEmailAddress}'"
         }
     }
