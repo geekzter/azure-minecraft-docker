@@ -162,11 +162,11 @@ jobs:
         $minecraftConfig  = (terraform output -json minecraft | ConvertFrom-Json -AsHashtable)
         foreach ($minecraftConfigName in $minecraftConfig.Keys) {
           Write-Host "Processing configuration '{$minecraftConfigName}''..."
-          $containerGroupID = $minecraft.container_group_id
-          $serverFQDN       = $minecraft.minecraft_server_fqdn
-          $serverPort       = $minecraft.minecraft_server_port
+          $containerGroupID = $minecraftConfig[$minecraftConfigName].container_group_id
+          $serverFQDN       = $minecraftConfig[$minecraftConfigName].minecraft_server_fqdn
+          $serverPort       = $minecraftConfig[$minecraftConfigName].minecraft_server_port
 
-          # Wait for Minecraft to boot up
+          # Wait for Minecraft socket to open
           $connectionAttempts = 0
           do {
             Start-Sleep -Seconds 10
@@ -178,11 +178,10 @@ jobs:
               Write-Warning $_
             }
           } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
+          az container exec --ids $containerGroupID --exec-command "/health.sh" --container-name minecraft
           
           az container show --ids $containerGroupID --query instanceView
           az container logs --ids $containerGroupID
-          # BUG: no tty
-          # az container exec --ids $containerGroupID --exec-command "rcon-cli say hello from ci" --container-name minecraft
         }
       shell: pwsh
 
