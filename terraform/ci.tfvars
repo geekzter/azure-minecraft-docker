@@ -1,3 +1,5 @@
+enable_auto_startstop          = true
+
 minecraft_config               = {
   primary                      = {
     allow_ops_only             = "false"
@@ -48,3 +50,4 @@ minecraft_config               = {
     vanity_hostname_prefix     = "minecraft117"
   }
 }
+provisoner_email_address       = "nobody@no.no"

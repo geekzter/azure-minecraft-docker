@@ -92,7 +92,7 @@ resource azurerm_monitor_action_group push_provisioner {
     email_address              = var.provisoner_email_address
   }
 
-  count                        = var.provisoner_email_address != "" ? 1 : 0
+  count                        = var.provisoner_email_address != "" && var.provisoner_email_address != null ? 1 : 0
 }
 
 resource azurerm_monitor_scheduled_query_rules_alert container_failed_alert {
@@ -119,7 +119,7 @@ resource azurerm_monitor_scheduled_query_rules_alert container_failed_alert {
   }
 }
 locals {
-  all_action_groups            = var.provisoner_email_address != "" ? [
+  all_action_groups            = var.provisoner_email_address != "" && var.provisoner_email_address != null ? [
       azurerm_monitor_action_group.arm_roles.id,
       azurerm_monitor_action_group.push_provisioner.0.id,
     ] : [
