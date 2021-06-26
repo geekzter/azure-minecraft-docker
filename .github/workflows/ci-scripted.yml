@@ -158,6 +158,7 @@ jobs:
     - name: Test connection to Minecraft Server
       if: ${{ matrix.terraform_apply }}
       run: | 
+        Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
         $minecraftConfig  = (terraform output -json minecraft | ConvertFrom-Json -AsHashtable)
         foreach ($minecraftConfigName in $configurations) {
           $containerGroupID = $minecraft.container_group_id
