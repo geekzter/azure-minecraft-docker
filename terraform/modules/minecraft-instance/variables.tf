@@ -1,3 +1,7 @@
+variable allow_ops_only {
+  type                         = bool
+}
+
 variable container_image_tag {
   type                         = string
   default                      = ""

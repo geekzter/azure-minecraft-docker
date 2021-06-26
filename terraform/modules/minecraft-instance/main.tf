@@ -17,7 +17,7 @@ locals {
     {
       OPS                      = join(",",var.minecraft_ops)
       TZ                       = var.minecraft_timezone
-      WHITELIST                = join(",",var.minecraft_users)
+      WHITELIST                = var.allow_ops_only ? join(",",var.minecraft_ops) : join(",",var.minecraft_users)
     }
   )  
   # https://github.com/itzg/docker-minecraft-server

@@ -41,6 +41,7 @@ variable minecraft_config {
   type                         = map
   default                      = {
     primary                    = {
+      allow_ops_only           = false
       container_image_tag      = ""
       environment_variables    = {
         # https://github.com/itzg/docker-minecraft-server#allow-nether
@@ -59,7 +60,8 @@ variable minecraft_config {
         MODE                   = "creative"
         # https://github.com/itzg/docker-minecraft-server#message-of-the-day
         MOTD                   = "Minecraft Server powered by Docker and Azure Container Instance"
-        OVERRIDE_SERVER_PROPERTIES = true # Use these settings over server.roperties every time the container starts
+        # Use these settings over server properties every time the container starts
+        OVERRIDE_SERVER_PROPERTIES = true 
         # https://github.com/itzg/docker-minecraft-server#snooper
         SNOOPER_ENABLED        = "false"
         TYPE                   = "PAPER"
@@ -73,7 +75,6 @@ variable minecraft_config {
     }
   }
 }
-
 
 # https://github.com/itzg/docker-minecraft-server#opadministrator-players
 variable minecraft_ops {

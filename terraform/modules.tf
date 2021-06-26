@@ -10,6 +10,8 @@ module minecraft {
   source                       = "./modules/minecraft-instance"
   name                         = "${azurerm_resource_group.minecraft.name}-${each.key}"
 
+  allow_ops_only               = tobool(lookup(each.value, "allow_ops_only", false))
+
   configuration_storage_container_name= azurerm_storage_container.configuration.name
 
   container_image_tag          = lookup(each.value, "container_image_tag", "LATEST")
