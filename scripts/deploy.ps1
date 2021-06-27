@@ -247,14 +247,13 @@ try {
             exit 
         }
 
-        Write-Warning "If it exists, this will delete the Minecraft Server in workspace '${workspace}'!"
         if ($env:TF_IN_AUTOMATION -ine "true") {
-            Write-Host "Press any key to continue"
-            Read-Host
+            Write-Warning "Ignoring -Force on -Destroy"
+            Write-Warning "If it exists, this will delete the Minecraft Server in workspace '${workspace}'!"
+            Invoke "terraform destroy $varArgs"
+        } else {
+            Invoke "terraform destroy $varArgs $forceArgs"
         }
-        
-        # Now let Terraform do it's work
-        Invoke "terraform destroy $varArgs $forceArgs"
     }
 
     if ($TearDown) {
