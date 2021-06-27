@@ -8,15 +8,15 @@ module service_principal {
 
 module minecraft {
   source                       = "./modules/minecraft-instance"
-  name                         = "${azurerm_resource_group.minecraft.name}-${each.key}"
+  name                         = replace("${azurerm_resource_group.minecraft.name}-${each.key}","-primary","")
 
   allow_ops_only               = tobool(lookup(each.value, "allow_ops_only", false))
 
   configuration_storage_container_name= azurerm_storage_container.configuration.name
 
   container_image_tag          = lookup(each.value, "container_image_tag", "LATEST")
-  container_data_share_name    = replace("minecraft-aci-${each.key}-data-${local.suffix}","primary-","")
-  container_modpacks_share_name= replace("minecraft-aci-${each.key}-modpacks-${local.suffix}","primary-","")
+  container_data_share_name    = replace("minecraft-aci-${each.key}-data-${local.suffix}","-primary","")
+  container_modpacks_share_name= replace("minecraft-aci-${each.key}-modpacks-${local.suffix}","-primary","")
   environment_variables        = each.value["environment_variables"]
 
   environment                  = local.environment
@@ -60,11 +60,11 @@ module functions {
   source                       = "./modules/functions"
   appinsights_id               = azurerm_application_insights.insights.id
   appinsights_instrumentation_key = azurerm_application_insights.insights.instrumentation_key
-  configuration_name           = each.key
   location                     = var.location
   log_analytics_workspace_resource_id = azurerm_log_analytics_workspace.monitor.id
   minecraft_fqdn               = module.minecraft[each.key].minecraft_server_fqdn
   minecraft_port               = lookup(each.value, "minecraft_server_port", 25565)
+  plan_name                    = replace("${azurerm_resource_group.minecraft.name}-${each.key}-functions","-primary","")
   resource_group_name          = azurerm_resource_group.minecraft.name
   suffix                       = local.suffix
 
