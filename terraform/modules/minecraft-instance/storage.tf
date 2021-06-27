@@ -2,6 +2,11 @@ locals {
   config_directory             = "${formatdate("YYYY",timestamp())}/${formatdate("MM",timestamp())}/${formatdate("DD",timestamp())}/${formatdate("hhmm",timestamp())}/${var.name}"
 }
 
+data azurerm_storage_account minecraft {
+  name                         = var.storage_account_name
+  resource_group_name          = var.resource_group_name
+}
+
 resource azurerm_storage_blob minecraft_configuration {
   name                         = "${local.config_directory}/config.json"
   storage_account_name         = var.storage_account_name
@@ -30,6 +35,16 @@ resource azurerm_storage_share minecraft_share {
   name                         = var.container_data_share_name
   storage_account_name         = var.storage_account_name
   quota                        = 50
+}
+
+resource azurerm_backup_protected_file_share minecraft_data {
+  resource_group_name          = var.resource_group_name
+  recovery_vault_name          = var.recovery_vault_name
+  source_storage_account_id    = data.azurerm_storage_account.minecraft.id
+  source_file_share_name       = azurerm_storage_share.minecraft_share.name
+  backup_policy_id             = var.backup_policy_id
+
+  count                        = var.enable_backup ? 1 : 0
 }
 
 resource azurerm_storage_share minecraft_modpacks {

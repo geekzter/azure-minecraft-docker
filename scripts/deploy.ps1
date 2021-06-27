@@ -4,12 +4,6 @@
 .SYNOPSIS 
     Deploys Azure resources using Terraform
  
-.DESCRIPTION 
-    This script is a wrapper around Terraform. It is provided for convenience only, as it works around some limitations in the demo. 
-    E.g. terraform might need resources to be started before executing, and resources may not be accessible from the current locastion (IP address).
-
-.EXAMPLE
-    ./deploy.ps1 -apply
 #> 
 #Requires -Version 7
 
@@ -105,7 +99,7 @@ function Validate-Plan (
 }
 
 ### Internal Functions
-. (Join-Path (Split-Path $MyInvocation.MyCommand.Path -Parent) functions.ps1)
+. (Join-Path $PSScriptRoot functions.ps1)
 
 ### Validation
 if (!(Get-Command terraform -ErrorAction SilentlyContinue)) {
@@ -192,6 +186,11 @@ try {
     if ($Force) {
         $forceArgs = "-auto-approve"
     }
+
+    # if ($Apply) {
+    #     # Migrate to module structure before creating plan
+    #     Migrate-StorageShareState -ConfigurationName $ConfigurationName
+    # }
 
     if ($Plan -or $Apply) {
         if (Test-Path $varsFile) {

@@ -2,6 +2,8 @@ variable allow_ops_only {
   type                         = bool
 }
 
+variable backup_policy_id {}
+
 variable container_image_tag {
   type                         = string
   default                      = ""
@@ -11,6 +13,10 @@ variable container_data_share_name {}
 variable container_modpacks_share_name {}
 
 variable enable_auto_startstop {
+  type                         = bool
+  default                      = false
+}
+variable enable_backup {
   type                         = bool
   default                      = false
 }
@@ -74,6 +80,8 @@ variable minecraft_users {
 variable monitor_action_group_id {}
 
 variable name {}
+
+variable recovery_vault_name {}
 
 variable resource_group_id {}
 variable resource_group_name {}

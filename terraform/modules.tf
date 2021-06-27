@@ -12,6 +12,7 @@ module minecraft {
 
   allow_ops_only               = tobool(lookup(each.value, "allow_ops_only", false))
 
+  backup_policy_id             = var.enable_backup ? azurerm_backup_policy_file_share.nightly.0.id : null
   configuration_storage_container_name= azurerm_storage_container.configuration.name
 
   container_image_tag          = lookup(each.value, "container_image_tag", "LATEST")
@@ -21,6 +22,7 @@ module minecraft {
 
   environment                  = local.environment
 
+  enable_backup                = var.enable_backup
   enable_log_filter            = var.enable_log_filter
   enable_auto_startstop        = var.enable_auto_startstop
   start_time                   = lookup(each.value, "start_time", "07:00")
@@ -39,6 +41,8 @@ module minecraft {
 
   monitor_action_group_id      = azurerm_monitor_action_group.arm_roles.id
 
+  recovery_vault_name          = var.enable_backup ? azurerm_recovery_services_vault.backup.0.name : null
+
   resource_group_id            = azurerm_resource_group.minecraft.id
   resource_group_name          = azurerm_resource_group.minecraft.name
   storage_account_name         = azurerm_storage_account.minecraft.name
@@ -51,7 +55,10 @@ module minecraft {
   workflow_sp_application_secret= local.workflow_sp_application_secret
   workflow_sp_object_id        = local.workflow_sp_object_id
 
-  depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
+  depends_on                   = [
+    azurerm_backup_container_storage_account.minecraft,
+    azurerm_role_assignment.terraform_storage_owner
+  ]
 
   for_each                     = var.minecraft_config
 }
