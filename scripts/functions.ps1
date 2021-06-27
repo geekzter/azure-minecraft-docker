@@ -227,7 +227,9 @@ function Invoke (
 }
 
 function Migrate-StorageShareState (
-    [parameter(Mandatory=$false)][string]$ConfigurationName="primary"    
+    [parameter(Mandatory=$false)][string]$ConfigurationName="primary",
+    [parameter(Mandatory=$false)][switch]$DryRun
+    
 ) {
     try {
         $tfdirectory=$(Join-Path (Split-Path -Parent -Path $PSScriptRoot) "terraform")
@@ -235,9 +237,10 @@ function Migrate-StorageShareState (
     
         $shareResources = $(terraform state list | Select-String -Pattern "^(azurerm_storage_share|azurerm_backup_protected_file_share)")
         if ($shareResources) {
-            Write-Warning "Terraform needs to move resources, as resources has been modularized to accomodate multiple Minecraft instances running side-by-side. This moves resources within Terraform state, not within Azure."
+            Write-Warning "Terraform needs to move resources within iits state, as resources have been modularized to accomodate multiple Minecraft instances running side-by-side. This will move resources within Terraform state, not within Azure."
+            $shareResources | Write-Information
             Write-Warning "Running 'terraform apply' without reconciling storage resources will delete Minecraft world data, hence deployment will abort without confirmation"
-            Write-Host "If you wish to proceed moving resources within terraform state, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
+            Write-Host "If you wish to proceed moving resources within Terraform state, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
             $proceedanswer = Read-Host 
     
             if ($proceedanswer -ne "yes") {
@@ -245,12 +248,14 @@ function Migrate-StorageShareState (
                 exit
             }
     
+            $moveArgs = $DryRun ? "-dry-run" : ""
+
             foreach ($shareResource in $shareResources) {
                 $newShareResource = "module.minecraft[`"${ConfigurationName}`"].${shareResource}"
                 Write-Host "Processing '$shareResource' -> '$newShareResource'"
                 $newShareResourceEscaped = ($newShareResource -replace "`"","`\`"")
                 Write-Verbose "Processing '$shareResource' -> '$newShareResourceEscaped'"
-                terraform state mv $shareResource $newShareResourceEscaped
+                terraform state mv $moveArgs $shareResource $newShareResourceEscaped
             }
         }
     } finally {

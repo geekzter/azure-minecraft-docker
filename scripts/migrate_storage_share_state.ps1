@@ -20,7 +20,8 @@
 . (Join-Path $PSScriptRoot functions.ps1)
 
 param ( 
-    [parameter(Mandatory=$false)][string]$ConfigurationName="primary"
+    [parameter(Mandatory=$false)][string]$ConfigurationName="primary",
+    [parameter(Mandatory=$false)][switch]$DryRun
 ) 
 
-Migrate-StorageShareState -ConfigurationName $ConfigurationName
+Migrate-StorageShareState -ConfigurationName $ConfigurationName -DryRun:$DryRun

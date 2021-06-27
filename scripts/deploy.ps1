@@ -187,10 +187,10 @@ try {
         $forceArgs = "-auto-approve"
     }
 
-    # if ($Apply) {
-    #     # Migrate to module structure before creating plan
-    #     Migrate-StorageShareState -ConfigurationName $ConfigurationName
-    # }
+    if ($Apply) {
+        # Migrate to module structure before creating plan
+        Migrate-StorageShareState -ConfigurationName $ConfigurationName
+    }
 
     if ($Plan -or $Apply) {
         if (Test-Path $varsFile) {
