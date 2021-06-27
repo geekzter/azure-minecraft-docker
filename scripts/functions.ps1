@@ -235,10 +235,12 @@ function Migrate-StorageShareState (
         $tfdirectory=$(Join-Path (Split-Path -Parent -Path $PSScriptRoot) "terraform")
         Push-Location $tfdirectory
     
-        $shareResources = $(terraform state list | Select-String -Pattern "^(azurerm_storage_share|azurerm_backup_protected_file_share)")
-        if ($shareResources) {
-            Write-Warning "Terraform needs to move resources within iits state, as resources have been modularized to accomodate multiple Minecraft instances running side-by-side. This will move resources within Terraform state, not within Azure."
-            $shareResources | Write-Information
+        $obsoleteResources = $(terraform state list | Select-String -Pattern "^azurerm_monitor_diagnostic_setting.*workflow")
+        $shareResources    = $(terraform state list | Select-String -Pattern "^(azurerm_storage_share|azurerm_backup_protected_file_share)")
+        if ($obsoleteResources -or $shareResources) {
+            Write-Warning "Terraform needs to move resources within its state, as resources have been modularized to accomodate multiple Minecraft instances running side-by-side. This will move resources within Terraform state, not within Azure."
+            $obsoleteResources | Write-Information
+            $shareResources    | Write-Information
             Write-Warning "Running 'terraform apply' without reconciling storage resources will delete Minecraft world data, hence deployment will abort without confirmation"
             Write-Host "If you wish to proceed moving resources within Terraform state, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
             $proceedanswer = Read-Host 
@@ -257,7 +259,16 @@ function Migrate-StorageShareState (
                 Write-Verbose "Processing '$shareResource' -> '$newShareResourceEscaped'"
                 terraform state mv $moveArgs $shareResource $newShareResourceEscaped
             }
+
+            if (!$DryRun) {
+                foreach ($obsoleteResource in $obsoleteResources) {
+                    Write-Verbose "Processing '$obsoleteResource'"
+                    terraform state rm $obsoleteResource
+                }   
+            }
+         
         }
+
     } finally {
         Pop-Location
     }
