@@ -189,7 +189,7 @@ try {
 
     if ($Apply) {
         # Migrate to module structure before creating plan
-        Migrate-StorageShareState -ConfigurationName $ConfigurationName
+        Migrate-StorageShareState
     }
 
     if ($Plan -or $Apply) {

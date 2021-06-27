@@ -16,12 +16,13 @@
     azurerm_storage_share_file.log_filter_jar[0]    -> module.minecraft["primary"].azurerm_storage_share_file.log_filter_jar[0]
 #> 
 #Requires -Version 7
-
-. (Join-Path $PSScriptRoot functions.ps1)
-
 param ( 
     [parameter(Mandatory=$false)][string]$ConfigurationName="primary",
     [parameter(Mandatory=$false)][switch]$DryRun
 ) 
+
+. (Join-Path $PSScriptRoot functions.ps1)
+
+
 
 Migrate-StorageShareState -ConfigurationName $ConfigurationName -DryRun:$DryRun
