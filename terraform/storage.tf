@@ -187,6 +187,17 @@ resource azurerm_backup_container_storage_account minecraft {
   count                        = var.enable_backup ? 1 : 0
 }
 
+resource azurerm_backup_protected_file_share minecraft_data {
+  resource_group_name          = azurerm_resource_group.minecraft.name
+  recovery_vault_name          = azurerm_recovery_services_vault.backup.0.name
+  source_storage_account_id    = azurerm_storage_account.minecraft.id
+  source_file_share_name       = module.minecraft[each.key].container_data_share_name
+  backup_policy_id             = azurerm_backup_policy_file_share.nightly.0.id
+
+  for_each                     = var.enable_backup ? toset(keys(var.minecraft_config)) : []
+  # for_each                     = var.enable_backup ? var.minecraft_config: {}
+}
+
 resource azurerm_management_lock minecraft_backup_lock {
   name                         = "${azurerm_recovery_services_vault.backup.0.name}-lock"
   scope                        = azurerm_recovery_services_vault.backup.0.id
