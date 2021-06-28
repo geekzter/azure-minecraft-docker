@@ -1,3 +1,5 @@
+$repository   = 'azure-minecraft-docker'
+
 function AzLogin (
     [parameter(Mandatory=$false)][switch]$DisplayMessages=$false
 ) {
@@ -235,7 +237,7 @@ function Migrate-StorageShareState (
         $tfdirectory=$(Join-Path (Split-Path -Parent -Path $PSScriptRoot) "terraform")
         Push-Location $tfdirectory
     
-        $backupResources   = $(terraform state list | Select-String -Pattern "^azurerm_backup_protected_file_share")
+        $backupResources   = $(terraform state list | Select-String -Pattern "^azurerm_backup_protected_file_share.minecraft_data[0]")
         $obsoleteResources = $(terraform state list | Select-String -Pattern "^azurerm_monitor_diagnostic_setting.*workflow")
         $shareResources    = $(terraform state list | Select-String -Pattern "^azurerm_storage_share")
         if ($backupResources -or $obsoleteResources -or $shareResources) {
@@ -342,90 +344,98 @@ function TearDown-Resources (
     [parameter(mandatory=$false)][switch]$Resources,
     [parameter(mandatory=$false)][switch]$State
 ) {
-    if ($env:TF_IN_AUTOMATION -ine "true") {
-        # Prompt to continue
-        Write-Warning "This will tear down all resources in workspace '${env:TF_WORKSPACE}' for repository '${repository}'!"
-        Write-Host "If you wish to proceed tearing down resources, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
-        $proceedanswer = Read-Host 
+    try {
+        $tfdirectory = $(Join-Path (Get-Item $PSScriptRoot).Parent.FullName "terraform")
+        Push-Location $tfdirectory
 
-        if ($proceedanswer -ne "yes") {
-            Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
-            exit
-        }
-    }
-    Invoke-Command -ScriptBlock {
-        $private:ErrorActionPreference = "Continue" # Try to complete as much as possible
+        if ($env:TF_IN_AUTOMATION -ine "true") {
+            # Prompt to continue
+            Write-Warning "This will tear down all resources in workspace '${env:TF_WORKSPACE}' for repository '${repository}'!"
+            Write-Host "If you wish to proceed tearing down resources, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
+            $proceedanswer = Read-Host 
 
-        # Build JMESPath expression
-        $condition = "tags.repository == '${repository}' && tags.workspace == '${env:TF_WORKSPACE}'"
-        if ($env:GITHUB_RUN_ID) {
-            $condition += " && tags.runid == '${env:GITHUB_RUN_ID}'"
-        }
-        $query = "[?${condition}].id"
-        Write-Verbose "JMESPath: `"$query`""
-
-        # Remove resource locks (only the ones created by Terraform)
-        if ($All -or $Locks) {
-            $resourceLocksJSON = $(terraform output -json resource_locks 2>$null)
-            if ($resourceLocksJSON -and ($resourceLocksJSON -match "^\[.*\]$")) {
-                $resourceLocks = ($resourceLocksJSON | ConvertFrom-JSON)
-                Write-Host "Removing resource locks defined in Terraform state..."
-                az resource lock delete --ids $resourceLocks -o none
+            if ($proceedanswer -ne "yes") {
+                Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
+                exit
             }
         }
+        Invoke-Command -ScriptBlock {
+            $private:ErrorActionPreference = "Continue" # Try to complete as much as possible
 
-        $resourceGroupIDs = $(az group list --query "$query" -o tsv)
-        if ($resourceGroupIDs) {
-            $resourceGroup = $resourceGroupIDs.Split("/")[-1]
+            # Build JMESPath expression
+            $condition = "tags.repository == '${repository}' && tags.workspace == '${env:TF_WORKSPACE}'"
+            if ($env:GITHUB_RUN_ID) {
+                $condition += " && tags.runid == '${env:GITHUB_RUN_ID}'"
+            }
+            $query = "[?${condition}].id"
+            Write-Verbose "JMESPath: `"$query`""
 
-            if ($All -or $Backups) {
-                $backupVaultID = $(az backup vault list -g $resourceGroup --query "[].id" -o tsv)
-                if ($backupVaultID) {
-                    $backupVault = $backupVaultID.Split("/")[-1]
-
-                    Write-Host "Disabling purge protection on backup vault '${backupVault}'..."
-                    az backup vault backup-properties set --ids $backupVaultID --soft-delete-feature-state Disable --query "properties" -o table
-
-                    $backupItemIDs = $(az backup item list -g $resourceGroup -v $backupVault --query "[].id" -o tsv)
-                    if ($backupItemIDs) {
-                        Write-Host "Removing backup items from backup vault '${backupVault}'..."
-                        az backup protection disable --ids $backupItemIDs --backup-management-type AzureStorage --workload-type AzureFileShare --delete-backup-data true --yes --query "[].properties.extendedInfo.propertyBag" -o table
-                    }
-
-                    $backupContainerIDs = $(az backup container list --resource-group $resourceGroup --vault-name $backupVault --backup-management-type AzureStorage --query "[].id" -o tsv)
-                    if ($backupContainerIDs) {
-                        Write-Host "Unregistering backup containers from vault '${backupVault}'..."
-                        az backup container unregister --backup-management-type AzureStorage --ids $backupContainerIDs --yes
-                    } else {
-                        Write-Information "No storage accounts found registered with vault '${backupVault}'"
-                    }
-                } else {
-                    Write-Information "No backup vault found in resource group '${resourceGroup}'"
+            # Remove resource locks (only the ones created by Terraform)
+            if ($All -or $Locks) {
+                $resourceLocksJSON = $(terraform output -json resource_locks 2>$null)
+                if ($resourceLocksJSON -and ($resourceLocksJSON -match "^\[.*\]$")) {
+                    $resourceLocks = ($resourceLocksJSON | ConvertFrom-JSON)
+                    Write-Host "Removing resource locks defined in Terraform state..."
+                    az resource lock delete --ids $resourceLocks -o none
                 }
             }
-            if ($All -or $Resources) {
-                Write-Host "Removing resource group identified by `"$query`"..."
-                Write-Host "az resource delete --ids ${resourceGroupIDs}..."
-                az resource delete --ids $resourceGroupIDs --verbose
-            }
-        } else {
-            Write-Host "Nothing to remove"
-        }
 
-        # Run this only when we have performed other Terraform activities
-        if ($All -or $State) {
-            $terraformState = (terraform state pull | ConvertFrom-Json)
-            if ($terraformState.resources) {
-                Write-Host "Clearing Terraform state in workspace ${env:TF_WORKSPACE}..."
-                $terraformState.outputs = New-Object PSObject # Empty output
-                $terraformState.resources = @() # No resources
-                $terraformState.serial++
-                $terraformState | ConvertTo-Json | terraform state push -
+            $resourceGroupIDs = $(az group list --query "$query" -o tsv)
+            if ($resourceGroupIDs) {
+                $resourceGroup = $resourceGroupIDs.Split("/")[-1]
+
+                if ($All -or $Backups) {
+                    $backupVaultID = $(az backup vault list -g $resourceGroup --query "[].id" -o tsv)
+                    if ($backupVaultID) {
+                        $backupVault = $backupVaultID.Split("/")[-1]
+
+                        Write-Host "Disabling purge protection on backup vault '${backupVault}'..."
+                        az backup vault backup-properties set --ids $backupVaultID --soft-delete-feature-state Disable --query "properties" -o table
+
+                        $backupItemIDs = $(az backup item list -g $resourceGroup -v $backupVault --query "[].id" -o tsv)
+                        if ($backupItemIDs) {
+                            Write-Host "Removing backup items from backup vault '${backupVault}'..."
+                            az backup protection disable --ids $backupItemIDs --backup-management-type AzureStorage --workload-type AzureFileShare --delete-backup-data true --yes --query "[].properties.extendedInfo.propertyBag" -o table
+                        }
+
+                        $backupContainerIDs = $(az backup container list --resource-group $resourceGroup --vault-name $backupVault --backup-management-type AzureStorage --query "[].id" -o tsv)
+                        if ($backupContainerIDs) {
+                            Write-Host "Unregistering backup containers from vault '${backupVault}'..."
+                            az backup container unregister --backup-management-type AzureStorage --ids $backupContainerIDs --yes
+                        } else {
+                            Write-Information "No storage accounts found registered with vault '${backupVault}'"
+                        }
+                    } else {
+                        Write-Information "No backup vault found in resource group '${resourceGroup}'"
+                    }
+                }
+                if ($All -or $Resources) {
+                    Write-Host "Removing resource group identified by `"$query`"..."
+                    Write-Host "az resource delete --ids ${resourceGroupIDs}..."
+                    az resource delete --ids $resourceGroupIDs --verbose
+                }
             } else {
-                Write-Host "No resources in Terraform state in workspace ${env:TF_WORKSPACE}..."
+                Write-Host "Nothing to remove"
             }
-            terraform state pull  
+
+            # Run this only when we have performed other Terraform activities
+            if ($All -or $State) {
+                $terraformState = (terraform state pull | ConvertFrom-Json)
+                if ($terraformState.resources) {
+                    Write-Host "Clearing Terraform state in workspace ${env:TF_WORKSPACE}..."
+                    $terraformState.outputs = New-Object PSObject # Empty output
+                    $terraformState.resources = @() # No resources
+                    $terraformState.serial++
+                    $terraformState | ConvertTo-Json | terraform state push -
+                } else {
+                    Write-Host "No resources in Terraform state in workspace ${env:TF_WORKSPACE}..."
+                }
+                terraform state pull  
+            }
         }
+    } finally {
+        Pop-Location
+
     }
 }
 

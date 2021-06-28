@@ -41,7 +41,6 @@ if (!(Get-Command terraform -ErrorAction SilentlyContinue)) {
 Write-Information $MyInvocation.line 
 $script:ErrorActionPreference = "Stop"
 
-$repository   = 'azure-minecraft-docker'
 $workspace    = Get-TerraformWorkspace
 $planFile     = "${workspace}.tfplan".ToLower()
 $varsFile     = "${workspace}.tfvars".ToLower()
