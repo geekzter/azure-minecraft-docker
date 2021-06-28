@@ -6,14 +6,16 @@
 
 .DESCRIPTION 
     Migrates the state of the following resources to the designated primary minecraft module:
-    azurerm_storage_share.minecraft_modpacks        -> module.minecraft["primary"].azurerm_storage_share.minecraft_modpacks
-    azurerm_storage_share.minecraft_share           -> module.minecraft["primary"].azurerm_storage_share.minecraft_share
-    azurerm_storage_share_directory.bstats[0]       -> module.minecraft["primary"].azurerm_storage_share_directory.bstats[0]
-    azurerm_storage_share_directory.log_filter[0]   -> module.minecraft["primary"].azurerm_storage_share_directory.log_filter[0]
-    azurerm_storage_share_directory.plugins[0]      -> module.minecraft["primary"].azurerm_storage_share_directory.plugins[0]
-    azurerm_storage_share_file.bstats_config[0]     -> module.minecraft["primary"].azurerm_storage_share_file.bstats_config[0]
-    azurerm_storage_share_file.log_filter_config[0] -> module.minecraft["primary"].azurerm_storage_share_file.log_filter_config[0]
-    azurerm_storage_share_file.log_filter_jar[0]    -> module.minecraft["primary"].azurerm_storage_share_file.log_filter_jar[0]
+    azurerm_storage_share.minecraft_modpacks              -> module.minecraft["primary"].azurerm_storage_share.minecraft_modpacks
+    azurerm_storage_share.minecraft_share                 -> module.minecraft["primary"].azurerm_storage_share.minecraft_share
+    azurerm_storage_share_directory.bstats[0]             -> module.minecraft["primary"].azurerm_storage_share_directory.bstats[0]
+    azurerm_storage_share_directory.log_filter[0]         -> module.minecraft["primary"].azurerm_storage_share_directory.log_filter[0]
+    azurerm_storage_share_directory.plugins[0]            -> module.minecraft["primary"].azurerm_storage_share_directory.plugins[0]
+    azurerm_storage_share_file.bstats_config[0]           -> module.minecraft["primary"].azurerm_storage_share_file.bstats_config[0]
+    azurerm_storage_share_file.log_filter_config[0]       -> module.minecraft["primary"].azurerm_storage_share_file.log_filter_config[0]
+    azurerm_storage_share_file.log_filter_jar[0]          -> module.minecraft["primary"].azurerm_storage_share_file.log_filter_jar["primary"]
+
+    azurerm_backup_protected_file_share.minecraft_data[0] -> azurerm_backup_protected_file_share.minecraft_data["primary"]
 #> 
 #Requires -Version 7
 param ( 

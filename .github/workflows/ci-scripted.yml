@@ -185,10 +185,18 @@ jobs:
         }
       shell: pwsh
 
+    - name: Remove backup items & resource locks
+      if: ${{ matrix.terraform_apply }}
+      run: | 
+        . (Join-Path $env:GITHUB_WORKSPACE scripts functions.ps1)
+        TearDown-Resources -Backups -Locks
+      shell: pwsh
+
     - name: Terraform Destroy
       if: ${{ matrix.terraform_apply }}
       run: ./deploy.ps1 -Destroy -Force
       shell: pwsh
+      continue-on-error: true
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
