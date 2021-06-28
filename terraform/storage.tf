@@ -194,6 +194,8 @@ resource azurerm_backup_protected_file_share minecraft_data {
   source_file_share_name       = module.minecraft[each.key].container_data_share_name
   backup_policy_id             = azurerm_backup_policy_file_share.nightly.0.id
 
+  depends_on                   = [azurerm_backup_container_storage_account.minecraft]
+
   for_each                     = var.enable_backup ? toset(keys(var.minecraft_config)) : []
 }
 

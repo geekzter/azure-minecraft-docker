@@ -57,7 +57,6 @@ module minecraft {
   workflow_sp_object_id        = local.workflow_sp_object_id
 
   depends_on                   = [
-    # azurerm_backup_container_storage_account.minecraft,
     azurerm_role_assignment.terraform_storage_owner
   ]
 
