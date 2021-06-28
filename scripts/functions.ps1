@@ -237,7 +237,7 @@ function Migrate-StorageShareState (
         $tfdirectory=$(Join-Path (Split-Path -Parent -Path $PSScriptRoot) "terraform")
         Push-Location $tfdirectory
     
-        $backupResources   = $(terraform state list | Select-String -Pattern "^azurerm_backup_protected_file_share.minecraft_data[0]")
+        $backupResources   = $(terraform state list | Select-String -Pattern "^azurerm_backup_protected_file_share.minecraft_data\[0\]")
         $obsoleteResources = $(terraform state list | Select-String -Pattern "^azurerm_monitor_diagnostic_setting.*workflow")
         $shareResources    = $(terraform state list | Select-String -Pattern "^azurerm_storage_share")
         if ($backupResources -or $obsoleteResources -or $shareResources) {
@@ -245,7 +245,7 @@ function Migrate-StorageShareState (
             $obsoleteResources | Write-Information
             $backupResources   | Write-Information
             $shareResources    | Write-Information
-            Write-Warning "Running 'terraform apply' without reconciling storage resources will delete Minecraft world data, hence deployment will abort without confirmation"
+            Write-Warning "Running 'terraform apply' without reconciling storage resources will delete Minecraft world data, deployment will abort without confirmation"
             Write-Host "If you wish to proceed moving resources within Terraform state, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
             $proceedanswer = Read-Host 
     
