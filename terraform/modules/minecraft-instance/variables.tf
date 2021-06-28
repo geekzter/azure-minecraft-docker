@@ -101,7 +101,6 @@ variable timezone {
 }
 
 variable configuration_storage_container_name {}
-variable storage_account_id {}
 variable storage_account_key {}
 variable storage_account_name {}
 

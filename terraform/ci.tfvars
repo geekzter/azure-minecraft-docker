@@ -1,4 +1,6 @@
 enable_auto_startstop          = true
+enable_backup                  = true
+enable_log_filter              = false
 
 minecraft_config               = {
   primary                      = {

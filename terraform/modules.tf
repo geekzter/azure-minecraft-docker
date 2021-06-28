@@ -8,8 +8,8 @@ module service_principal {
 
 module minecraft {
   source                       = "./modules/minecraft-instance"
-  # name                         = replace("${azurerm_resource_group.minecraft.name}-${each.key}","-primary","")
-  name                         = "${azurerm_resource_group.minecraft.name}-${each.key}"
+  name                         = replace("${azurerm_resource_group.minecraft.name}-${each.key}","-primary","")
+  # name                         = "${azurerm_resource_group.minecraft.name}-${each.key}"
 
   allow_ops_only               = tobool(lookup(each.value, "allow_ops_only", false))
 
@@ -46,7 +46,6 @@ module minecraft {
 
   resource_group_id            = azurerm_resource_group.minecraft.id
   resource_group_name          = azurerm_resource_group.minecraft.name
-  storage_account_id           = azurerm_storage_account.minecraft.id
   storage_account_name         = azurerm_storage_account.minecraft.name
   storage_account_key          = azurerm_storage_account.minecraft.primary_access_key
   tags                         = azurerm_resource_group.minecraft.tags
@@ -58,7 +57,7 @@ module minecraft {
   workflow_sp_object_id        = local.workflow_sp_object_id
 
   depends_on                   = [
-    azurerm_backup_container_storage_account.minecraft,
+    # azurerm_backup_container_storage_account.minecraft,
     azurerm_role_assignment.terraform_storage_owner
   ]
 

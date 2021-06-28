@@ -51,7 +51,8 @@ function TearDown-Resources () {
         $resourceLocksJSON = $(terraform output -json resource_locks 2>$null)
         if ($resourceLocksJSON -and ($resourceLocksJSON -match "^\[.*\]$")) {
             $resourceLocks = ($resourceLocksJSON | ConvertFrom-JSON)
-            az resource lock delete --ids $resourceLocks --verbose
+            Write-Host "Removing resource locks defined in Terraform state..."
+            az resource lock delete --ids $resourceLocks -o none
         }
 
         $resourceGroupIDs = $(az group list --query "$query" -o tsv)
@@ -60,12 +61,19 @@ function TearDown-Resources () {
             $backupVaultID = $(az backup vault list -g $resourceGroup --query "[].id" -o tsv)
             if ($backupVaultID) {
                 $backupVault = $backupVaultID.Split("/")[-1]
+
                 Write-Host "Disabling purge protection on backup vault '${backupVault}'..."
-                az backup vault backup-properties set --ids $backupVaultID --soft-delete-feature-state Disable --query "properties"
+                az backup vault backup-properties set --ids $backupVaultID --soft-delete-feature-state Disable --query "properties" -o table
+
+                $backupItemIDs = $(az backup item list -g $resourceGroup -v $backupVault --query "[].id" -o tsv)
+                if ($backupItemIDs) {
+                    Write-Host "Removing backup items from backup vault '${backupVault}'..."
+                    az backup protection disable --ids $backupItemIDs --backup-management-type AzureStorage --workload-type AzureFileShare --delete-backup-data true --yes --query "[].properties.extendedInfo.propertyBag" -o table
+                }
 
                 $backupContainerIDs = $(az backup container list --resource-group $resourceGroup --vault-name $backupVault --backup-management-type AzureStorage --query "[].id" -o tsv)
                 if ($backupContainerIDs) {
-                    Write-Host "Unregistering containers from vault '${backupVault}'..."
+                    Write-Host "Unregistering backup containers from vault '${backupVault}'..."
                     az backup container unregister --backup-management-type AzureStorage --ids $backupContainerIDs --yes
                 } else {
                     Write-Information "No storage accounts found registered with vault '${backupVault}'"
