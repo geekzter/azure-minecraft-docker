@@ -363,12 +363,12 @@ function TearDown-Resources (
             $private:ErrorActionPreference = "Continue" # Try to complete as much as possible
 
             # Build JMESPath expression
-            $condition = "tags.repository == '${repository}' && tags.workspace == '${env:TF_WORKSPACE}'"
+            $tagCondition = "tags.repository == '${repository}' && tags.workspace == '${env:TF_WORKSPACE}'"
             if ($env:GITHUB_RUN_ID) {
-                $condition += " && tags.runid == '${env:GITHUB_RUN_ID}'"
+                $tagCondition += " && tags.runid == '${env:GITHUB_RUN_ID}'"
             }
-            $query = "[?${condition}].id"
-            Write-Verbose "JMESPath: `"$query`""
+            $tagQuery = "[?${tagCondition}].id"
+            Write-Verbose "JMESPath: `"$tagQuery`""
 
             # Remove resource locks (only the ones created by Terraform)
             if ($All -or $Locks) {
@@ -380,7 +380,7 @@ function TearDown-Resources (
                 }
             }
 
-            $resourceGroupIDs = $(az group list --query "$query" -o tsv)
+            $resourceGroupIDs = $(az group list --query "$tagQuery" -o tsv)
             if ($resourceGroupIDs) {
                 $resourceGroup = $resourceGroupIDs.Split("/")[-1]
 
@@ -416,6 +416,22 @@ function TearDown-Resources (
                 }
             } else {
                 Write-Host "Nothing to remove"
+            }
+
+            if ($All -or $Resources) {
+                $metadataQuery = $tagQuery -replace "tags\.","metadata."
+                Write-Verbose "JMESPath Metadata Query: $metadataQuery"
+                # Remove DNS records using tags expressed as record level metadata
+                Write-Host "Removing '${repository}' records from shared DNS zone (sync)..."
+                $dnsZones = $(az network dns zone list | ConvertFrom-Json)
+                foreach ($dnsZone in $dnsZones) {
+                    Write-Verbose "Processing zone '$($dnsZone.name)'..."
+                    $dnsResourceIDs = $(az network dns record-set list -g $dnsZone.resourceGroup -z $dnsZone.name --query "${metadataQuery}" -o tsv)
+                    if ($dnsResourceIDs) {
+                        Write-Information "Removing DNS records from zone '$($dnsZone.name)'..."
+                        az resource delete --ids $dnsResourceIDs -o none
+                    }
+                }
             }
 
             # Run this only when we have performed other Terraform activities
