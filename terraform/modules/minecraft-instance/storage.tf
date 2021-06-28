@@ -40,7 +40,8 @@ resource azurerm_storage_share minecraft_share {
 # resource azurerm_backup_protected_file_share minecraft_data {
 #   resource_group_name          = var.resource_group_name
 #   recovery_vault_name          = var.recovery_vault_name
-#   source_storage_account_id    = data.azurerm_storage_account.minecraft.id
+#   # source_storage_account_id    = data.azurerm_storage_account.minecraft.id
+#   source_storage_account_id    = var.storage_account_id
 #   source_file_share_name       = azurerm_storage_share.minecraft_share.name
 #   backup_policy_id             = var.backup_policy_id
 

@@ -23,6 +23,77 @@ param (
     [parameter(Mandatory=$false,HelpMessage="Tear down infrastructure using Azure CLI")][switch]$TearDown=$false
 ) 
 
+function TearDown-Resources () {
+    if ($env:TF_IN_AUTOMATION -ine "true") {
+        # Prompt to continue
+        Write-Warning "This will tear down all resources in workspace '${env:TF_WORKSPACE}' for repository '${repository}'!"
+        Write-Host "If you wish to proceed tearing down resources, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
+        $proceedanswer = Read-Host 
+
+        if ($proceedanswer -ne "yes") {
+            Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
+            exit
+        }
+    }
+    Invoke-Command -ScriptBlock {
+        $private:ErrorActionPreference = "Continue" # Try to complete as much as possible
+
+        # Build JMESPath expression
+        # $condition = "properties.provisioningState != 'Deleting' && tags.repository == '${repository}' && tags.workspace == '${env:TF_WORKSPACE}'"
+        $condition = "tags.repository == '${repository}' && tags.workspace == '${env:TF_WORKSPACE}'"
+        if ($env:GITHUB_RUN_ID) {
+            $condition += " && tags.runid == '${env:GITHUB_RUN_ID}'"
+        }
+        $query = "[?${condition}].id"
+        Write-Verbose "JMESPath: `"$query`""
+
+        # Remove resource locks (only the ones created by Terraform)
+        $resourceLocksJSON = $(terraform output -json resource_locks 2>$null)
+        if ($resourceLocksJSON -and ($resourceLocksJSON -match "^\[.*\]$")) {
+            $resourceLocks = ($resourceLocksJSON | ConvertFrom-JSON)
+            az resource lock delete --ids $resourceLocks --verbose
+        }
+
+        $resourceGroupIDs = $(az group list --query "$query" -o tsv)
+        if ($resourceGroupIDs) {
+            $resourceGroup = $resourceGroupIDs.Split("/")[-1]
+            $backupVaultID = $(az backup vault list -g $resourceGroup --query "[].id" -o tsv)
+            if ($backupVaultID) {
+                $backupVault = $backupVaultID.Split("/")[-1]
+                Write-Host "Disabling purge protection on backup vault '${backupVault}'..."
+                az backup vault backup-properties set --ids $backupVaultID --soft-delete-feature-state Disable --query "properties"
+
+                $backupContainerIDs = $(az backup container list --resource-group $resourceGroup --vault-name $backupVault --backup-management-type AzureStorage --query "[].id" -o tsv)
+                if ($backupContainerIDs) {
+                    Write-Host "Unregistering containers from vault '${backupVault}'..."
+                    az backup container unregister --backup-management-type AzureStorage --ids $backupContainerIDs --yes
+                } else {
+                    Write-Information "No storage accounts found registered with vault '${backupVault}'"
+                }
+            } else {
+                Write-Information "No backup vault found in resource group '${resourceGroup}'"
+            }
+            Write-Host "Removing resource group identified by `"$query`"..."
+            Write-Host "az resource delete --ids ${resourceGroupIDs}..."
+            az resource delete --ids $resourceGroupIDs --verbose
+        } else {
+            Write-Host "Nothing to remove"
+        }
+
+        # Run this only when we have performed other Terraform activities
+        $terraformState = (terraform state pull | ConvertFrom-Json)
+        if ($terraformState.resources) {
+            Write-Host "Clearing Terraform state in workspace ${env:TF_WORKSPACE}..."
+            $terraformState.outputs = New-Object PSObject # Empty output
+            $terraformState.resources = @() # No resources
+            $terraformState.serial++
+            $terraformState | ConvertTo-Json | terraform state push -
+        } else {
+            Write-Host "No resources in Terraform state in workspace ${env:TF_WORKSPACE}..."
+        }
+        terraform state pull  
+    }
+}
 function Validate-Plan (
     [parameter(Mandatory=$true)][string]$File
 ) {
@@ -115,13 +186,20 @@ if (!(Get-Command terraform -ErrorAction SilentlyContinue)) {
 Write-Information $MyInvocation.line 
 $script:ErrorActionPreference = "Stop"
 
-$workspace = Get-TerraformWorkspace
-$planFile  = "${workspace}.tfplan".ToLower()
-$varsFile  = "${workspace}.tfvars".ToLower()
+$repository   = 'azure-minecraft-docker'
+$workspace    = Get-TerraformWorkspace
+$planFile     = "${workspace}.tfplan".ToLower()
+$varsFile     = "${workspace}.tfvars".ToLower()
 $inAutomation = ($env:TF_IN_AUTOMATION -ieq "true")
-if (($workspace -ieq "prod") -and $Force) {
-    $Force = $false
-    Write-Warning "Ignoring -Force in workspace '${workspace}'"
+if (!$inAutomation -and $Force) {
+    if ($workspace -ieq "prod") {
+        $Force = $false
+        Write-Warning "Ignoring -Force in workspace '${workspace}'"
+    }
+    if ($Destroy -or $TearDown) {
+        $Force = $false
+        Write-Warning "Ignoring -Force on destroy"
+    }
 }
 
 try {
@@ -248,7 +326,6 @@ try {
         }
 
         if ($env:TF_IN_AUTOMATION -ine "true") {
-            Write-Warning "Ignoring -Force on -Destroy"
             Write-Warning "If it exists, this will delete the Minecraft Server in workspace '${workspace}'!"
             Invoke "terraform destroy $varArgs"
         } else {
@@ -257,46 +334,13 @@ try {
     }
 
     if ($TearDown) {
-        if ($env:TF_WORKSPACE -and $env:GITHUB_RUN_ID -and $env:GITHUB_REPOSITORY) {
-            Invoke-Command -ScriptBlock {
-                $private:ErrorActionPreference = "Continue" # Try to complete as much as possible
-
-                # Remove resource locks first
-                $resourceLocksJSON = $(terraform output -json resource_locks 2>$null)
-                if ($resourceLocksJSON -and ($resourceLocksJSON -match "^\[.*\]$")) {
-                    $resourceLocks = ($resourceLocksJSON | ConvertFrom-JSON)
-                    az resource lock delete --ids $resourceLocks --verbose
-                }
-
-                # Build JMESPath expression
-                $repository = ($env:GITHUB_REPOSITORY).Split("/")[-1]
-                $tagQuery = "[?tags.repository == '${repository}' && tags.workspace == '${env:TF_WORKSPACE}' && tags.runid == '${env:GITHUB_RUN_ID}' && properties.provisioningState != 'Deleting'].id"
-
-                Write-Host "Removing resource group identified by `"$tagQuery`"..."
-                $resourceGroupIDs = $(az group list --query "$tagQuery" -o tsv)
-                if ($resourceGroupIDs) {
-                    Write-Host "az resource delete --ids ${resourceGroupIDs}..."
-                    az resource delete --ids $resourceGroupIDs --verbose
-                } else {
-                    Write-Host "Nothing to remove"
-                }
-
-                # Run this only when we have performed other Terraform activities
-                $terraformState = (terraform state pull | ConvertFrom-Json)
-                if ($terraformState.resources) {
-                    Write-Host "Clearing Terraform state in workspace ${env:TF_WORKSPACE}..."
-                    $terraformState.outputs = New-Object PSObject # Empty output
-                    $terraformState.resources = @() # No resources
-                    $terraformState.serial++
-                    $terraformState | ConvertTo-Json | terraform state push -
-                } else {
-                    Write-Host "No resources in Terraform state in workspace ${env:TF_WORKSPACE}..."
-                }
-                terraform state pull  
-            }
-
+        if ($env:TF_WORKSPACE -and ($env:TF_WORKSPACE -notmatch 'prod')) {
+            TearDown-Resources
         } else {
-            Write-Warning "The following environment variables need to be set for teardown. Current values are:`nGITHUB_REPOSITORY='${env:GITHUB_REPOSITORY}'`nGITHUB_RUN_ID='${env:GITHUB_RUN_ID}'`nTF_WORKSPACE='${env:TF_WORKSPACE}'"
+            Write-Warning "The following environment variable need to be set for teardown. Current value is: `nTF_WORKSPACE='${env:TF_WORKSPACE}'"
+            if ($env:TF_WORKSPACE -imatch 'prod') {
+                Write-Warning "Workspace ${env:TF_WORKSPACE} is not allowed!"
+            }
         }
     }
 } finally {
