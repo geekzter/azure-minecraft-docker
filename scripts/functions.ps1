@@ -235,11 +235,13 @@ function Migrate-StorageShareState (
         $tfdirectory=$(Join-Path (Split-Path -Parent -Path $PSScriptRoot) "terraform")
         Push-Location $tfdirectory
     
+        $backupResources   = $(terraform state list | Select-String -Pattern "^azurerm_backup_protected_file_share")
         $obsoleteResources = $(terraform state list | Select-String -Pattern "^azurerm_monitor_diagnostic_setting.*workflow")
-        $shareResources    = $(terraform state list | Select-String -Pattern "^(azurerm_storage_share|azurerm_backup_protected_file_share)")
-        if ($obsoleteResources -or $shareResources) {
+        $shareResources    = $(terraform state list | Select-String -Pattern "^azurerm_storage_share")
+        if ($backupResources -or $obsoleteResources -or $shareResources) {
             Write-Warning "Terraform needs to move resources within its state, as resources have been modularized to accomodate multiple Minecraft instances running side-by-side. This will move resources within Terraform state, not within Azure."
             $obsoleteResources | Write-Information
+            $backupResources   | Write-Information
             $shareResources    | Write-Information
             Write-Warning "Running 'terraform apply' without reconciling storage resources will delete Minecraft world data, hence deployment will abort without confirmation"
             Write-Host "If you wish to proceed moving resources within Terraform state, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
@@ -260,12 +262,20 @@ function Migrate-StorageShareState (
                 terraform state mv $moveArgs $shareResource $newShareResourceEscaped
             }
 
-            if (!$DryRun) {
-                foreach ($obsoleteResource in $obsoleteResources) {
-                    Write-Verbose "Processing '$obsoleteResource'"
-                    terraform state rm $obsoleteResource
-                }   
+            foreach ($backupResource in $backupResources) {
+                $newbackupResource = ($backupResource -replace "\[0\]","[`"${ConfigurationName}`"]")
+                Write-Host "Processing '$backupResource' -> '$newbackupResource'"
+                $newBackupResourceEscaped = ($newbackupResource -replace "`"","`\`"")
+                Write-Verbose "Processing '$backupResource' -> '$newBackupResourceEscaped'"
+                terraform state mv $moveArgs $backupResource $newBackupResourceEscaped
             }
+
+            foreach ($obsoleteResource in $obsoleteResources) {
+                Write-Verbose "Processing '$obsoleteResource'"
+                if (!$DryRun) {
+                    terraform state rm $obsoleteResource
+                }
+            }   
         }
     } finally {
         Pop-Location
