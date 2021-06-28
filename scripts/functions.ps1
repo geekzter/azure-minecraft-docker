@@ -411,7 +411,7 @@ function TearDown-Resources (
                 }
                 if ($All -or $Resources) {
                     Write-Host "Removing resource group identified by `"$tagQuery`"..."
-                    Write-Host "az resource delete --ids ${resourceGroupIDs}..."
+                    Write-Information "az resource delete --ids ${resourceGroupIDs}..."
                     az resource delete --ids $resourceGroupIDs --verbose
                 }
             } else {
