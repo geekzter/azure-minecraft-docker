@@ -8,8 +8,7 @@ module service_principal {
 
 module minecraft {
   source                       = "./modules/minecraft-instance"
-  name                         = replace("${azurerm_resource_group.minecraft.name}-${each.key}","-primary","")
-  # name                         = "${azurerm_resource_group.minecraft.name}-${each.key}"
+  name                         = "${azurerm_resource_group.minecraft.name}-${each.key}"
 
   allow_ops_only               = tobool(lookup(each.value, "allow_ops_only", false))
 
@@ -71,7 +70,7 @@ module functions {
   log_analytics_workspace_resource_id = azurerm_log_analytics_workspace.monitor.id
   minecraft_fqdn               = module.minecraft[each.key].minecraft_server_fqdn
   minecraft_port               = lookup(each.value, "minecraft_server_port", 25565)
-  plan_name                    = replace("${azurerm_resource_group.minecraft.name}-${each.key}-functions","-primary","")
+  plan_name                    = "${azurerm_resource_group.minecraft.name}-${each.key}-functions"
   resource_group_name          = azurerm_resource_group.minecraft.name
   suffix                       = local.suffix
 
