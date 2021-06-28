@@ -37,6 +37,10 @@ variable enable_log_filter {
   description                  = "Enable log filter (bukkit/paper/spigot) that is configured to hide chat messages for improved privacy, and hide plugin stats"
 }
 
+variable log_filter_jar {
+  default                      = "https://media.forgecdn.net/files/3106/184/ConsoleSpamFix-1.8.5.jar"
+}
+
 variable minecraft_config {
   type                         = map
   default                      = {

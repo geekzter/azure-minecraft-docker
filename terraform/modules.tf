@@ -33,6 +33,7 @@ module minecraft {
   log_analytics_workspace_id   = azurerm_log_analytics_workspace.monitor.id
   log_analytics_workspace_workspace_id = azurerm_log_analytics_workspace.monitor.workspace_id
   log_analytics_workspace_workspace_key = azurerm_log_analytics_workspace.monitor.primary_shared_key
+  log_filter_jar               = var.log_filter_jar
 
   minecraft_ops                = var.minecraft_ops
   minecraft_server_port        = lookup(each.value, "minecraft_server_port", 25565)

@@ -53,9 +53,7 @@ variable log_analytics_workspace_id {}
 variable log_analytics_workspace_workspace_id {}
 variable log_analytics_workspace_workspace_key {}
 
-variable log_filter_jar {
-  default                      = "https://media.forgecdn.net/files/3198/907/ConsoleSpamFix-1.8.6.jar"
-}
+variable log_filter_jar {}
 
 variable minecraft_server_port {
   type                         = number
