@@ -65,13 +65,14 @@ module minecraft {
 
 module functions {
   source                       = "./modules/functions"
+  app_service_plan_id          = azurerm_app_service_plan.functions.id
   appinsights_id               = azurerm_application_insights.insights.id
   appinsights_instrumentation_key = azurerm_application_insights.insights.instrumentation_key
+  function_name                = "${azurerm_resource_group.minecraft.name}-${each.key}-ping-test"
   location                     = var.location
   log_analytics_workspace_resource_id = azurerm_log_analytics_workspace.monitor.id
   minecraft_fqdn               = module.minecraft[each.key].minecraft_server_fqdn
   minecraft_port               = lookup(each.value, "minecraft_server_port", 25565)
-  plan_name                    = "${azurerm_resource_group.minecraft.name}-${each.key}-functions"
   resource_group_name          = azurerm_resource_group.minecraft.name
   suffix                       = local.suffix
 
