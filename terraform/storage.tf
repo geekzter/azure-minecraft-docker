@@ -187,6 +187,8 @@ resource azurerm_backup_container_storage_account minecraft {
   count                        = var.enable_backup ? 1 : 0
 }
 
+# BUG: [ERROR] fileshare 'minecraft-aci-experimental-data-xxxx' not found in protectable or protected fileshares, make sure Storage Account "minecraftstorxxxx" is registered with Recovery Service Vault "Minecraft-default-xxxx-backup" (Resource Group "Minecraft-default-xxxx")
+#      https://github.com/terraform-providers/terraform-provider-azurerm/issues/11184#issuecomment-870535683
 resource azurerm_backup_protected_file_share minecraft_data {
   resource_group_name          = azurerm_resource_group.minecraft.name
   recovery_vault_name          = azurerm_recovery_services_vault.backup.0.name
@@ -209,6 +211,7 @@ resource azurerm_management_lock minecraft_backup_lock {
 
   depends_on                   = [
     module.minecraft,
+    azurerm_backup_protected_file_share.minecraft_data,
     azurerm_monitor_diagnostic_setting.backup_vault
   ]
 }
