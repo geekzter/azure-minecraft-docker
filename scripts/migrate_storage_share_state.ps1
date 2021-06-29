@@ -16,6 +16,8 @@
     azurerm_storage_share_file.log_filter_jar[0]          -> module.minecraft["primary"].azurerm_storage_share_file.log_filter_jar["primary"]
 
     azurerm_backup_protected_file_share.minecraft_data[0] -> azurerm_backup_protected_file_share.minecraft_data["primary"]
+
+    module.functions.azurerm_app_service_plan.functions   -> azurerm_app_service_plan.functions
 #> 
 #Requires -Version 7
 param ( 
@@ -24,7 +26,6 @@ param (
 ) 
 
 . (Join-Path $PSScriptRoot functions.ps1)
-
 
 
 Migrate-StorageShareState -ConfigurationName $ConfigurationName -DryRun:$DryRun

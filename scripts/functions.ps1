@@ -238,9 +238,10 @@ function Migrate-StorageShareState (
         Push-Location $tfdirectory
     
         $backupResources   = $(terraform state list | Select-String -Pattern "^azurerm_backup_protected_file_share.minecraft_data\[0\]")
+        $functionResources = $(terraform state list | Select-String -Pattern "^module.functions.azurerm_app_service_plan.functions")
         $obsoleteResources = $(terraform state list | Select-String -Pattern "^azurerm_monitor_diagnostic_setting.*workflow")
         $shareResources    = $(terraform state list | Select-String -Pattern "^azurerm_storage_share")
-        if ($backupResources -or $obsoleteResources -or $shareResources) {
+        if ($backupResources -or $functionResources -or $obsoleteResources -or $shareResources) {
             Write-Warning "Terraform needs to move resources within its state, as resources have been modularized to accomodate multiple Minecraft instances running side-by-side. This will move resources within Terraform state, not within Azure."
             $obsoleteResources | Write-Information
             $backupResources   | Write-Information
@@ -256,14 +257,6 @@ function Migrate-StorageShareState (
     
             $moveArgs = $DryRun ? "-dry-run" : ""
 
-            foreach ($shareResource in $shareResources) {
-                $newShareResource = "module.minecraft[`"${ConfigurationName}`"].${shareResource}"
-                Write-Host "Processing '$shareResource' -> '$newShareResource'"
-                $newShareResourceEscaped = ($newShareResource -replace "`"","`\`"")
-                Write-Verbose "Processing '$shareResource' -> '$newShareResourceEscaped'"
-                terraform state mv $moveArgs $shareResource $newShareResourceEscaped
-            }
-
             foreach ($backupResource in $backupResources) {
                 $newbackupResource = ($backupResource -replace "\[0\]","[`"${ConfigurationName}`"]")
                 Write-Host "Processing '$backupResource' -> '$newbackupResource'"
@@ -272,12 +265,26 @@ function Migrate-StorageShareState (
                 terraform state mv $moveArgs $backupResource $newBackupResourceEscaped
             }
 
+            foreach ($functionResource in $functionResources) {
+                $newFunctionResource = ($functionResource -replace "module.functions.","")
+                Write-Host "Processing '$functionResource' -> '$newFunctionResource'"
+                terraform state mv $moveArgs $functionResource $newFunctionResource
+            }
+
             foreach ($obsoleteResource in $obsoleteResources) {
                 Write-Verbose "Processing '$obsoleteResource'"
                 if (!$DryRun) {
                     terraform state rm $obsoleteResource
                 }
             }   
+
+            foreach ($shareResource in $shareResources) {
+                $newShareResource = "module.minecraft[`"${ConfigurationName}`"].${shareResource}"
+                Write-Host "Processing '$shareResource' -> '$newShareResource'"
+                $newShareResourceEscaped = ($newShareResource -replace "`"","`\`"")
+                Write-Verbose "Processing '$shareResource' -> '$newShareResourceEscaped'"
+                terraform state mv $moveArgs $shareResource $newShareResourceEscaped
+            }
         }
     } finally {
         Pop-Location
