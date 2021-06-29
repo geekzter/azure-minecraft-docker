@@ -1,3 +1,10 @@
+output backup_policy {
+  value       = var.enable_backup ? azurerm_backup_policy_file_share.nightly.0.name : null
+}
+output backup_vault {
+  value       = var.enable_backup ? azurerm_recovery_services_vault.backup.0.name : null
+}
+
 output container_group {
   value       = [for minecraft in module.minecraft : minecraft.container_group_name]
 }
@@ -20,7 +27,7 @@ output environment {
 }
 
 output function_name {
-  value        = [for function in module.functions : function.function_name]
+  value       = [for function in module.functions : function.function_name]
 }
 
 output location {

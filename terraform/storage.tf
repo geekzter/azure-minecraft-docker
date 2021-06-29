@@ -201,29 +201,11 @@ resource azurerm_backup_protected_file_share minecraft_data {
   for_each                     = var.enable_backup ? toset(keys(var.minecraft_config)) : []
 }
 
-resource azurerm_management_lock minecraft_backup_lock {
-  name                         = "${azurerm_recovery_services_vault.backup.0.name}-lock"
-  scope                        = azurerm_recovery_services_vault.backup.0.id
-  lock_level                   = "CanNotDelete"
-  notes                        = "Do not accidentally delete Minecraft (world) backups"
-
-  count                        = var.enable_backup ? 1 : 0
-
-  depends_on                   = [
-    module.minecraft,
-    azurerm_backup_protected_file_share.minecraft_data,
-    azurerm_monitor_diagnostic_setting.backup_vault
-  ]
-}
-
 locals {
   all_resource_locks           = var.enable_backup ? concat(local.storage_resource_locks,local.backup_resource_locks) : local.storage_resource_locks
-  backup_resource_locks        = concat(
-    azurerm_management_lock.minecraft_backup_lock.*.id,
-    [
+  backup_resource_locks        = [
       replace(azurerm_management_lock.minecraft_data_lock.id,azurerm_management_lock.minecraft_data_lock.name,"AzureBackupProtectionLock"),
-    ],
-  )
+  ]
   storage_resource_locks       = [
     azurerm_management_lock.minecraft_data_lock.id
   ]
