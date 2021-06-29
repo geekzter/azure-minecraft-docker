@@ -247,6 +247,7 @@ function Migrate-StorageShareState (
             $backupResources   | Write-Information
             $shareResources    | Write-Information
             Write-Warning "Running 'terraform apply' without reconciling storage resources will delete Minecraft world data, deployment will abort without confirmation"
+            Write-Warning "Before confirming, verify whether you have set custom Terraform input variable values (e.g. through an .auto.tfvars file). You may need to adapt those to the new map structure, see variables.tf and config.auto.example.tfvars."
             Write-Host "If you wish to proceed moving resources within Terraform state, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
             $proceedanswer = Read-Host 
     
