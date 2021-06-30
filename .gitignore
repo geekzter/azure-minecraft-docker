@@ -35,10 +35,10 @@ backend.tf
 *.tfvars_
 # Used for c-scripted.yml workflow
 !ci.tfvars 
+!config.auto.example.tfvars
 
 # Ignore temporary files
 *.*_
-
 
 # Ignore downloaded plugins
 *.jar
