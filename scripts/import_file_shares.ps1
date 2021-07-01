@@ -9,6 +9,9 @@
     this is needed to reconcile Terraform state
 #> 
 #Requires -Version 7
+param ( 
+    [parameter(Mandatory=$false)][string]$ConfigurationName="primary"
+) 
 
 . (Join-Path $PSScriptRoot functions.ps1)
 
@@ -18,7 +21,6 @@ try {
     $tfdirectory = $(Join-Path (Get-Item $PSScriptRoot).Parent.FullName "terraform")
     Push-Location $tfdirectory
     
-    $minecraftConfigName = "primary"
     $resourceGroupName   = (Get-TerraformOutput "resource_group")
     $storageAccount      = (Get-TerraformOutput "storage_account")
     $suffix = $storageAccount.Substring($storageAccount.Length-4)
@@ -31,10 +33,10 @@ try {
         }
 
         $dataShareUrl     = "https://${storageAccount}.file.core.windows.net/minecraft-aci-data-${suffix}"
-        Import-TerraformResource -ResourceName "module.minecraft[`"$minecraftConfigName`"].azurerm_storage_share.minecraft_share"    -ResourceID "${dataShareUrl}"
+        Import-TerraformResource -ResourceName "module.minecraft[`"$ConfigurationName`"].azurerm_storage_share.minecraft_share"    -ResourceID "${dataShareUrl}"
 
         $modePackShareUrl = "https://${storageAccount}.file.core.windows.net/minecraft-aci-modpacks-${suffix}"
-        Import-TerraformResource -ResourceName "module.minecraft[`"$minecraftConfigName`"].azurerm_storage_share.minecraft_modpacks" -ResourceID "${modePackShareUrl}"
+        Import-TerraformResource -ResourceName "module.minecraft[`"$ConfigurationName`"].azurerm_storage_share.minecraft_modpacks" -ResourceID "${modePackShareUrl}"
     } else {
         Write-Warning "Storage Account has not been created, nothing to do"
         exit 
