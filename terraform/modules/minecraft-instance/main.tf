@@ -85,7 +85,8 @@ resource azurerm_container_group minecraft_server {
   }
 
   identity {
-    type                       = "SystemAssigned"
+    type                       = "UserAssigned"
+    identity_ids               = [var.user_assigned_identity_id]
   }
 
   tags                         = var.tags

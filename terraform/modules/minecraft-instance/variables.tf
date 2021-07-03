@@ -106,6 +106,8 @@ variable tags {
   type                         = map
 }
 
+variable user_assigned_identity_id {}
+
 variable vanity_dns_zone_id {
   type                         = string
   default                      = ""

@@ -37,6 +37,14 @@ resource azurerm_resource_group minecraft {
   tags                         = local.tags
 }
 
+resource azurerm_user_assigned_identity minecraft_identity {
+  name                         = "${azurerm_resource_group.minecraft.name}-minecraft-identity"
+  resource_group_name          = azurerm_resource_group.minecraft.name
+  location                     = var.location
+
+  tags                         = local.tags
+}
+
 # Requires Terraform owner access to resource group, in order to be able to perform access management
 resource azurerm_role_assignment backup_operators {
   scope                        = azurerm_resource_group.minecraft.id
