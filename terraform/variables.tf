@@ -46,7 +46,7 @@ variable minecraft_config {
   default                      = {
     primary                    = {
       allow_ops_only           = false
-      container_image_tag      = "latest"
+      container_image_tag      = "multiarch-latest"
       environment_variables    = {
         # https://github.com/itzg/docker-minecraft-server#allow-nether
         ALLOW_NETHER           = true

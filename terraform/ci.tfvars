@@ -29,7 +29,7 @@ minecraft_config               = {
   }
   experimental                 = {
     allow_ops_only             = "true"
-    container_image_tag        = ""
+    container_image_tag        = "multiarch-latest"
     environment_variables      = {
       ALLOW_NETHER             = true
       ANNOUNCE_PLAYER_ACHIEVEMENTS = "true"
