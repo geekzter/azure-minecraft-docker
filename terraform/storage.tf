@@ -172,6 +172,24 @@ resource azurerm_backup_policy_file_share nightly {
     time                       = "03:00"
   }
 
+  retention_weekly {
+    count                      = 7
+    weekdays                   = ["Monday"]
+  }
+
+  retention_monthly {
+    count                      = 12
+    weekdays                   = ["Monday","Sunday"]
+    weeks                      = ["First", "Last"]
+  }
+
+  retention_yearly {
+    count                      = 10
+    weekdays                   = ["Monday"]
+    weeks                      = ["First"]
+    months                     = ["January"]
+  }  
+
   retention_daily {
     count                      = 30
   }
