@@ -15,6 +15,7 @@ module minecraft {
   backup_policy_id             = var.enable_backup ? azurerm_backup_policy_file_share.nightly.0.id : null
   configuration_storage_container_name= azurerm_storage_container.configuration.name
 
+  container_image              = lookup(each.value, "container_image", "itzg/minecraft-server")
   container_image_tag          = lookup(each.value, "container_image_tag", "LATEST")
   container_data_share_name    = replace("minecraft-aci-${each.key}-data-${local.suffix}","-primary","")
   container_modpacks_share_name= replace("minecraft-aci-${each.key}-modpacks-${local.suffix}","-primary","")

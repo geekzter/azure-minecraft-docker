@@ -21,7 +21,7 @@ locals {
     }
   )  
   # https://github.com/itzg/docker-minecraft-server
-  container_image              = var.container_image_tag != null && var.container_image_tag != "" ? "itzg/minecraft-server:${var.container_image_tag}" : "itzg/minecraft-server"
+  container_image              = var.container_image_tag != null && var.container_image_tag != "" ? "${var.container_image}:${var.container_image_tag}" : var.container_image
   minecraft_server_fqdn        = var.vanity_dns_zone_id != "" ? replace(try(azurerm_dns_cname_record.vanity_hostname.0.fqdn,""),"/\\W*$/","") : azurerm_container_group.minecraft_server.fqdn
 }
 

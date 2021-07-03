@@ -4,6 +4,10 @@ variable allow_ops_only {
 
 variable backup_policy_id {}
 
+variable container_image {
+  type                         = string
+  default                      = "itzg/minecraft-server"
+}
 variable container_image_tag {
   type                         = string
   default                      = ""
