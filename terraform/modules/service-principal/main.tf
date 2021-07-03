@@ -9,11 +9,16 @@ resource random_string password {
 
 resource azuread_application app {
   display_name                 = var.name
-  homepage                     = "https://${var.name}"
   identifier_uris              = ["http://${var.name}"]
-  reply_urls                   = ["http://${var.name}/replyignored"]
-  available_to_other_tenants   = false
-  oauth2_allow_implicit_flow   = false
+  sign_in_audience             = "AzureADMyOrg"
+
+  web {
+    homepage_url               = "https://${var.name}"
+    implicit_grant {
+      access_token_issuance_enabled = false
+    }
+    redirect_uris              = ["http://${var.name}/replyignored"]
+  }
 }
 
 resource azuread_service_principal spn {
