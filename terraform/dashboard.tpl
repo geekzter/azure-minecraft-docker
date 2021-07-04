@@ -10,12 +10,12 @@
             "asset": {
               "idInputName": "id"
             },
-            "deepLink": "#@/resource${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}/overview",
+            "deepLink": "#@/resource${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/${resource_group}-primary/overview",
             "inputs": [
               {
                 "isOptional": true,
                 "name": "id",
-                "value": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}"
+                "value": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/${resource_group}-primary"
               },
               {
                 "isOptional": true,

@@ -34,7 +34,7 @@ Once you have those, you can go ahead and provision:
 - Provision cloud infrastructure: `terraform apply`
 
 ### Customization
-You can customize the deployment by overriding defaults for Terraform [input variables](https://www.terraform.io/docs/configuration/variables.html). The easiest way to do this is to copy [config.auto.tfvars.example](./terraform/config.auto.tfvars.example) and save it as config.auto.tfvars.
+You can customize the deployment by overriding defaults for Terraform [input variables](https://www.terraform.io/docs/configuration/variables.html). The easiest way to do this is to copy [config.auto.example.tfvars](./terraform/config.auto.example.tfvars) and save it as config.auto.tfvars.
 - Use the `minecraft_users` array to define users allowed to log in
 - Use a custom DNS name with `vanity_dns_zone_id` and `vanity_hostname_prefix`, using an Azure DNS managed domain
 - Once things get serious, you may want to start backing up data with `enable_backup`

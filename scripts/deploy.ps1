@@ -4,12 +4,6 @@
 .SYNOPSIS 
     Deploys Azure resources using Terraform
  
-.DESCRIPTION 
-    This script is a wrapper around Terraform. It is provided for convenience only, as it works around some limitations in the demo. 
-    E.g. terraform might need resources to be started before executing, and resources may not be accessible from the current locastion (IP address).
-
-.EXAMPLE
-    ./deploy.ps1 -apply
 #> 
 #Requires -Version 7
 
@@ -29,8 +23,9 @@ param (
     [parameter(Mandatory=$false,HelpMessage="Tear down infrastructure using Azure CLI")][switch]$TearDown=$false
 ) 
 
+
 ### Internal Functions
-. (Join-Path (Split-Path $MyInvocation.MyCommand.Path -Parent) functions.ps1)
+. (Join-Path $PSScriptRoot functions.ps1)
 
 ### Validation
 if (!(Get-Command terraform -ErrorAction SilentlyContinue)) {
@@ -46,13 +41,19 @@ if (!(Get-Command terraform -ErrorAction SilentlyContinue)) {
 Write-Information $MyInvocation.line 
 $script:ErrorActionPreference = "Stop"
 
-$workspace = Get-TerraformWorkspace
-$planFile  = "${workspace}.tfplan".ToLower()
-$varsFile  = "${workspace}.tfvars".ToLower()
+$workspace    = Get-TerraformWorkspace
+$planFile     = "${workspace}.tfplan".ToLower()
+$varsFile     = "${workspace}.tfvars".ToLower()
 $inAutomation = ($env:TF_IN_AUTOMATION -ieq "true")
-if (($workspace -ieq "prod") -and $Force) {
-    $Force = $false
-    Write-Warning "Ignoring -Force in workspace '${workspace}'"
+if (!$inAutomation -and $Force) {
+    if ($workspace -ieq "prod") {
+        $Force = $false
+        Write-Warning "Ignoring -Force in workspace '${workspace}'"
+    }
+    if ($Destroy -or $TearDown) {
+        $Force = $false
+        Write-Warning "Ignoring -Force on destroy"
+    }
 }
 
 try {
@@ -118,84 +119,27 @@ try {
         $forceArgs = "-auto-approve"
     }
 
-    if (!(Get-ChildItem Env:TF_VAR_* -Exclude TF_VAR_backend_*) -and (Test-Path $varsFile)) {
-        # Load variables from file, if it exists and environment variables have not been set
-        $varArgs = " -var-file='$varsFile'"
-        $userEmailAddress = $(az account show --query "user.name" -o tsv)
-        if ($userEmailAddress) {
-            $varArgs += " -var 'provisoner_email_address=${userEmailAddress}'"
-        }
+    if ($Apply) {
+        # Migrate to module structure before creating plan
+        Migrate-StorageShareState
     }
 
     if ($Plan -or $Apply) {
+        if (Test-Path $varsFile) {
+            # Load variables from file, if it exists and environment variables have not been set
+            $varArgs = " -var-file='$varsFile'"
+            $userEmailAddress = $(az account show --query "user.name" -o tsv)
+        }
+        if ($userEmailAddress -match "@") {
+            $varArgs += " -var 'provisoner_email_address=${userEmailAddress}'"
+        }
+
         # Create plan
         Invoke "terraform plan $varArgs -out='$planFile'"
     }
 
     if ($Apply) {
-        Write-Verbose "Converting $planFile into JSON so we can perform some inspection..."
-        $planJSON = (terraform show -json $planFile)
-
-        # Validation
-        # Check whether key resources will be replaced
-        if (Get-Command jq -ErrorAction SilentlyContinue) {
-            $containerGroupActions  = $planJSON | jq '.resource_changes[] | select(.address == \"azurerm_container_group.minecraft_server\") | .change.actions' | ConvertFrom-Json
-            $containerGroupReplaced = $containerGroupActions.Contains("delete")
-            $serverFQDNActions      = $planJSON | jq '.resource_changes[] | select(.address == \"azurerm_dns_cname_record.vanity_hostname[0]\") | .change.actions'    | ConvertFrom-Json
-            $serverFQDNReplaced     = ($serverFQDNActions -and $serverFQDNActions.Contains("delete"))
-            $minecraftDataActions   = $planJSON | jq '.resource_changes[] | select(.address == \"azurerm_storage_share.minecraft_share\") | .change.actions'    | ConvertFrom-Json
-            $minecraftDataReplaced  = $minecraftDataActions.Contains("delete")
-        } else {
-            Write-Warning "jq not found, plan validation skipped. Look at the plan carefully before approving"
-            $Force = $false
-        }
-
-        if ($serverFQDNReplaced) {
-            if ($workspace -ieq "prod") {
-                Write-Error "You're about to change the Minecraft Server hostname in workspace '${workspace}'!!! Please figure out another way of doing so, exiting..."
-                exit 
-            }
-            Write-Warning "You're about to change the Minecraft Server hostname in workspace '${workspace}'!!!"
-        }
-
-        if ($minecraftDataReplaced) {
-            if ($workspace -ieq "prod") {
-                Write-Error "You're about to delete Minecraft world data in workspace '${workspace}'!!! Please figure out another way of doing so, exiting..."
-                exit 
-            }
-            Write-Warning "You're about to delete Minecraft world data in workspace '${workspace}'!!!"
-        }
-
-        if (!$inAutomation) {
-            if ($containerGroupReplaced) {
-                $containerGroupID = (Get-TerraformOutput "container_group_id")
-                $minecraftContainerState = (az container show --ids $containerGroupID --query "containers[?name=='minecraft'].instanceView.currentState.state" -o tsv)
-                if ($minecraftContainerState -ieq "Running") {
-                    Write-Warning "You're about to replace the running Minecraft container in workspace '${workspace}'! Inform users so they can bail out."
-                    $onlineUsers = Get-OnlineUsers
-                    if ($onlineUsers) {
-                        Write-Warning "These users were online 5-10 minutes ago: ${onlineUsers}"
-                    }
-                    Write-Host "Opening rcon-cli to send any last commands and messages (e.g. list, save-all, say):"
-                    Execute-MinecraftCommand
-    
-                    # BUG: https://github.com/Azure/azure-cli/issues/8687
-                    # rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused "exec: \"rcon-cli say hi\": executable file not found in $PATH"
-                    # Send-MinecraftMessage -Message "Server will go down in ${GracePeriodSeconds} seconds" -SleepSeconds $GracePeriodSeconds
-                }
-            }
-
-            if (!$Force -or $containerGroupReplaced -or $minecraftDataReplaced) {
-                # Prompt to continue
-                Write-Host "If you wish to proceed executing Terraform plan $planFile in workspace $workspace, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
-                $proceedanswer = Read-Host 
-
-                if ($proceedanswer -ne "yes") {
-                    Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
-                    exit
-                }
-            }
-        }
+        Validate-Plan -File $planFile
 
         # Terraform Apply
         Invoke "terraform apply $forceArgs '$planFile'"
@@ -235,57 +179,22 @@ try {
             exit 
         }
 
-        Write-Warning "If it exists, this will delete the Minecraft Server in workspace '${workspace}'!"
         if ($env:TF_IN_AUTOMATION -ine "true") {
-            Write-Host "Opening rcon-cli to send any last commands and messages (e.g. list, say):"
-            Execute-MinecraftCommand
+            Write-Warning "If it exists, this will delete the Minecraft Server in workspace '${workspace}'!"
+            Invoke "terraform destroy $varArgs"
+        } else {
+            Invoke "terraform destroy $varArgs $forceArgs"
         }
-        
-        # Now let Terraform do it's work
-        Invoke "terraform destroy $varArgs $forceArgs"
     }
 
     if ($TearDown) {
-        if ($env:TF_WORKSPACE -and $env:GITHUB_RUN_ID -and $env:GITHUB_REPOSITORY) {
-            Invoke-Command -ScriptBlock {
-                $private:ErrorActionPreference = "Continue" # Try to complete as much as possible
-
-                # Remove resource locks first
-                $resourceLocksJSON = $(terraform output -json resource_locks 2>$null)
-                if ($resourceLocksJSON -and ($resourceLocksJSON -match "^\[.*\]$")) {
-                    $resourceLocks = ($resourceLocksJSON | ConvertFrom-JSON)
-                    az resource lock delete --ids $resourceLocks --verbose
-                }
-
-                # Build JMESPath expression
-                $repository = ($env:GITHUB_REPOSITORY).Split("/")[-1]
-                $tagQuery = "[?tags.repository == '${repository}' && tags.workspace == '${env:TF_WORKSPACE}' && tags.runid == '${env:GITHUB_RUN_ID}' && properties.provisioningState != 'Deleting'].id"
-
-                Write-Host "Removing resource group identified by `"$tagQuery`"..."
-                $resourceGroupIDs = $(az group list --query "$tagQuery" -o tsv)
-                if ($resourceGroupIDs) {
-                    Write-Host "az resource delete --ids ${resourceGroupIDs}..."
-                    az resource delete --ids $resourceGroupIDs --verbose
-                } else {
-                    Write-Host "Nothing to remove"
-                }
-
-                # Run this only when we have performed other Terraform activities
-                $terraformState = (terraform state pull | ConvertFrom-Json)
-                if ($terraformState.resources) {
-                    Write-Host "Clearing Terraform state in workspace ${env:TF_WORKSPACE}..."
-                    $terraformState.outputs = New-Object PSObject # Empty output
-                    $terraformState.resources = @() # No resources
-                    $terraformState.serial++
-                    $terraformState | ConvertTo-Json | terraform state push -
-                } else {
-                    Write-Host "No resources in Terraform state in workspace ${env:TF_WORKSPACE}..."
-                }
-                terraform state pull  
-            }
-
+        if ($env:TF_WORKSPACE -and ($env:TF_WORKSPACE -notmatch 'prod')) {
+            TearDown-Resources -All
         } else {
-            Write-Warning "The following environment variables need to be set for teardown. Current values are:`nGITHUB_REPOSITORY='${env:GITHUB_REPOSITORY}'`nGITHUB_RUN_ID='${env:GITHUB_RUN_ID}'`nTF_WORKSPACE='${env:TF_WORKSPACE}'"
+            Write-Warning "The following environment variable need to be set for teardown. Current value is: `nTF_WORKSPACE='${env:TF_WORKSPACE}'"
+            if ($env:TF_WORKSPACE -imatch 'prod') {
+                Write-Warning "Workspace ${env:TF_WORKSPACE} is not allowed!"
+            }
         }
     }
 } finally {

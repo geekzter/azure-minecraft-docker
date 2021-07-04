@@ -1,6 +1,9 @@
-# variable monitor_action_group_id {}
+variable app_service_plan_id {}
+
 variable appinsights_id {}
 variable appinsights_instrumentation_key {}
+
+variable function_name {}
 
 variable location {}
 
@@ -11,6 +14,10 @@ variable minecraft_port {}
 
 variable resource_group_name {
   type         = string
+}
+
+variable tags {
+  type                         = map
 }
 
 variable suffix {

@@ -1,7 +1,3 @@
-data azurerm_resource_group rg {
-  name                         = var.resource_group_name
-}
-
 locals {
   app_service_settings         = {
     APPINSIGHTS_INSTRUMENTATIONKEY = var.appinsights_instrumentation_key
@@ -15,40 +11,20 @@ locals {
 }
 
 resource azurerm_storage_account functions {
-  # name                         = "${lower(substr(replace(var.resource_group_name,"/a|e|i|o|u|y|-/",""),0,17))}fnc${var.suffix}"
-  name                         = "min${lower(substr(replace(var.location,"/a|e|i|o|u|y|-/",""),0,13))}func${var.suffix}"
+  name                         = lower(substr(replace(var.function_name,"/a|e|i|o|u|y|-/",""),0,24))
   resource_group_name          = var.resource_group_name
   location                     = var.location
   account_tier                 = "Standard"
   account_replication_type     = "LRS"
 
-  tags                         = data.azurerm_resource_group.rg.tags
+  tags                         = var.tags
 }
-resource azurerm_app_service_plan functions {
-  name                         = "${var.resource_group_name}-${var.location}-functions"
-  resource_group_name          = var.resource_group_name
-  location                     = var.location
-  kind                         = "FunctionApp"
-  reserved                     = true
 
-  sku {
-    tier                       = "Dynamic"
-    size                       = "Y1"
-  }
-
-  lifecycle {
-    ignore_changes             = [
-      kind
-    ]
-  }
-
-  tags                         = data.azurerm_resource_group.rg.tags
-}
 resource azurerm_function_app ping_test {
-  name                         = "${azurerm_app_service_plan.functions.name}-ping-test"
+  name                         = var.function_name
   resource_group_name          = var.resource_group_name
   location                     = var.location
-  app_service_plan_id          = azurerm_app_service_plan.functions.id
+  app_service_plan_id          = var.app_service_plan_id
   app_settings                 = local.app_service_settings
   https_only                   = true
   storage_account_name         = azurerm_storage_account.functions.name
@@ -64,7 +40,7 @@ resource azurerm_function_app ping_test {
     ]
   }  
 
-  tags                         = data.azurerm_resource_group.rg.tags
+  tags                         = var.tags
 }
 
 resource azurerm_monitor_diagnostic_setting function_logs {

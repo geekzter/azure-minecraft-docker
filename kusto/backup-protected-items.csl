@@ -1,0 +1,8 @@
+recoveryservicesresources
+| where type == 'microsoft.recoveryservices/vaults/backupfabrics/protectioncontainers/protecteditems'
+| where tolower(resourceGroup) == tolower('${resource_group}')
+| extend containerName = properties['containerName']
+| extend storageAccount = split(containerName,';')[3]
+| extend protectedResourceId=properties['dataSourceInfo'].resourceID
+| extend protectedResourceName=split(protectedResourceId,'/')[-1]
+| project protectedResourceId, protectedResourceName, storageAccount

@@ -18,80 +18,6 @@ resource azurerm_storage_account minecraft {
   tags                         = local.tags
 }
 
-resource azurerm_storage_share minecraft_share {
-  name                         = "minecraft-aci-data-${local.suffix}"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  quota                        = 50
-}
-# https://www.spigotmc.org/resources/console-spam-fix.18410/download?version=366123
-resource azurerm_storage_share_directory plugins {
-  name                         = "plugins"
-  share_name                   = azurerm_storage_share.minecraft_share.name
-  storage_account_name         = azurerm_storage_account.minecraft.name
-
-  count                        = var.enable_log_filter ? 1 : 0
-}
-resource azurerm_storage_share_directory bstats {
-  name                         = "${azurerm_storage_share_directory.plugins.0.name}/bStats"
-  share_name                   = azurerm_storage_share.minecraft_share.name
-  storage_account_name         = azurerm_storage_account.minecraft.name
-
-  count                        = var.enable_log_filter ? 1 : 0
-}
-resource azurerm_storage_share_file bstats_config {
-  name                         = "config.yml"
-  path                         = azurerm_storage_share_directory.bstats.0.name
-  storage_share_id             = azurerm_storage_share.minecraft_share.id
-  source                       = "${path.root}/../minecraft/bstats/config.yml"
-  content_type                 = "application/yaml"
-
-  count                        = var.enable_log_filter ? 1 : 0
-}
-resource azurerm_storage_share_directory log_filter {
-  name                         = "${azurerm_storage_share_directory.plugins.0.name}/ConsoleSpamFix"
-  share_name                   = azurerm_storage_share.minecraft_share.name
-  storage_account_name         = azurerm_storage_account.minecraft.name
-
-  count                        = var.enable_log_filter ? 1 : 0
-}
-resource azurerm_storage_share_file log_filter_config {
-  name                         = "config.yml"
-  path                         = azurerm_storage_share_directory.log_filter.0.name
-  storage_share_id             = azurerm_storage_share.minecraft_share.id
-  source                       = "${path.root}/../minecraft/log-filter/config.yml"
-  content_type                 = "application/yaml"
-
-  count                        = var.enable_log_filter ? 1 : 0
-}
-resource null_resource log_filter_jar {
-  provisioner local-exec {
-    command                    = "../scripts/download_plugins.ps1 -Url ${var.log_filter_jar}"
-    interpreter                = ["pwsh","-nop","-c"]
-  }
-
-  count                        = var.enable_log_filter && !fileexists("${path.root}/../minecraft/plugins/${basename(var.log_filter_jar)}") ? 1 : 0
-}
-resource azurerm_storage_share_file log_filter_jar {
-  name                         = basename(var.log_filter_jar)
-  path                         = azurerm_storage_share_directory.plugins.0.name
-  storage_share_id             = azurerm_storage_share.minecraft_share.id
-  source                       = "${path.root}/../minecraft/plugins/${basename(var.log_filter_jar)}"
-  content_type                 = "application/java-archive"
-
-  count                        = var.enable_log_filter ? 1 : 0
-
-  depends_on                   = [
-    azurerm_storage_share_file.log_filter_config,
-    null_resource.log_filter_jar
-  ]
-}
-
-resource azurerm_storage_share minecraft_modpacks {
-  name                         = "minecraft-aci-modpacks-${local.suffix}"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  quota                        = 50
-}
-
 resource azurerm_storage_container configuration {
   name                         = "configuration"
   storage_account_name         = azurerm_storage_account.minecraft.name
@@ -104,36 +30,6 @@ resource azurerm_role_assignment terraform_storage_owner {
   principal_id                 = each.value
 
   for_each                     = toset(var.solution_contributors)
-}
-
-resource azurerm_storage_blob minecraft_configuration {
-  name                         = "${local.config_directory}/config.json"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  storage_container_name       = azurerm_storage_container.configuration.name
-  type                         = "Block"
-  source_content               = jsonencode(local.config)
-
-  depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
-}
-
-resource azurerm_storage_blob minecraft_environment {
-  name                         = "${local.config_directory}/environment.json"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  storage_container_name       = azurerm_storage_container.configuration.name
-  type                         = "Block"
-  source_content               = jsonencode(azurerm_container_group.minecraft_server.container.0.environment_variables)
-
-  depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
-}
-
-resource azurerm_storage_blob minecraft_user_configuration {
-  name                         = "${local.config_directory}/users.json"
-  storage_account_name         = azurerm_storage_account.minecraft.name
-  storage_container_name       = azurerm_storage_container.configuration.name
-  type                         = "Block"
-  source_content               = jsonencode(var.minecraft_users)
-
-  depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
 }
 
 resource azurerm_storage_blob minecraft_backend_configuration {
@@ -176,8 +72,7 @@ resource azurerm_management_lock minecraft_data_lock {
   notes                        = "Do not accidentally delete Minecraft (world) data"
 
   depends_on                   = [
-    azurerm_storage_share.minecraft_share,
-    azurerm_storage_share.minecraft_modpacks,
+    module.minecraft
   ]
 }
 
@@ -277,6 +172,24 @@ resource azurerm_backup_policy_file_share nightly {
     time                       = "03:00"
   }
 
+  retention_weekly {
+    count                      = 7
+    weekdays                   = ["Monday"]
+  }
+
+  retention_monthly {
+    count                      = 12
+    weekdays                   = ["Monday","Sunday"]
+    weeks                      = ["First", "Last"]
+  }
+
+  retention_yearly {
+    count                      = 10
+    weekdays                   = ["Monday"]
+    weeks                      = ["First"]
+    months                     = ["January"]
+  }  
+
   retention_daily {
     count                      = 30
   }
@@ -292,41 +205,25 @@ resource azurerm_backup_container_storage_account minecraft {
   count                        = var.enable_backup ? 1 : 0
 }
 
+# BUG: https://github.com/terraform-providers/terraform-provider-azurerm/issues/11184#issuecomment-870535683
+#      [ERROR] fileshare 'minecraft-aci-experimental-data-xxxx' not found in protectable or protected fileshares, make sure Storage Account "minecraftstorxxxx" is registered with Recovery Service Vault "Minecraft-default-xxxx-backup" (Resource Group "Minecraft-default-xxxx")
 resource azurerm_backup_protected_file_share minecraft_data {
   resource_group_name          = azurerm_resource_group.minecraft.name
   recovery_vault_name          = azurerm_recovery_services_vault.backup.0.name
   source_storage_account_id    = azurerm_storage_account.minecraft.id
-  source_file_share_name       = azurerm_storage_share.minecraft_share.name
+  source_file_share_name       = module.minecraft[each.key].container_data_share_name
   backup_policy_id             = azurerm_backup_policy_file_share.nightly.0.id
 
   depends_on                   = [azurerm_backup_container_storage_account.minecraft]
 
-  count                        = var.enable_backup ? 1 : 0
-}
-
-resource azurerm_management_lock minecraft_backup_lock {
-  name                         = "${azurerm_recovery_services_vault.backup.0.name}-lock"
-  scope                        = azurerm_recovery_services_vault.backup.0.id
-  lock_level                   = "CanNotDelete"
-  notes                        = "Do not accidentally delete Minecraft (world) backups"
-
-  count                        = var.enable_backup ? 1 : 0
-
-  depends_on                   = [
-    azurerm_backup_protected_file_share.minecraft_data,
-    azurerm_storage_share.minecraft_modpacks,
-    azurerm_monitor_diagnostic_setting.backup_vault
-  ]
+  for_each                     = var.enable_backup ? toset(keys(var.minecraft_config)) : []
 }
 
 locals {
   all_resource_locks           = var.enable_backup ? concat(local.storage_resource_locks,local.backup_resource_locks) : local.storage_resource_locks
-  backup_resource_locks        = concat(
-    azurerm_management_lock.minecraft_backup_lock.*.id,
-    [
+  backup_resource_locks        = [
       replace(azurerm_management_lock.minecraft_data_lock.id,azurerm_management_lock.minecraft_data_lock.name,"AzureBackupProtectionLock"),
-    ],
-  )
+  ]
   storage_resource_locks       = [
     azurerm_management_lock.minecraft_data_lock.id
   ]

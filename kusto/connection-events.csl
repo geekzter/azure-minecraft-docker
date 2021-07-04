@@ -2,4 +2,4 @@ ContainerInstanceLog_CL
 | where Message contains "connect" or Message contains "[/" 
 | extend MessageWithoutTimestamp=replace(@'\[[^\]]* (\w+)\]: ', @'[\1] ', Message)
 | order by TimeGenerated desc
-| project TimeGenerated, Message=tolower(MessageWithoutTimestamp)
+| project TimeGenerated, ContainerGroup_s, Message=tolower(MessageWithoutTimestamp)

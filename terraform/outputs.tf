@@ -1,11 +1,18 @@
+output backup_policy {
+  value       = var.enable_backup ? azurerm_backup_policy_file_share.nightly.0.name : null
+}
+output backup_vault {
+  value       = var.enable_backup ? azurerm_recovery_services_vault.backup.0.name : null
+}
+
 output container_group {
-  value       = azurerm_container_group.minecraft_server.name
+  value       = [for minecraft in module.minecraft : minecraft.container_group_name]
 }
 output container_group_id {
-  value       = azurerm_container_group.minecraft_server.id  
+  value       = [for minecraft in module.minecraft : minecraft.container_group_id]
 }
 output container_log_command {
-  value       = "az container logs --ids ${azurerm_container_group.minecraft_server.id} --follow"
+  value       = "az container logs --ids ${join(" ",[for minecraft in module.minecraft : minecraft.container_group_id])} --follow"
 }
 
 output dashboard_id {
@@ -20,7 +27,7 @@ output environment {
 }
 
 output function_name {
-  value        = [module.functions.function_name]
+  value       = [for function in module.functions : function.function_name]
 }
 
 output location {
@@ -31,23 +38,24 @@ output log_analytics_workspace_guid {
   value       = azurerm_log_analytics_workspace.monitor.workspace_id
 }
 
+output minecraft {
+  value       = {for key in keys(var.minecraft_config) : key => merge(var.minecraft_config[key],module.functions[key],module.minecraft[key])}
+}
+
 output minecraft_server_fqdn {
-  value       = local.minecraft_server_fqdn
+  value       = [for minecraft in module.minecraft : minecraft.minecraft_server_fqdn]
 }
 output minecraft_server_ip {
-  value       = azurerm_container_group.minecraft_server.ip_address
+  value       = [for minecraft in module.minecraft : minecraft.minecraft_server_ip]
 }
 output minecraft_server_connection {
-  value       = "${var.vanity_dns_zone_id != "" ? replace(try(azurerm_dns_cname_record.vanity_hostname.0.fqdn,""),"/\\W*$/","") : azurerm_container_group.minecraft_server.fqdn}:${local.minecraft_server_port}"
+  value       = [for minecraft in module.minecraft : minecraft.minecraft_server_connection]
 }
 output minecraft_server_port {
-  value       = local.minecraft_server_port
+  value       = [for minecraft in module.minecraft : minecraft.minecraft_server_port]
 }
 output minecraft_users {
   value       = var.minecraft_users
-}
-output minecraft_version {
-  value       = var.minecraft_version
 }
 
 output resource_group {
@@ -77,7 +85,7 @@ output storage_account_id {
   value       = azurerm_storage_account.minecraft.id
 }
 output storage_data_share {
-  value       = azurerm_storage_share.minecraft_share.name
+  value       = [for minecraft in module.minecraft : minecraft.container_data_share_name]
 }
 output storage_key {
   sensitive   = true

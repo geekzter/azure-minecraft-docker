@@ -158,29 +158,45 @@ jobs:
     - name: Test connection to Minecraft Server
       if: ${{ matrix.terraform_apply }}
       run: | 
-        # Wait for Minecraft to boot up
-        $connectionAttempts = 0
-        do {
-          Start-Sleep -Seconds 10
-          Write-Host "Pinging ${env:TF_OUT_minecraft_server_fqdn} on port ${env:TF_OUT_minecraft_server_port}..."
-          try {
-            $connectionAttempts++
-            $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($env:TF_OUT_minecraft_server_fqdn, $env:TF_OUT_minecraft_server_port) -ErrorAction SilentlyContinue
-          } catch [System.Management.Automation.MethodInvocationException] {
-            Write-Warning $_
-          }
-        } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
-        
-        az container show --ids ${{ steps.terraform-apply.outputs.container_group_id }} --query instanceView
-        az container logs --ids ${{ steps.terraform-apply.outputs.container_group_id }}
-        # BUG: no tty
-        # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "rcon-cli say hello from ci" --container-name minecraft
+        Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
+        $minecraftConfig  = (terraform output -json minecraft | ConvertFrom-Json -AsHashtable)
+        foreach ($minecraftConfigName in $minecraftConfig.Keys) {
+          Write-Host "Processing configuration '{$minecraftConfigName}''..."
+          $containerGroupID = $minecraftConfig[$minecraftConfigName].container_group_id
+          $serverFQDN       = $minecraftConfig[$minecraftConfigName].minecraft_server_fqdn
+          $serverPort       = $minecraftConfig[$minecraftConfigName].minecraft_server_port
+
+          # Wait for Minecraft socket to open
+          $connectionAttempts = 0
+          do {
+            Start-Sleep -Seconds 10
+            Write-Host "Pinging ${serverFQDN} on port ${serverPort}..."
+            try {
+              $connectionAttempts++
+              $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($serverFQDN, $serverPort) -ErrorAction SilentlyContinue
+            } catch [System.Management.Automation.MethodInvocationException] {
+              Write-Warning $_
+            }
+          } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
+          # az container exec --ids $containerGroupID --exec-command "/health.sh" --container-name minecraft
+          
+          az container show --ids $containerGroupID --query instanceView
+          az container logs --ids $containerGroupID
+        }
+      shell: pwsh
+
+    - name: Remove backup items & resource locks
+      if: ${{ matrix.terraform_apply }}
+      run: | 
+        . (Join-Path $env:GITHUB_WORKSPACE scripts functions.ps1)
+        TearDown-Resources -Backups -Locks
       shell: pwsh
 
     - name: Terraform Destroy
       if: ${{ matrix.terraform_apply }}
       run: ./deploy.ps1 -Destroy -Force
       shell: pwsh
+      continue-on-error: false
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2

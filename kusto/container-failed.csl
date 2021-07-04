@@ -1,4 +1,5 @@
-ContainerEvent_CL 
-| where Message contains_cs "failed" and ResourceGroup == "${resource_group_name}"
-| project TimeGenerated, Message
+ContainerInstanceLog_CL 
+| where Message contains "connect" or Message contains "[/" 
+| extend MessageWithoutTimestamp=replace(@'\[[^\]]* (\w+)\]: ', @'[\1] ', Message)
 | order by TimeGenerated desc
+| project TimeGenerated, ContainerGroup_s, Message=tolower(MessageWithoutTimestamp)

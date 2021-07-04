@@ -1,7 +1,7 @@
 terraform {
   required_providers {
-    azuread                    = "~> 1.4"
-    azurerm                    = "~> 2.55"
+    azuread                    = "~> 1.6"
+    azurerm                    = "~> 2.57"
     http                       = "~> 2.1"
     null                       = "~> 3.1"
     random                     = "~> 3.1"
