@@ -1,0 +1,5 @@
+Resources
+| extend Repository=tostring(tags['repository']), Configuration=tostring(tags['configuration-name']), VanityFQDN=tostring(tags['vanity-fqdn']), Workspace=tostring(tags['workspace']), Suffix=tostring(tags['suffix']) 
+| where Repository == "azure-minecraft-docker" and isnotempty(Configuration)
+| distinct Workspace, Configuration, VanityFQDN
+| order by Workspace, Configuration asc, VanityFQDN asc
