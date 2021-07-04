@@ -22,3 +22,7 @@ output minecraft_server_ip {
 output minecraft_server_port {
   value       = var.minecraft_server_port
 }
+
+output tags {
+  value       = local.tags
+}

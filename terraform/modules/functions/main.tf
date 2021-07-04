@@ -1,7 +1,3 @@
-data azurerm_resource_group rg {
-  name                         = var.resource_group_name
-}
-
 locals {
   app_service_settings         = {
     APPINSIGHTS_INSTRUMENTATIONKEY = var.appinsights_instrumentation_key
@@ -21,7 +17,7 @@ resource azurerm_storage_account functions {
   account_tier                 = "Standard"
   account_replication_type     = "LRS"
 
-  tags                         = data.azurerm_resource_group.rg.tags
+  tags                         = var.tags
 }
 
 resource azurerm_function_app ping_test {
@@ -44,7 +40,7 @@ resource azurerm_function_app ping_test {
     ]
   }  
 
-  tags                         = data.azurerm_resource_group.rg.tags
+  tags                         = var.tags
 }
 
 resource azurerm_monitor_diagnostic_setting function_logs {

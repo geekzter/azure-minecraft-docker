@@ -16,6 +16,10 @@ variable resource_group_name {
   type         = string
 }
 
+variable tags {
+  type                         = map
+}
+
 variable suffix {
   type         = string
 }

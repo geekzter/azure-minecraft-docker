@@ -23,6 +23,13 @@ locals {
   # https://github.com/itzg/docker-minecraft-server
   container_image              = var.container_image_tag != null && var.container_image_tag != "" ? "${var.container_image}:${var.container_image_tag}" : var.container_image
   minecraft_server_fqdn        = var.vanity_dns_zone_id != "" ? replace(try(azurerm_dns_cname_record.vanity_hostname.0.fqdn,""),"/\\W*$/","") : azurerm_container_group.minecraft_server.fqdn
+
+  tags                         = merge(
+    var.tags,
+    {
+      vanity-fqdn              = var.vanity_dns_zone_id != "" ? "${var.vanity_hostname_prefix}${replace(var.environment,"prod","")}.${split("/",var.vanity_dns_zone_id)[8]}" : null
+    }
+  )
 }
 
 resource azurerm_container_group minecraft_server {
@@ -89,7 +96,7 @@ resource azurerm_container_group minecraft_server {
     identity_ids               = [var.user_assigned_identity_id]
   }
 
-  tags                         = var.tags
+  tags                         = local.tags
 
   depends_on                   = [
     azurerm_storage_share_file.log_filter_config,
@@ -111,6 +118,6 @@ resource azurerm_dns_cname_record vanity_hostname {
   ttl                          = 300
   record                       = azurerm_container_group.minecraft_server.fqdn
 
-  tags                         = var.tags
+  tags                         = local.tags
   count                        = var.vanity_dns_zone_id != "" ? 1 : 0
 }

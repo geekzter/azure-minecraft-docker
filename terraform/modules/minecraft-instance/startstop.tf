@@ -19,10 +19,12 @@ resource azurerm_logic_app_workflow start {
   name                         = "${var.name}-start"
   resource_group_name          = var.resource_group_name
   location                     = var.location
+  tags                         = local.tags
 
   lifecycle {
     ignore_changes             = [
-      parameters
+      parameters,
+      tags
     ]
   }
 
@@ -57,10 +59,12 @@ resource azurerm_logic_app_workflow stop {
   name                         = "${var.name}-stop"
   resource_group_name          = var.resource_group_name
   location                     = var.location
+  tags                         = local.tags
 
   lifecycle {
     ignore_changes             = [
-      parameters
+      parameters,
+      tags
     ]
   }
 
@@ -125,7 +129,7 @@ resource azurerm_resource_group_template_deployment container_instance_api_conne
     tenant_id                  = data.azurerm_subscription.primary.tenant_id
   })
 
-  tags                         = var.tags
+  tags                         = local.tags
   count                        = var.enable_auto_startstop ? 1 : 0
 
   depends_on                   = [azurerm_role_assignment.minecraft_startstop]                                                                    
@@ -152,7 +156,7 @@ resource azurerm_resource_group_template_deployment start_workflow {
     workflow_name              = azurerm_logic_app_workflow.start.0.name
   })
 
-  tags                         = var.tags
+  tags                         = local.tags
   count                        = var.enable_auto_startstop && var.start_time != null && var.start_time != "" ? 1 : 0
 
   depends_on                   = [azurerm_resource_group_template_deployment.container_instance_api_connection]
@@ -176,7 +180,7 @@ resource azurerm_resource_group_template_deployment stop_workflow {
     workflow_name              = azurerm_logic_app_workflow.stop.0.name
   })
 
-  tags                         = var.tags
+  tags                         = local.tags
   count                        = var.enable_auto_startstop && var.stop_time != null && var.stop_time != "" ? 1 : 0
 
   depends_on                   = [

@@ -49,7 +49,13 @@ module minecraft {
   resource_group_name          = azurerm_resource_group.minecraft.name
   storage_account_name         = azurerm_storage_account.minecraft.name
   storage_account_key          = azurerm_storage_account.minecraft.primary_access_key
-  tags                         = azurerm_resource_group.minecraft.tags
+  tags                         = merge(
+    azurerm_resource_group.minecraft.tags,
+    {
+      configuration-name       = each.key
+    }
+  )
+
   user_assigned_identity_id    = azurerm_user_assigned_identity.minecraft_identity.id
   vanity_dns_zone_id           = var.vanity_dns_zone_id
   vanity_hostname_prefix       = lookup(each.value, "vanity_hostname_prefix", "minecraft")
@@ -77,6 +83,7 @@ module functions {
   minecraft_port               = lookup(each.value, "minecraft_server_port", 25565)
   resource_group_name          = azurerm_resource_group.minecraft.name
   suffix                       = local.suffix
+  tags                         = module.minecraft[each.key].tags
 
   for_each                     = var.minecraft_config
 }
