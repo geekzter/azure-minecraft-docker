@@ -1,13 +1,13 @@
 ContainerInstanceLog_CL 
 | where Message contains "lost connection: " or Message contains "logged in with entity" 
-// | where Message contains "master" 
 | extend MessageWithoutTimestamp=replace(@'\[[^\]]* (\w+)\]: ', @'[\1] ', Message)
-| extend OnlinePlayer=extract(@'\]: *(\w+)',1, Message)
-| extend User=extract(@'name=(\w+)',1, Message)
-| extend Player=coalesce(User,OnlinePlayer)
-| extend DisconnectedStatus=extract(@'lost connection: *(.*)',1, Message)
-| extend Status=coalesce(DisconnectedStatus,"Joined")
+| extend OnlinePlayer=extract(@'\]: *(\w+)', 1, Message)
+| extend User=extract(@'name=(\w+)', 1, Message)
+| extend Player=coalesce(User, OnlinePlayer)
+| extend DisconnectedStatus=extract(@'lost connection: *(.*)', 1, Message)
+| extend Status=coalesce(DisconnectedStatus, "Joined")
+| extend Instance=tostring(split(ContainerGroup_s,'-')[-1])
 | order by TimeGenerated desc
-| summarize arg_max(TimeGenerated, *) by Player
+| summarize arg_max(TimeGenerated, *) by Player, Instance
 | order by TimeGenerated desc
-| project TimeGenerated, Player, Status
+| project TimeGenerated, Instance, Player, Status
