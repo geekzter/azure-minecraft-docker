@@ -41,7 +41,6 @@ try {
     $dashboardID      = (Get-TerraformOutput "dashboard_id")
     $environment      = (Get-TerraformOutput "environment")
     $location         = (Get-TerraformOutput "location")
-    $minecraftFQDN    = (Get-TerraformOutput "minecraft_server_fqdn")
     $resourceGroupID  = (Get-TerraformOutput "resource_group_id")
     $suffix           = (Get-TerraformOutput "resource_suffix")
     $subscriptionGUID = (Get-TerraformOutput "subscription_guid")
@@ -79,9 +78,6 @@ if ($subscriptionGUID) {
 }
 if ($location) {
     $template = $template -Replace "${location}", "`$`{location`}"
-}
-if ($minecraftFQDN) {
-    $template = $template -Replace "${minecraftFQDN}", "`$`{minecraft_server_fqdn`}"
 }
 if ($suffix) {
     $template = $template -Replace "-${suffix}", "-`$`{suffix`}"

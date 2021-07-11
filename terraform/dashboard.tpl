@@ -57,335 +57,6 @@
         },
         "10": {
           "metadata": {
-            "deepLink": "#blade/Microsoft_Azure_CostManagement/Menu/costanalysis",
-            "inputs": [
-              {
-                "name": "scope",
-                "value": "/subscriptions/${subscription_guid}"
-              },
-              {
-                "name": "scopeName",
-                "value": "Resources tagged 'repository'='azure-minecraft-docker'"
-              },
-              {
-                "isOptional": true,
-                "name": "view",
-                "value": {
-                  "accumulated": "true",
-                  "chart": "Area",
-                  "currency": "USD",
-                  "dateRange": "ThisMonth",
-                  "displayName": "Cost Consumption",
-                  "kpis": [
-                    {
-                      "enabled": true,
-                      "extendedProperties": {
-                        "amount": 2500,
-                        "name": "NormalBudget",
-                        "timeGrain": "Monthly",
-                        "type": "${subscription_guid}"
-                      },
-                      "id": "${subscription_id}/providers/Microsoft.Consumption/budgets/NormalBudget",
-                      "type": "Budget"
-                    },
-                    {
-                      "enabled": true,
-                      "type": "Forecast"
-                    }
-                  ],
-                  "pivots": [
-                    {
-                      "name": "ServiceName",
-                      "type": "Dimension"
-                    },
-                    {
-                      "name": "ResourceLocation",
-                      "type": "Dimension"
-                    },
-                    {
-                      "name": "ResourceGroupName",
-                      "type": "Dimension"
-                    }
-                  ],
-                  "query": {
-                    "dataSet": {
-                      "aggregation": {
-                        "totalCost": {
-                          "function": "Sum",
-                          "name": "Cost"
-                        },
-                        "totalCostUSD": {
-                          "function": "Sum",
-                          "name": "CostUSD"
-                        }
-                      },
-                      "filter": {
-                        "Tags": {
-                          "Name": "repository",
-                          "Operator": "In",
-                          "Values": [
-                            "azure-minecraft-docker"
-                          ]
-                        }
-                      },
-                      "granularity": "Daily",
-                      "sorting": [
-                        {
-                          "direction": "ascending",
-                          "name": "UsageDate"
-                        }
-                      ]
-                    },
-                    "timeframe": "None",
-                    "type": "ActualCost"
-                  },
-                  "scope": "subscriptions/${subscription_guid}"
-                }
-              },
-              {
-                "isOptional": true,
-                "name": "externalState"
-              }
-            ],
-            "type": "Extension/Microsoft_Azure_CostManagement/PartType/CostAnalysisPinPart"
-          },
-          "position": {
-            "colSpan": 6,
-            "metadata": null,
-            "rowSpan": 4,
-            "x": 6,
-            "y": 6
-          }
-        },
-        "11": {
-          "metadata": {
-            "filters": {
-              "MsPortalFx_TimeRange": {
-                "model": {
-                  "format": "local",
-                  "granularity": "auto",
-                  "relative": "1440m"
-                }
-              }
-            },
-            "inputs": [
-              {
-                "isOptional": true,
-                "name": "options",
-                "value": {
-                  "chart": {
-                    "metrics": [
-                      {
-                        "aggregationType": 4,
-                        "metricVisualization": {
-                          "displayName": "Network Bytes Transmitted Per Second",
-                          "resourceDisplayName": "minecraft-${suffix}"
-                        },
-                        "name": "NetworkBytesTransmittedPerSecond",
-                        "resourceMetadata": {
-                          "id": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}",
-                          "resourceGroup": "${resource_group}"
-                        }
-                      }
-                    ],
-                    "openBladeOnClick": {
-                      "openBlade": true
-                    },
-                    "title": "Network bytes transmitted",
-                    "titleKind": 2,
-                    "visualization": {
-                      "chartType": 2
-                    }
-                  }
-                }
-              },
-              {
-                "isOptional": true,
-                "name": "sharedTimeRange"
-              }
-            ],
-            "settings": {
-              "content": {
-                "options": {
-                  "chart": {
-                    "metrics": [
-                      {
-                        "aggregationType": 4,
-                        "metricVisualization": {
-                          "displayName": "Network Bytes Transmitted Per Second",
-                          "resourceDisplayName": "minecraft-${suffix}"
-                        },
-                        "name": "NetworkBytesTransmittedPerSecond",
-                        "namespace": "microsoft.containerinstance/containergroups",
-                        "resourceMetadata": {
-                          "id": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}",
-                          "resourceGroup": "${resource_group}"
-                        }
-                      }
-                    ],
-                    "title": "Network bytes transmitted",
-                    "titleKind": 2,
-                    "visualization": {
-                      "axisVisualization": {
-                        "x": {
-                          "axisType": 2,
-                          "isVisible": true
-                        },
-                        "y": {
-                          "axisType": 1,
-                          "isVisible": true
-                        }
-                      },
-                      "chartType": 2,
-                      "disablePinning": true,
-                      "legendVisualization": {
-                        "hideSubtitle": false,
-                        "isVisible": true,
-                        "position": 2
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "type": "Extension/HubsExtension/PartType/MonitorChartPart"
-          },
-          "position": {
-            "colSpan": 6,
-            "metadata": null,
-            "rowSpan": 4,
-            "x": 12,
-            "y": 8
-          }
-        },
-        "12": {
-          "metadata": {
-            "inputs": [
-              {
-                "isOptional": true,
-                "name": "resourceTypeMode"
-              },
-              {
-                "isOptional": true,
-                "name": "ComponentId"
-              },
-              {
-                "isOptional": true,
-                "name": "Scope",
-                "value": {
-                  "resourceIds": [
-                    "${resource_group_id}/providers/microsoft.operationalinsights/workspaces/${resource_group}-loganalytics"
-                  ]
-                }
-              },
-              {
-                "isOptional": true,
-                "name": "Dimensions"
-              },
-              {
-                "isOptional": true,
-                "name": "PartId",
-                "value": "15a53e10-286d-4b38-ac93-bd98b26c8546"
-              },
-              {
-                "isOptional": true,
-                "name": "Version",
-                "value": "2.0"
-              },
-              {
-                "isOptional": true,
-                "name": "TimeRange",
-                "value": "P1D"
-              },
-              {
-                "isOptional": true,
-                "name": "DashboardId"
-              },
-              {
-                "isOptional": true,
-                "name": "DraftRequestParameters"
-              },
-              {
-                "isOptional": true,
-                "name": "Query",
-                "value": "ContainerInstanceLog_CL \n| where Message contains \"connect\" or Message contains \"[/\" \n| order by TimeGenerated desc\n| project Message\n\n"
-              },
-              {
-                "isOptional": true,
-                "name": "ControlType",
-                "value": "AnalyticsGrid"
-              },
-              {
-                "isOptional": true,
-                "name": "SpecificChart"
-              },
-              {
-                "isOptional": true,
-                "name": "PartTitle",
-                "value": "Analytics"
-              },
-              {
-                "isOptional": true,
-                "name": "PartSubTitle",
-                "value": "${resource_group}-loganalytics"
-              },
-              {
-                "isOptional": true,
-                "name": "LegendOptions"
-              },
-              {
-                "isOptional": true,
-                "name": "IsQueryContainTimeRange"
-              }
-            ],
-            "settings": {
-              "content": {
-                "GridColumnsWidth": {
-                  "Message": "362px",
-                  "MessageWithoutTimestamp": "362px",
-                  "TimeGenerated": "138px"
-                },
-                "PartSubTitle": "${resource_group}-loganalytics",
-                "PartTitle": "Connection Events",
-                "Query": "ContainerInstanceLog_CL \n| where Message contains \"connect\" or Message contains \"[/\" \n| extend MessageWithoutTimestamp=replace(@'\\[[^\\]]* (\\w+)\\]: ', @'[\\1] ', Message)\n| order by TimeGenerated desc\n| project TimeGenerated, Message=tolower(MessageWithoutTimestamp)"
-              }
-            },
-            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
-          },
-          "position": {
-            "colSpan": 6,
-            "metadata": null,
-            "rowSpan": 6,
-            "x": 0,
-            "y": 10
-          }
-        },
-        "13": {
-          "metadata": {
-            "deepLink": "#@/resource${resource_group_id}/overview",
-            "inputs": [
-              {
-                "isOptional": true,
-                "name": "resourceGroup"
-              },
-              {
-                "isOptional": true,
-                "name": "id",
-                "value": "${resource_group_id}"
-              }
-            ],
-            "type": "Extension/HubsExtension/PartType/ResourceGroupMapPinnedPart"
-          },
-          "position": {
-            "colSpan": 6,
-            "metadata": null,
-            "rowSpan": 6,
-            "x": 6,
-            "y": 10
-          }
-        },
-        "14": {
-          "metadata": {
             "filters": {
               "MsPortalFx_TimeRange": {
                 "model": {
@@ -499,8 +170,143 @@
             "colSpan": 6,
             "metadata": null,
             "rowSpan": 4,
-            "x": 12,
-            "y": 12
+            "x": 13,
+            "y": 6
+          }
+        },
+        "11": {
+          "metadata": {
+            "inputs": [
+              {
+                "isOptional": true,
+                "name": "resourceTypeMode"
+              },
+              {
+                "isOptional": true,
+                "name": "ComponentId"
+              },
+              {
+                "isOptional": true,
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "${resource_group_id}/providers/microsoft.operationalinsights/workspaces/${resource_group}-loganalytics"
+                  ]
+                }
+              },
+              {
+                "isOptional": true,
+                "name": "Dimensions"
+              },
+              {
+                "isOptional": true,
+                "name": "PartId",
+                "value": "15a53e10-286d-4b38-ac93-bd98b26c8546"
+              },
+              {
+                "isOptional": true,
+                "name": "Version",
+                "value": "2.0"
+              },
+              {
+                "isOptional": true,
+                "name": "TimeRange",
+                "value": "P1D"
+              },
+              {
+                "isOptional": true,
+                "name": "DashboardId"
+              },
+              {
+                "isOptional": true,
+                "name": "DraftRequestParameters"
+              },
+              {
+                "isOptional": true,
+                "name": "Query",
+                "value": "ContainerInstanceLog_CL \n| where Message contains \"connect\" or Message contains \"[/\" \n| order by TimeGenerated desc\n| project Message\n\n"
+              },
+              {
+                "isOptional": true,
+                "name": "ControlType",
+                "value": "AnalyticsGrid"
+              },
+              {
+                "isOptional": true,
+                "name": "SpecificChart"
+              },
+              {
+                "isOptional": true,
+                "name": "PartTitle",
+                "value": "Analytics"
+              },
+              {
+                "isOptional": true,
+                "name": "PartSubTitle",
+                "value": "${resource_group}-loganalytics"
+              },
+              {
+                "isOptional": true,
+                "name": "LegendOptions"
+              },
+              {
+                "isOptional": true,
+                "name": "IsQueryContainTimeRange"
+              }
+            ],
+            "savedContainerState": {
+              "assetName": "${resource_group}-loganalytics",
+              "partTitle": "Connection Events"
+            },
+            "settings": {
+              "content": {
+                "GridColumnsWidth": {
+                  "Instance": "92px",
+                  "Message": "362px",
+                  "MessageWithoutTimestamp": "362px",
+                  "TimeGenerated": "138px"
+                },
+                "PartSubTitle": "${resource_group}-loganalytics",
+                "PartTitle": "Connection Events",
+                "Query": "ContainerInstanceLog_CL \n| where Message contains \"connect\" or Message contains \"[/\" \n| extend MessageWithoutTimestamp=replace(@'\\[[^\\]]* (\\w+)\\]: ', @'[\\1] ', Message)\n| extend Instance=tostring(split(ContainerGroup_s,'-')[-1])\n| order by TimeGenerated desc\n| project TimeGenerated, Instance, Message=tolower(MessageWithoutTimestamp)\n"
+              }
+            },
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
+          },
+          "position": {
+            "colSpan": 7,
+            "metadata": null,
+            "rowSpan": 6,
+            "x": 0,
+            "y": 10
+          }
+        },
+        "12": {
+          "metadata": {
+            "deepLink": "#@/resource${resource_group_id}/overview",
+            "inputs": [
+              {
+                "isOptional": true,
+                "name": "resourceGroup"
+              },
+              {
+                "isOptional": true,
+                "name": "id",
+                "value": "${resource_group_id}"
+              }
+            ],
+            "savedContainerState": {
+              "assetName": "${resource_group}",
+              "partTitle": "Resources"
+            },
+            "type": "Extension/HubsExtension/PartType/ResourceGroupMapPinnedPart"
+          },
+          "position": {
+            "colSpan": 6,
+            "metadata": null,
+            "rowSpan": 6,
+            "x": 7,
+            "y": 10
           }
         },
         "2": {
@@ -547,6 +353,10 @@
         "4": {
           "metadata": {
             "inputs": [],
+            "savedContainerState": {
+              "assetName": "",
+              "partTitle": " "
+            },
             "settings": {
               "content": {
                 "settings": {
@@ -564,108 +374,53 @@
             "colSpan": 6,
             "metadata": null,
             "rowSpan": 2,
-            "x": 6,
+            "x": 7,
             "y": 0
           }
         },
         "5": {
           "metadata": {
-            "filters": {
-              "MsPortalFx_TimeRange": {
-                "model": {
-                  "format": "local",
-                  "granularity": "auto",
-                  "relative": "1440m"
-                }
-              }
-            },
             "inputs": [
               {
                 "isOptional": true,
-                "name": "options",
-                "value": {
-                  "chart": {
-                    "metrics": [
-                      {
-                        "aggregationType": 4,
-                        "metricVisualization": {
-                          "displayName": "CPU Usage",
-                          "resourceDisplayName": "minecraft-${suffix}"
-                        },
-                        "name": "CpuUsage",
-                        "resourceMetadata": {
-                          "id": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}",
-                          "resourceGroup": "${resource_group}"
-                        }
-                      }
-                    ],
-                    "openBladeOnClick": {
-                      "openBlade": true
-                    },
-                    "title": "CPU",
-                    "titleKind": 2,
-                    "visualization": {
-                      "chartType": 2
-                    }
-                  }
-                }
+                "name": "partTitle",
+                "value": "Minecraft Instances"
               },
               {
                 "isOptional": true,
-                "name": "sharedTimeRange"
+                "name": "query",
+                "value": "Resources\n| extend Repository=tostring(tags['repository']), Instance=tostring(tags['configuration-name']), VanityFQDN=tostring(tags['vanity-fqdn']), Workspace=tostring(tags['workspace']), Suffix=tostring(tags['suffix']) \n| where Repository == \"azure-minecraft-docker\" and isnotempty(Instance)\n| distinct Workspace, Instance, VanityFQDN\n| order by Workspace, Instance asc, VanityFQDN asc"
+              },
+              {
+                "isOptional": true,
+                "name": "chartType"
+              },
+              {
+                "isOptional": true,
+                "name": "isShared"
+              },
+              {
+                "isOptional": true,
+                "name": "queryId",
+                "value": ""
+              },
+              {
+                "isOptional": true,
+                "name": "formatResults"
               }
             ],
-            "settings": {
-              "content": {
-                "options": {
-                  "chart": {
-                    "metrics": [
-                      {
-                        "aggregationType": 4,
-                        "metricVisualization": {
-                          "displayName": "CPU Usage",
-                          "resourceDisplayName": "minecraft-${suffix}"
-                        },
-                        "name": "CpuUsage",
-                        "namespace": "microsoft.containerinstance/containergroups",
-                        "resourceMetadata": {
-                          "id": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}",
-                          "resourceGroup": "${resource_group}"
-                        }
-                      }
-                    ],
-                    "title": "CPU (millicores)",
-                    "titleKind": 2,
-                    "visualization": {
-                      "axisVisualization": {
-                        "x": {
-                          "axisType": 2,
-                          "isVisible": true
-                        },
-                        "y": {
-                          "axisType": 1,
-                          "isVisible": true
-                        }
-                      },
-                      "chartType": 2,
-                      "disablePinning": true,
-                      "legendVisualization": {
-                        "hideSubtitle": false,
-                        "isVisible": true,
-                        "position": 2
-                      }
-                    }
-                  }
-                }
-              }
+            "savedContainerState": {
+              "assetName": "Private Resource Graph query",
+              "partTitle": "Minecraft Instances"
             },
-            "type": "Extension/HubsExtension/PartType/MonitorChartPart"
+            "settings": {},
+            "type": "Extension/HubsExtension/PartType/ArgQueryGridTile"
           },
           "position": {
             "colSpan": 6,
             "metadata": null,
-            "rowSpan": 4,
-            "x": 12,
+            "rowSpan": 6,
+            "x": 13,
             "y": 0
           }
         },
@@ -750,21 +505,26 @@
                 "value": false
               }
             ],
+            "savedContainerState": {
+              "assetName": "${resource_group}-loganalytics",
+              "partTitle": "Player Status"
+            },
             "settings": {
               "content": {
                 "GridColumnsWidth": {
-                  "TimeGenerated": "138px",
+                  "Instance": "92px",
                   "Player": "126px",
-                  "Status": "236px"
+                  "Status": "236px",
+                  "TimeGenerated": "138px"
                 },
                 "PartTitle": "Player Status",
-                "Query": "ContainerInstanceLog_CL \n| where Message contains \"lost connection: \" or Message contains \"logged in with entity\" \n| extend MessageWithoutTimestamp=replace(@'\\[[^\\]]* (\\w+)\\]: ', @'[\\1] ', Message)\n| extend OnlinePlayer=extract(@'\\]: *(\\w+)',1, Message)\n| extend User=extract(@'name=(\\w+)',1, Message)\n| extend Player=coalesce(User,OnlinePlayer)\n| extend DisconnectedStatus=extract(@'lost connection: *(.*)',1, Message)\n| extend Status=coalesce(DisconnectedStatus,\"Joined\")\n| order by TimeGenerated desc\n| summarize arg_max(TimeGenerated, *) by Player\n| order by TimeGenerated desc\n| project TimeGenerated, Player, Status\n\n"
+                "Query": "ContainerInstanceLog_CL \n| where Message contains \"lost connection: \" or Message contains \"logged in with entity\" \n| extend MessageWithoutTimestamp=replace(@'\\[[^\\]]* (\\w+)\\]: ', @'[\\1] ', Message)\n| extend OnlinePlayer=extract(@'\\]: *(\\w+)', 1, Message)\n| extend User=extract(@'name=(\\w+)', 1, Message)\n| extend Player=coalesce(User, OnlinePlayer)\n| extend DisconnectedStatus=extract(@'lost connection: *(.*)', 1, Message)\n| extend Status=coalesce(DisconnectedStatus, \"Joined\")\n| extend Instance=tostring(split(ContainerGroup_s,'-')[-1])\n| order by TimeGenerated desc\n| summarize arg_max(TimeGenerated, *) by Player, Instance\n| order by TimeGenerated desc\n| project TimeGenerated, Instance, Player, Status\n\n"
               }
             },
             "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
           },
           "position": {
-            "colSpan": 6,
+            "colSpan": 7,
             "metadata": null,
             "rowSpan": 5,
             "x": 0,
@@ -774,10 +534,14 @@
         "7": {
           "metadata": {
             "inputs": [],
+            "savedContainerState": {
+              "assetName": "Powered by Docker & Azure Container Instance",
+              "partTitle": "Minecraft Server(less)"
+            },
             "settings": {
               "content": {
                 "settings": {
-                  "content": "Minecraft Server running at <a href='minecraft://${minecraft_server_fqdn}' target='_blank'>${minecraft_server_fqdn}</a> on <img width='10' src='https://portal.azure.com/favicon.ico'/>&nbsp;<a href='https://azure.microsoft.com/en-us/services/container-instances/' target='_blank'>Container&nbsp;Instance</a> and <img width='10' src='https://portal.azure.com/favicon.ico'/> <a href='https://azure.microsoft.com/en-us/services/storage/files/' target='_blank'>File Shares</a>. \n<br/>\nThe technology stack is all on GitHub:\n<ul>\n<li><a href='https://github.com/PaperMC' target='_blank'>Paper Minecraft</a>\n<li>Minecraft Docker image: <a href='https://github.com/itzg/docker-minecraft-server' target='_blank'>itzg/docker-minecraft-server</a>\n<li>How to provision this infrastructure:<a href='https://github.com/geekzter/azure-minecraft-docker' target='_blank'>\ngeekzter/azure-minecraft-docker </a>\n<li><a href='https://github.com/Azure/azure-cli' target='_blank'>Azure CLI</a>\n<li><a href='https://github.com/codespaces' target='_blank'>Codespace</a> (<a href='https://github.com/geekzter/azure-minecraft-docker/tree/main/.devcontainer' target='_blank'>definition</a>, <a href='https://github.com/features/codespaces' target='_blank'>\nfeature description</a>)\n<li>GitHub Actions <a href='https://github.com/geekzter/azure-minecraft-docker/actions?query=workflow%3Aci-vanilla' target='_blank'>CI workflow</a> (<a href='https://github.com/geekzter/azure-minecraft-docker/tree/main/.github/workflows' target='_blank'>source</a>)\n<li><a href='https://github.com/PowerShell/PowerShell' target='_blank'>Powershell</a>\n<li><a href='https://github.com/hashicorp/terraform' target='_blank'>Terraform (<a href='https://github.com/terraform-providers/terraform-provider-azuread' target='_blank'>azuread</a>,<a href='https://github.com/terraform-providers/terraform-provider-azurerm' target='_blank'>azurerm</a> providers)</a>\n</ul>",
+                  "content": "Minecraft Server running on <img width='10' src='https://portal.azure.com/favicon.ico'/>&nbsp;<a href='https://azure.microsoft.com/en-us/services/container-instances/' target='_blank'>Container&nbsp;Instance</a> and <img width='10' src='https://portal.azure.com/favicon.ico'/> <a href='https://azure.microsoft.com/en-us/services/storage/files/' target='_blank'>File Shares</a>. \n<br/>\nThe technology stack is all on GitHub:\n<ul>\n<li><a href='https://github.com/PaperMC' target='_blank'>Paper Minecraft</a>\n<li>Minecraft Docker image: <a href='https://github.com/itzg/docker-minecraft-server' target='_blank'>itzg/docker-minecraft-server</a>\n<li>How to provision this infrastructure:<a href='https://github.com/geekzter/azure-minecraft-docker' target='_blank'>\ngeekzter/azure-minecraft-docker </a>\n<li><a href='https://github.com/Azure/azure-cli' target='_blank'>Azure CLI</a>\n<li><a href='https://github.com/codespaces' target='_blank'>Codespace</a> (<a href='https://github.com/geekzter/azure-minecraft-docker/tree/main/.devcontainer' target='_blank'>definition</a>, <a href='https://github.com/features/codespaces' target='_blank'>\nfeature description</a>)\n<li>GitHub Actions <a href='https://github.com/geekzter/azure-minecraft-docker/actions?query=workflow%3Aci-vanilla' target='_blank'>CI workflow</a> (<a href='https://github.com/geekzter/azure-minecraft-docker/tree/main/.github/workflows' target='_blank'>source</a>)\n<li><a href='https://github.com/PowerShell/PowerShell' target='_blank'>Powershell</a>\n<li><a href='https://github.com/hashicorp/terraform' target='_blank'>Terraform (<a href='https://github.com/terraform-providers/terraform-provider-azuread' target='_blank'>azuread</a>,<a href='https://github.com/terraform-providers/terraform-provider-azurerm' target='_blank'>azurerm</a> providers)</a>\n</ul>",
                   "markdownSource": 1,
                   "subtitle": "Powered by Docker & Azure Container Instance",
                   "title": "Minecraft Server(less)"
@@ -790,112 +554,11 @@
             "colSpan": 6,
             "metadata": null,
             "rowSpan": 4,
-            "x": 6,
+            "x": 7,
             "y": 2
           }
         },
         "8": {
-          "metadata": {
-            "filters": {
-              "MsPortalFx_TimeRange": {
-                "model": {
-                  "format": "local",
-                  "granularity": "auto",
-                  "relative": "1440m"
-                }
-              }
-            },
-            "inputs": [
-              {
-                "isOptional": true,
-                "name": "options",
-                "value": {
-                  "chart": {
-                    "metrics": [
-                      {
-                        "aggregationType": 4,
-                        "metricVisualization": {
-                          "displayName": "Memory Usage",
-                          "resourceDisplayName": "minecraft-${suffix}"
-                        },
-                        "name": "MemoryUsage",
-                        "resourceMetadata": {
-                          "id": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}",
-                          "resourceGroup": "${resource_group}"
-                        }
-                      }
-                    ],
-                    "openBladeOnClick": {
-                      "openBlade": true
-                    },
-                    "title": "Memory",
-                    "titleKind": 2,
-                    "visualization": {
-                      "chartType": 2
-                    }
-                  }
-                }
-              },
-              {
-                "isOptional": true,
-                "name": "sharedTimeRange"
-              }
-            ],
-            "settings": {
-              "content": {
-                "options": {
-                  "chart": {
-                    "metrics": [
-                      {
-                        "aggregationType": 4,
-                        "metricVisualization": {
-                          "displayName": "Memory Usage",
-                          "resourceDisplayName": "minecraft-${suffix}"
-                        },
-                        "name": "MemoryUsage",
-                        "namespace": "microsoft.containerinstance/containergroups",
-                        "resourceMetadata": {
-                          "id": "${resource_group_id}/providers/Microsoft.ContainerInstance/containerGroups/Minecraft-${suffix}",
-                          "resourceGroup": "${resource_group}"
-                        }
-                      }
-                    ],
-                    "title": "Memory",
-                    "titleKind": 2,
-                    "visualization": {
-                      "axisVisualization": {
-                        "x": {
-                          "axisType": 2,
-                          "isVisible": true
-                        },
-                        "y": {
-                          "axisType": 1,
-                          "isVisible": true
-                        }
-                      },
-                      "chartType": 2,
-                      "disablePinning": true,
-                      "legendVisualization": {
-                        "hideSubtitle": false,
-                        "isVisible": true,
-                        "position": 2
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "type": "Extension/HubsExtension/PartType/MonitorChartPart"
-          },
-          "position": {
-            "colSpan": 6,
-            "metadata": null,
-            "rowSpan": 4,
-            "x": 12,
-            "y": 4
-          }
-        },
-        "9": {
           "metadata": {
             "inputs": [
               {
@@ -977,23 +640,135 @@
                 "name": "IsQueryContainTimeRange"
               }
             ],
+            "savedContainerState": {
+              "assetName": "${resource_group}-loganalytics",
+              "partTitle": "Container Events"
+            },
             "settings": {
               "content": {
                 "GridColumnsWidth": {
+                  "Instance": "92px",
                   "Message": "362px",
                   "TimeGenerated": "138px"
                 },
                 "PartSubTitle": "${resource_group}-loganalytics",
-                "PartTitle": "Container Events"
+                "PartTitle": "Container Events",
+                "Query": "ContainerEvent_CL \n| extend Instance=tostring(split(ContainerGroup_s,'-')[-1])\n| project TimeGenerated, Instance, Message\n| order by TimeGenerated desc"
               }
             },
             "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
           },
           "position": {
-            "colSpan": 6,
+            "colSpan": 7,
             "metadata": null,
             "rowSpan": 4,
             "x": 0,
+            "y": 6
+          }
+        },
+        "9": {
+          "metadata": {
+            "deepLink": "#blade/Microsoft_Azure_CostManagement/Menu/costanalysis",
+            "inputs": [
+              {
+                "name": "scope",
+                "value": "/subscriptions/${subscription_guid}"
+              },
+              {
+                "name": "scopeName",
+                "value": "Resources tagged 'repository'='azure-minecraft-docker'"
+              },
+              {
+                "isOptional": true,
+                "name": "view",
+                "value": {
+                  "accumulated": "true",
+                  "chart": "Area",
+                  "currency": "USD",
+                  "dateRange": "ThisMonth",
+                  "displayName": "Cost Consumption",
+                  "kpis": [
+                    {
+                      "enabled": true,
+                      "extendedProperties": {
+                        "amount": 2500,
+                        "name": "NormalBudget",
+                        "timeGrain": "Monthly",
+                        "type": "${subscription_guid}"
+                      },
+                      "id": "${subscription_id}/providers/Microsoft.Consumption/budgets/NormalBudget",
+                      "type": "Budget"
+                    },
+                    {
+                      "enabled": true,
+                      "type": "Forecast"
+                    }
+                  ],
+                  "pivots": [
+                    {
+                      "name": "ServiceName",
+                      "type": "Dimension"
+                    },
+                    {
+                      "name": "ResourceLocation",
+                      "type": "Dimension"
+                    },
+                    {
+                      "name": "ResourceGroupName",
+                      "type": "Dimension"
+                    }
+                  ],
+                  "query": {
+                    "dataSet": {
+                      "aggregation": {
+                        "totalCost": {
+                          "function": "Sum",
+                          "name": "Cost"
+                        },
+                        "totalCostUSD": {
+                          "function": "Sum",
+                          "name": "CostUSD"
+                        }
+                      },
+                      "filter": {
+                        "Tags": {
+                          "Name": "repository",
+                          "Operator": "In",
+                          "Values": [
+                            "azure-minecraft-docker"
+                          ]
+                        }
+                      },
+                      "granularity": "Daily",
+                      "sorting": [
+                        {
+                          "direction": "ascending",
+                          "name": "UsageDate"
+                        }
+                      ]
+                    },
+                    "timeframe": "None",
+                    "type": "ActualCost"
+                  },
+                  "scope": "subscriptions/${subscription_guid}"
+                }
+              },
+              {
+                "isOptional": true,
+                "name": "externalState"
+              }
+            ],
+            "savedContainerState": {
+              "assetName": "Resources tagged 'repository'='azure-minecraft-docker'",
+              "partTitle": "Cost Consumption"
+            },
+            "type": "Extension/Microsoft_Azure_CostManagement/PartType/CostAnalysisPinPart"
+          },
+          "position": {
+            "colSpan": 6,
+            "metadata": null,
+            "rowSpan": 4,
+            "x": 7,
             "y": 6
           }
         }
@@ -1014,13 +789,10 @@
               "value": "Past 30 days"
             },
             "filteredPartIds": [
-              "StartboardPart-MonitorChartPart-3f334281-b88f-469e-8516-e8b3eb2b4011",
-              "StartboardPart-LogsDashboardPart-3f334281-b88f-469e-8516-e8b3eb2b4013",
-              "StartboardPart-MonitorChartPart-3f334281-b88f-469e-8516-e8b3eb2b4017",
-              "StartboardPart-LogsDashboardPart-3f334281-b88f-469e-8516-e8b3eb2b4019",
-              "StartboardPart-MonitorChartPart-3f334281-b88f-469e-8516-e8b3eb2b401d",
-              "StartboardPart-LogsDashboardPart-3f334281-b88f-469e-8516-e8b3eb2b401f",
-              "StartboardPart-MonitorChartPart-3f334281-b88f-469e-8516-e8b3eb2b4023"
+              "StartboardPart-LogsDashboardPart-509a799a-9431-48a7-9ab1-9bd1561f4013",
+              "StartboardPart-LogsDashboardPart-509a799a-9431-48a7-9ab1-9bd1561f4017",
+              "StartboardPart-MonitorChartPart-509a799a-9431-48a7-9ab1-9bd1561f401b",
+              "StartboardPart-LogsDashboardPart-509a799a-9431-48a7-9ab1-9bd1561f401d"
             ],
             "model": {
               "format": "local",
