@@ -487,11 +487,6 @@ function Validate-Plan (
     }
 
     if ($serverFQDNIDsToReplace) {
-        if ($workspace -ieq "prod") {
-            Write-Error "You're about to change the Minecraft Server hostname in workspace '${workspace}'!!! Please figure out another way of doing so, exiting..."
-            Write-Information $serverFQDNIDsToReplace
-            exit 
-        }
         Write-Warning "You're about to change the Minecraft Server hostname in workspace '${workspace}'!!!"
     }
 
