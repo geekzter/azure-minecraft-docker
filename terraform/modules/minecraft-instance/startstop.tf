@@ -22,9 +22,11 @@ resource azurerm_logic_app_workflow start {
   tags                         = local.tags
 
   lifecycle {
+    # Rely on ARM template until connections are supported: https://github.com/terraform-providers/terraform-provider-azurerm/issues/1691
     ignore_changes             = [
       parameters,
-      tags
+      tags,
+      workflow_parameters
     ]
   }
 
@@ -63,9 +65,11 @@ resource azurerm_logic_app_workflow stop {
   tags                         = local.tags
 
   lifecycle {
+    # Rely on ARM template until connections are supported: https://github.com/terraform-providers/terraform-provider-azurerm/issues/1691
     ignore_changes             = [
       parameters,
-      tags
+      tags,
+      workflow_parameters
     ]
   }
 
