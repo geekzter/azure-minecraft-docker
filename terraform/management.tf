@@ -13,14 +13,8 @@ resource azurerm_application_insights insights {
   location                     = azurerm_log_analytics_workspace.monitor.location
   resource_group_name          = azurerm_log_analytics_workspace.monitor.resource_group_name
   application_type             = "web"
+  workspace_id                 = azurerm_log_analytics_workspace.monitor.id
 
-  # Associate with Log Analytics workspace
-  provisioner local-exec {
-    command                    = "az monitor app-insights component update --ids ${self.id} --workspace ${azurerm_log_analytics_workspace.monitor.id}"
-    environment                = {
-      AZURE_EXTENSION_USE_DYNAMIC_INSTALL = "yes_without_prompt"
-    }  
-  }
   tags                         = azurerm_resource_group.minecraft.tags
 }
 
