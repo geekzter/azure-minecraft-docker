@@ -29,6 +29,7 @@ resource azurerm_logic_app_workflow start {
   }
 
   count                        = var.enable_auto_startstop && var.start_time != null && var.start_time != "" ? 1 : 0
+  depends_on                   = [azurerm_resource_group_template_deployment.container_instance_api_connection]
 }  
 resource azurerm_monitor_diagnostic_setting start_workflow {
   name                         = "${azurerm_logic_app_workflow.start.0.name}-logs"
@@ -69,6 +70,7 @@ resource azurerm_logic_app_workflow stop {
   }
 
   count                        = var.enable_auto_startstop && var.stop_time != null && var.stop_time != "" ? 1 : 0
+  depends_on                   = [azurerm_resource_group_template_deployment.container_instance_api_connection]
 }  
 resource azurerm_monitor_diagnostic_setting stop_workflow {
   name                         = "${azurerm_logic_app_workflow.stop.0.name}-logs"
