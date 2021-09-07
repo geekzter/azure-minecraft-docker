@@ -178,6 +178,7 @@ jobs:
               Write-Warning $_
             }
           } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
+          # No tty
           # az container exec --ids $containerGroupID --exec-command "/health.sh" --container-name minecraft
           
           az container show --ids $containerGroupID --query instanceView
