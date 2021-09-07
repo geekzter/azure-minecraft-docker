@@ -201,26 +201,27 @@ jobs:
       
     - name: Clean Up
       if: ${{ always() }}
-      run: |
-        Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
-
-        # Remove resource locks first
-        $resourceLocksJSON = $(terraform output -json resource_locks 2>$null)
-        if ($resourceLocksJSON -and ($resourceLocksJSON -match "^\[.*\]$")) {
-          $resourceLocks = ($resourceLocksJSON | ConvertFrom-JSON)
-          az resource lock delete --ids $resourceLocks --verbose
-        }
-
-        # Build JMESPath expression
-        $repository = ($env:GITHUB_REPOSITORY).Split("/")[-1]
-        $tagQuery = "[?tags.repository == '${repository}' && tags.workspace == '${env:TF_WORKSPACE}' && tags.runid == '${env:GITHUB_RUN_ID}' && properties.provisioningState != 'Deleting'].id"
-
-        Write-Host "Removing resource group identified by `"$tagQuery`"..."
-        $resourceGroupIDs = $(az group list --query "$tagQuery" -o tsv)
-        if ($resourceGroupIDs) {
-          Write-Host "az resource delete --ids ${resourceGroupIDs}..."
-          az resource delete --ids $resourceGroupIDs --verbose
-        } else {
-          Write-Host "Nothing to remove"
-        }
-      shell: pwsh
+      uses: azure/powershell@v1
+      with:
+        inlineScript: |
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
+          # Remove resource locks first
+          $resourceLocksJSON = $(terraform output -json resource_locks 2>$null)
+          if ($resourceLocksJSON -and ($resourceLocksJSON -match "^\[.*\]$")) {
+            $resourceLocks = ($resourceLocksJSON | ConvertFrom-JSON)
+            az resource lock delete --ids $resourceLocks --verbose
+          }
+          # Build JMESPath expression
+          $repository = ($env:GITHUB_REPOSITORY).Split("/")[-1]
+          $tagQuery = "[?tags.repository == '${repository}' && tags.workspace == '${env:TF_WORKSPACE}' && tags.runid == '${env:GITHUB_RUN_ID}' && properties.provisioningState != 'Deleting'].id"
+          Write-Host "Removing resource group identified by `"$tagQuery`"..."
+          $resourceGroupIDs = $(az group list --query "$tagQuery" -o tsv)
+          if ($resourceGroupIDs) {
+            Write-Host "az resource delete --ids ${resourceGroupIDs}..."
+            az resource delete --ids $resourceGroupIDs --verbose
+          } else {
+            Write-Host "Nothing to remove"
+          }
+        azPSVersion: latest
+        errorActionPreference: Continue
+        failOnStandardError: true
