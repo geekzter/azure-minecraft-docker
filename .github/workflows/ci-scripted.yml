@@ -63,17 +63,6 @@ jobs:
         ./create_workflow_strategy.ps1
       shell: pwsh
 
-    - name: Install json2yaml
-      run: |
-        sudo npm install -g json2yaml
-
-    - name: Check matrix strategy definition
-      run: |
-        matrix='${{ steps.create-strategy.outputs.matrix }}'
-        echo $matrix
-        echo $matrix | jq .
-        echo $matrix | json2yaml
-
     outputs:
       matrix: ${{ steps.create-strategy.outputs.matrix }}
       terraform_preferred_version: ${{ steps.terraform-version-check.outputs.terraform_preferred_version }}
