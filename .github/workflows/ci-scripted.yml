@@ -41,7 +41,7 @@ jobs:
     name: Prepare strategy
     defaults:
       run:
-        working-directory: terraform
+        working-directory: scripts
     runs-on: ubuntu-latest
     steps:
     - name: Checkout source
@@ -57,27 +57,25 @@ jobs:
         Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,INPUT_*,TF_* | Sort-Object -Property Name
       shell: pwsh
 
-    - name: Detect desired Terraform version
-      id: terraform-version-check
-      run: | 
-        $terraformPreferredVersion = (Get-Content .terraform-version)
-        Write-Output "::set-output name=terraform_preferred_version::${terraformPreferredVersion}"
-
-        $terraformLatestVersion = (Invoke-WebRequest -Uri https://checkpoint-api.hashicorp.com/v1/check/terraform -UseBasicParsing | Select-Object -ExpandProperty Content | ConvertFrom-Json | Select-Object -ExpandProperty "current_version")
-        Write-Output "::set-output name=terraform_latest_version::${terraformLatestVersion}"
-      shell: pwsh
-
     - name: Create matrix
-      id: set-matrix
+      id: create-strategy
       run: |
-        $matrix = $(Get-Content ../.github/workflows/ci-scripted-strategy.json)
-        $matrix
-        $matrix | ConvertFrom-Json
-        Write-Output "::set-output name=matrix::${matrix}"
+        ./create_workflow_strategy.ps1
       shell: pwsh
+
+    - name: Install json2yaml
+      run: |
+        sudo npm install -g json2yaml
+
+    - name: Check matrix strategy definition
+      run: |
+        matrix='${{ steps.create-strategy.outputs.matrix }}'
+        echo $matrix
+        echo $matrix | jq .
+        echo $matrix | json2yaml
 
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix: ${{ steps.create-strategy.outputs.matrix }}
       terraform_preferred_version: ${{ steps.terraform-version-check.outputs.terraform_preferred_version }}
       terraform_latest_version: ${{ steps.terraform-version-check.outputs.terraform_latest_version }}
 
@@ -256,18 +254,3 @@ jobs:
     #   if: ${{ always() }}
     #   run: ./deploy.ps1 -Init -Teardown
     #   shell: pwsh
-
-  check-matrix:
-    runs-on: ubuntu-latest
-    needs: prepare
-    steps:
-      - name: Install json2yaml
-        run: |
-          sudo npm install -g json2yaml
-
-      - name: Check matrix definition
-        run: |
-          matrix='${{ needs.prepare.outputs.matrix }}'
-          echo $matrix
-          echo $matrix | jq .
-          echo $matrix | json2yaml

@@ -8,6 +8,7 @@
     "include": [
         {
             "use_latest_versions": false,
+            "azure_cli_version": "latest",
             "pin_provider_versions": true,
             "terraform_apply": true,
             "terraform_version": "latest",
@@ -15,6 +16,7 @@
         },
         {
             "use_latest_versions": true,
+            "azure_cli_version": "latest",
             "pin_provider_versions": false,
             "terraform_apply": true,
             "terraform_version": "latest",
