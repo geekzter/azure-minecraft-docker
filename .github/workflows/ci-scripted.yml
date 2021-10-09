@@ -64,7 +64,7 @@ jobs:
     #   shell: pwsh
 
     - name: Create matrix
-      id: create-strategy
+      id: matrix
       run: |
         $preferredTerraformVersion = (Get-Content ../terraform/.terraform-version | Out-String) -replace "`n|`r"
         Write-Output "::set-output name=terraform_preferred_version::${preferredTerraformVersion}"
@@ -93,7 +93,7 @@ jobs:
       shell: pwsh
 
     outputs:
-      matrix: ${{ steps.create-strategy.outputs.matrix }}
+      matrix: ${{ steps.matrix.outputs.matrix }}
       terraform_preferred_version: ${{ steps.terraform-version-check.outputs.terraform_preferred_version }}
       terraform_latest_version: ${{ steps.terraform-version-check.outputs.terraform_latest_version }}
 
