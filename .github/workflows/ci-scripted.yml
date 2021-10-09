@@ -11,7 +11,11 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-
+    username:
+      description: 'Upgrade Azure CLI to latest version'
+      default: false
+      required: false
+      type: boolean
 env:
   ARM_SAS_TOKEN: ${{ secrets.ARM_SAS_TOKEN }}
   TF_STATE_backend_storage_container: ${{ secrets.TF_STATE_BACKEND_STORAGE_CONTAINER }}
@@ -135,7 +139,7 @@ jobs:
         $env:TF_VAR_workflow_sp_object_id = $servicePrincipal.objectId
         
         # List environment variables
-        Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
+        Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,INPUT_*,TF_* | Sort-Object -Property Name
         # Save environment variable setup for subsequent steps
         Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
       shell: pwsh
@@ -152,16 +156,16 @@ jobs:
       run: 
         npm i -g azure-functions-core-tools@3 --unsafe-perm true
         
-    - name: Terraform Apply
-      id: terraform-apply
-      if: ${{ matrix.terraform_apply }}
-      run: ./deploy.ps1 -Apply -Force -NoCode
-      shell: pwsh
+    # - name: Terraform Apply
+    #   id: terraform-apply
+    #   if: ${{ matrix.terraform_apply }}
+    #   run: ./deploy.ps1 -Apply -Force -NoCode
+    #   shell: pwsh
 
-    - name: Deploy Azure Function
-      if: ${{ matrix.terraform_apply }}
-      run: ./deploy_functions.ps1
-      shell: pwsh
+    # - name: Deploy Azure Function
+    #   if: ${{ matrix.terraform_apply }}
+    #   run: ./deploy_functions.ps1
+    #   shell: pwsh
 
     # - name: Test connection to Minecraft Server
     #   if: ${{ matrix.terraform_apply }}
