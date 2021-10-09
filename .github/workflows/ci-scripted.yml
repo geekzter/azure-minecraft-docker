@@ -79,7 +79,7 @@ jobs:
 
     - name: Check matrix strategy definition
       run: |
-        matrix='${{fromJson(needs.prepare.outputs.matrix)}}'
+        matrix='${{ needs.prepare.outputs.matrix }}'
         echo $matrix
         echo $matrix | jq .
         echo $matrix | json2yaml
@@ -93,7 +93,7 @@ jobs:
     strategy:
       fail-fast: false
       max-parallel: 1
-      matrix: ${{fromJson(needs.prepare.outputs.matrix)}}
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
       # matrix:
       #   os: [ubuntu-latest]
       #   use_latest_versions: [false, true]
