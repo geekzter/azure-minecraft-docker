@@ -74,6 +74,7 @@ jobs:
         $matrix
         $matrix | ConvertFrom-Json
         Write-Output "::set-output name=matrix::${matrix}"
+      shell: pwsh
 
     outputs:
       terraform_preferred_version: ${{ steps.terraform-version-check.outputs.terraform_preferred_version }}
