@@ -57,11 +57,11 @@ jobs:
         Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,INPUT_*,TF_* | Sort-Object -Property Name
       shell: pwsh
 
-    - name: Create matrix
-      id: create-strategy
-      run: |
-        ./create_workflow_strategy.ps1
-      shell: pwsh
+    # - name: Create matrix
+    #   id: set-matrix
+    #   run: |
+    #     ./create_workflow_strategy.ps1
+    #   shell: pwsh
 
     - name: Create matrix
       id: set-matrix
@@ -87,7 +87,12 @@ jobs:
         # $matrixObject.include[1].terraform_version = $latestTerraformVersion
         # $matrixObject.include[1].azure_cli_version = $latestAzureCLIVersion
 
-        $matrixJSON = ($matrixObject | ConvertTo-Json | Out-String)
+        $matrixTempFile = (New-TemporaryFile).Name
+        $matrixObject | ConvertTo-Json | Out-File $matrixTempFile
+
+        # $matrixJSON = ($matrixObject | ConvertTo-Json)
+        $matrixJSON = (Get-Content $matrixTempFile)
+
         Write-Output "::set-output name=matrix::${matrixJSON}"
 
       shell: pwsh
