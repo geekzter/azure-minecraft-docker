@@ -77,7 +77,7 @@ jobs:
         Write-Output "::set-output name=azure_cli_latest_version::${latestAzureCLIVersion}"
 
         $matrixJSON = $(Get-Content ../.github/workflows/ci-scripted-strategy.json)
-        # $matrixObject = ($matrixJSON | ConvertFrom-Json) 
+        $matrixObject = ($matrixJSON | ConvertFrom-Json) 
 
         # # Current / preferred versions
         # $matrixObject.include[0].terraform_version = $preferredTerraformVersion
@@ -87,7 +87,7 @@ jobs:
         # $matrixObject.include[1].terraform_version = $latestTerraformVersion
         # $matrixObject.include[1].azure_cli_version = $latestAzureCLIVersion
 
-        # $matrixJSON = ($matrixObject | ConvertTo-Json)
+        $matrixJSON = ($matrixObject | ConvertTo-Json)
         Write-Output "::set-output name=matrix::${matrixJSON}"
 
       shell: pwsh
