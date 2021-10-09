@@ -59,6 +59,7 @@ jobs:
         os: [ubuntu-latest]
         pin_terraform_version: [true, false]
         pin_provider_versions: [true, false]
+        upgrade_azure_cli: [false, true]
         include:
         - pin_terraform_version: true
           terraform_apply: true
@@ -67,7 +68,7 @@ jobs:
           terraform_apply: false
           terraform_version: ${{ needs.prepare.outputs.terraform_latest_version }}
 
-    name: Pin providers = ${{ matrix.pin_provider_versions }} - Terraform ${{ matrix.terraform_version }}
+    name: Pin providers = ${{ matrix.pin_provider_versions }} - Terraform ${{ matrix.terraform_version }} - Upgrade az = ${{ matrix.upgrade_azure_cli }}
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -85,6 +86,13 @@ jobs:
         $env:MATRIX_CONTEXT   | ConvertFrom-Json | Format-List
       shell: pwsh
 
+    - name: Upgrade Azure CLI
+      id: az-upgrade
+      if: ${{ matrix.upgrade_azure_cli }}
+      run: |
+        az upgrade -y
+        az -v
+      
     - name: Use Azure CLI
       uses: azure/login@v1
       with:
@@ -155,36 +163,36 @@ jobs:
       run: ./deploy_functions.ps1
       shell: pwsh
 
-    - name: Test connection to Minecraft Server
-      if: ${{ matrix.terraform_apply }}
-      run: | 
-        Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
-        $minecraftConfig  = (terraform output -json minecraft | ConvertFrom-Json -AsHashtable)
-        foreach ($minecraftConfigName in $minecraftConfig.Keys) {
-          Write-Host "Processing configuration '{$minecraftConfigName}''..."
-          $containerGroupID = $minecraftConfig[$minecraftConfigName].container_group_id
-          $serverFQDN       = $minecraftConfig[$minecraftConfigName].minecraft_server_fqdn
-          $serverPort       = $minecraftConfig[$minecraftConfigName].minecraft_server_port
+    # - name: Test connection to Minecraft Server
+    #   if: ${{ matrix.terraform_apply }}
+    #   run: | 
+    #     Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
+    #     $minecraftConfig  = (terraform output -json minecraft | ConvertFrom-Json -AsHashtable)
+    #     foreach ($minecraftConfigName in $minecraftConfig.Keys) {
+    #       Write-Host "Processing configuration '{$minecraftConfigName}''..."
+    #       $containerGroupID = $minecraftConfig[$minecraftConfigName].container_group_id
+    #       $serverFQDN       = $minecraftConfig[$minecraftConfigName].minecraft_server_fqdn
+    #       $serverPort       = $minecraftConfig[$minecraftConfigName].minecraft_server_port
 
-          # Wait for Minecraft socket to open
-          $connectionAttempts = 0
-          do {
-            Start-Sleep -Seconds 10
-            Write-Host "Pinging ${serverFQDN} on port ${serverPort}..."
-            try {
-              $connectionAttempts++
-              $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($serverFQDN, $serverPort) -ErrorAction SilentlyContinue
-            } catch [System.Management.Automation.MethodInvocationException] {
-              Write-Warning $_
-            }
-          } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
-          # No tty
-          # az container exec --ids $containerGroupID --exec-command "/health.sh" --container-name minecraft
+    #       # Wait for Minecraft socket to open
+    #       $connectionAttempts = 0
+    #       do {
+    #         Start-Sleep -Seconds 10
+    #         Write-Host "Pinging ${serverFQDN} on port ${serverPort}..."
+    #         try {
+    #           $connectionAttempts++
+    #           $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($serverFQDN, $serverPort) -ErrorAction SilentlyContinue
+    #         } catch [System.Management.Automation.MethodInvocationException] {
+    #           Write-Warning $_
+    #         }
+    #       } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
+    #       # No tty
+    #       # az container exec --ids $containerGroupID --exec-command "/health.sh" --container-name minecraft
           
-          az container show --ids $containerGroupID --query instanceView
-          az container logs --ids $containerGroupID
-        }
-      shell: pwsh
+    #       az container show --ids $containerGroupID --query instanceView
+    #       az container logs --ids $containerGroupID
+    #     }
+    #   shell: pwsh
 
     - name: Remove backup items & resource locks
       if: ${{ matrix.terraform_apply }}
