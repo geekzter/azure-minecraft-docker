@@ -63,7 +63,7 @@ jobs:
         os: [ubuntu-latest]
         pin_terraform_version: [true, false]
         pin_provider_versions: [true, false]
-        upgrade_azure_cli: [false, true]
+        # upgrade_azure_cli: [false, true]
         include:
         - pin_terraform_version: true
           terraform_apply: true
