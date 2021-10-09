@@ -1,0 +1,24 @@
+{
+    "os": [
+        "ubuntu-latest"
+    ],
+    "use_latest_versions": [
+        false, true
+    ],
+    "include": [
+        {
+            "use_latest_versions": false,
+            "pin_provider_versions": true,
+            "terraform_apply": true,
+            "terraform_version": "latest",
+            "upgrade_azure_cli": false
+        },
+        {
+            "use_latest_versions": true,
+            "pin_provider_versions": false,
+            "terraform_apply": true,
+            "terraform_version": "latest",
+            "upgrade_azure_cli": true
+        }
+    ]
+}

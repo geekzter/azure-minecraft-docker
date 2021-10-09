@@ -66,6 +66,15 @@ jobs:
         $terraformLatestVersion = (Invoke-WebRequest -Uri https://checkpoint-api.hashicorp.com/v1/check/terraform -UseBasicParsing | Select-Object -ExpandProperty Content | ConvertFrom-Json | Select-Object -ExpandProperty "current_version")
         Write-Output "::set-output name=terraform_latest_version::${terraformLatestVersion}"
       shell: pwsh
+
+    - name: Create matrix
+      id: set-matrix
+      run: |
+        $matrix = $(Get-Content ../.github/workflows/ci-scripted-strategy.json)
+        $matrix
+        $matrix | ConvertFrom-Json
+        Write-Output "::set-output name=matrix::${matrix}"
+
     outputs:
       terraform_preferred_version: ${{ steps.terraform-version-check.outputs.terraform_preferred_version }}
       terraform_latest_version: ${{ steps.terraform-version-check.outputs.terraform_latest_version }}
@@ -79,20 +88,21 @@ jobs:
     strategy:
       fail-fast: false
       max-parallel: 1
-      matrix:
-        os: [ubuntu-latest]
-        use_latest_versions: [false, true]
-        include:
-        - use_latest_versions: false
-          pin_provider_versions: ${{ github.event.inputs.pin_provider_versions != 'false' && github.event.inputs.pin_provider_versions != 0 }}
-          terraform_apply: true
-          terraform_version: ${{ needs.prepare.outputs.terraform_preferred_version }}
-          upgrade_azure_cli: ${{ github.event.inputs.upgrade_azure_cli != 'true' && github.event.inputs.upgrade_azure_cli != 1 }}
-        - use_latest_versions: true
-          pin_provider_versions: ${{ github.event.inputs.pin_provider_versions != 'true' && github.event.inputs.pin_provider_versions != 1 }}
-          terraform_apply: true
-          terraform_version: ${{ needs.prepare.outputs.terraform_latest_version }}
-          upgrade_azure_cli: ${{ github.event.inputs.upgrade_azure_cli != 'false' && github.event.inputs.upgrade_azure_cli != 0 }}
+      matrix: ${{fromJson(needs.prepare.outputs.matrix)}}
+      # matrix:
+      #   os: [ubuntu-latest]
+      #   use_latest_versions: [false, true]
+      #   include:
+      #   - use_latest_versions: false
+      #     pin_provider_versions: ${{ github.event.inputs.pin_provider_versions != 'false' && github.event.inputs.pin_provider_versions != 0 }}
+      #     terraform_apply: true
+      #     terraform_version: ${{ needs.prepare.outputs.terraform_preferred_version }}
+      #     upgrade_azure_cli: ${{ github.event.inputs.upgrade_azure_cli != 'true' && github.event.inputs.upgrade_azure_cli != 1 }}
+      #   - use_latest_versions: true
+      #     pin_provider_versions: ${{ github.event.inputs.pin_provider_versions != 'true' && github.event.inputs.pin_provider_versions != 1 }}
+      #     terraform_apply: true
+      #     terraform_version: ${{ needs.prepare.outputs.terraform_latest_version }}
+      #     upgrade_azure_cli: ${{ github.event.inputs.upgrade_azure_cli != 'false' && github.event.inputs.upgrade_azure_cli != 0 }}
 
     name: Pin providers = ${{ matrix.pin_provider_versions }} - Terraform ${{ matrix.terraform_version }} - Upgrade az = ${{ matrix.upgrade_azure_cli }}
     runs-on: ${{ matrix.os }}
@@ -166,9 +176,9 @@ jobs:
         Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
       shell: pwsh
 
-    - name: Terraform Init & Plan
-      run: ./deploy.ps1 -Init -Plan
-      shell: pwsh
+    # - name: Terraform Init & Plan
+    #   run: ./deploy.ps1 -Init -Plan
+    #   shell: pwsh
         
     - name: Use Node.js
       if: ${{ matrix.terraform_apply }}
@@ -220,27 +230,42 @@ jobs:
     #     }
     #   shell: pwsh
 
-    - name: Remove backup items & resource locks
-      if: ${{ matrix.terraform_apply }}
-      run: | 
-        . (Join-Path $env:GITHUB_WORKSPACE scripts functions.ps1)
-        TearDown-Resources -Backups -Locks
-      shell: pwsh
+    # - name: Remove backup items & resource locks
+    #   if: ${{ matrix.terraform_apply }}
+    #   run: | 
+    #     . (Join-Path $env:GITHUB_WORKSPACE scripts functions.ps1)
+    #     TearDown-Resources -Backups -Locks
+    #   shell: pwsh
 
-    - name: Terraform Destroy
-      if: ${{ matrix.terraform_apply }}
-      run: ./deploy.ps1 -Destroy -Force
-      shell: pwsh
-      continue-on-error: false
+    # - name: Terraform Destroy
+    #   if: ${{ matrix.terraform_apply }}
+    #   run: ./deploy.ps1 -Destroy -Force
+    #   shell: pwsh
+    #   continue-on-error: false
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v2
-      if: ${{ matrix.terraform_apply }}
-      with:
-        name: terraform
-        path: 'terraform'
+    # - name: Upload artifacts
+    #   uses: actions/upload-artifact@v2
+    #   if: ${{ matrix.terraform_apply }}
+    #   with:
+    #     name: terraform
+    #     path: 'terraform'
       
-    - name: Teardown
-      if: ${{ always() }}
-      run: ./deploy.ps1 -Init -Teardown
-      shell: pwsh
+    # - name: Teardown
+    #   if: ${{ always() }}
+    #   run: ./deploy.ps1 -Init -Teardown
+    #   shell: pwsh
+
+  check-matrix:
+    runs-on: ubuntu-latest
+    needs: prepare
+    steps:
+      - name: Install json2yaml
+        run: |
+          sudo npm install -g json2yaml
+
+      - name: Check matrix definition
+        run: |
+          matrix='${{ needs.prepare.outputs.matrix }}'
+          echo $matrix
+          echo $matrix | jq .
+          echo $matrix | json2yaml
