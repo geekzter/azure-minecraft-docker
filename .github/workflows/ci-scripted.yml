@@ -11,11 +11,17 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-    username:
+    upgrade_azure_cli:
       description: 'Upgrade Azure CLI to latest version'
-      default: false
+      # default: false
       required: false
       type: boolean
+    username:
+      description: 'A username passed from the caller workflow'
+      default: 'john-doe'
+      required: true
+      type: string
+
 env:
   ARM_SAS_TOKEN: ${{ secrets.ARM_SAS_TOKEN }}
   TF_STATE_backend_storage_container: ${{ secrets.TF_STATE_BACKEND_STORAGE_CONTAINER }}
@@ -62,7 +68,8 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         pin_terraform_version: [true, false]
-        pin_provider_versions: [true, false]
+        # pin_provider_versions: [true, false]
+        pin_provider_versions: [true]
         # upgrade_azure_cli: [false, true]
         include:
         - pin_terraform_version: true
@@ -90,6 +97,11 @@ jobs:
         $env:MATRIX_CONTEXT   | ConvertFrom-Json | Format-List
       shell: pwsh
 
+    - name: Print the inputs
+      run: | 
+        echo The username is ${{ inputs.username }}
+        echo Upgrade Azure CLI: ${{ inputs.upgrade_azure_cli }}
+        
     - name: Upgrade Azure CLI
       id: az-upgrade
       if: ${{ matrix.upgrade_azure_cli }}
