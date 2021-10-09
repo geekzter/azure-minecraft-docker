@@ -12,23 +12,18 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
     inputs:
-      numOctocats:
-        description: 'Number of Octocats'
-        required: false
-        default: '1'
-      octocatEyeColor:
-        description: 'Eye color of the Octocats'
-        required: true
-      upgrade_azure_cli:
-        description: 'Upgrade Azure CLI to latest version'
-        # default: false
+      pin_provider_versions:
+        description: 'Pin Terraform provider versions'
         required: false
         type: boolean
-      username:
-        description: 'A username passed from the caller workflow'
-        default: 'john-doe'
-        required: true
-        type: string
+      # pin_terraform_version:
+      #   description: 'Pin Terraform version'
+      #   required: false
+      #   type: boolean
+      upgrade_azure_cli:
+        description: 'Upgrade Azure CLI to latest version'
+        required: false
+        type: boolean
 
 env:
   ARM_SAS_TOKEN: ${{ secrets.ARM_SAS_TOKEN }}
@@ -53,9 +48,8 @@ jobs:
       uses: actions/checkout@v2
     - name: Print the inputs
       run: | 
-        echo The username is ${{ github.event.inputs.username }}
-        echo numOctocats is ${{ github.event.inputs.numOctocats }}
-        echo octocatEyeColor is ${{ github.event.inputs.octocatEyeColor }}
+        echo Pin Terraform provider versions: ${{ github.event.inputs.pin_provider_versions }}
+        echo Pin Terraform version: ${{ github.event.inputs.pin_terraform_version }}
         echo Upgrade Azure CLI: ${{ github.event.inputs.upgrade_azure_cli }}
 
     - name: Print environment variables
@@ -87,29 +81,18 @@ jobs:
       max-parallel: 1
       matrix:
         os: [ubuntu-latest]
-        use_latest_versions: [true, false]
+        use_latest_versions: [false, true]
         include:
         - use_latest_versions: false
-          pin_provider_versions: true
+          pin_provider_versions: ${{ github.event.inputs.pin_provider_versions != 'false' && github.event.inputs.pin_provider_versions != 0 }}
           terraform_apply: true
           terraform_version: ${{ needs.prepare.outputs.terraform_preferred_version }}
-          upgrade_azure_cli: false
+          upgrade_azure_cli: ${{ github.event.inputs.upgrade_azure_cli != 'true' && github.event.inputs.upgrade_azure_cli != 1 }}
         - use_latest_versions: true
-          pin_provider_versions: false
+          pin_provider_versions: ${{ github.event.inputs.pin_provider_versions != 'true' && github.event.inputs.pin_provider_versions != 1 }}
           terraform_apply: true
           terraform_version: ${{ needs.prepare.outputs.terraform_latest_version }}
-          upgrade_azure_cli: true
-        # pin_terraform_version: [true, false]
-        # # pin_provider_versions: [true, false]
-        # pin_provider_versions: [true]
-        # # upgrade_azure_cli: [false, true]
-        # include:
-        # - pin_terraform_version: true
-        #   terraform_apply: true
-        #   terraform_version: ${{ needs.prepare.outputs.terraform_preferred_version }}
-        # - pin_terraform_version: false
-        #   terraform_apply: false
-        #   terraform_version: ${{ needs.prepare.outputs.terraform_latest_version }}
+          upgrade_azure_cli: ${{ github.event.inputs.upgrade_azure_cli != 'false' && github.event.inputs.upgrade_azure_cli != 0 }}
 
     name: Pin providers = ${{ matrix.pin_provider_versions }} - Terraform ${{ matrix.terraform_version }} - Upgrade az = ${{ matrix.upgrade_azure_cli }}
     runs-on: ${{ matrix.os }}
@@ -129,13 +112,6 @@ jobs:
         $env:MATRIX_CONTEXT   | ConvertFrom-Json | Format-List
       shell: pwsh
 
-    - name: Print the inputs
-      run: | 
-        echo The username is ${{ github.event.inputs.username }}
-        echo numOctocats is ${{ github.event.inputs.numOctocats }}
-        echo octocatEyeColor is ${{ github.event.inputs.octocatEyeColor }}
-        echo Upgrade Azure CLI: ${{ github.event.inputs.upgrade_azure_cli }}
-        
     - name: Upgrade Azure CLI
       id: az-upgrade
       if: ${{ matrix.upgrade_azure_cli }}
