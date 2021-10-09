@@ -87,7 +87,7 @@ jobs:
         # $matrixObject.include[1].terraform_version = $latestTerraformVersion
         # $matrixObject.include[1].azure_cli_version = $latestAzureCLIVersion
 
-        $matrixJSON = ($matrixObject | ConvertTo-Json)
+        $matrixJSON = ($matrixObject | ConvertTo-Json | Out-String)
         Write-Output "::set-output name=matrix::${matrixJSON}"
 
       shell: pwsh
