@@ -44,6 +44,16 @@ jobs:
     steps:
     - name: Checkout source
       uses: actions/checkout@v2
+    - name: Print the inputs
+      run: | 
+        echo The username is ${{ inputs.username }}
+        echo Upgrade Azure CLI: ${{ inputs.upgrade_azure_cli }}
+
+    - name: Print environment variables
+      run: | 
+        Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,INPUT_*,TF_* | Sort-Object -Property Name
+      shell: pwsh
+
     - name: Detect desired Terraform version
       id: terraform-version-check
       run: | 
