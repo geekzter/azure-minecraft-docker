@@ -87,6 +87,7 @@ jobs:
         $matrixObject.include[1].azure_cli_version = $latestAzureCLIVersion
 
         $matrix = ($matrixObject | ConvertTo-Json)
+        $matrix
         Write-Output "::set-output name=matrix::${matrix}"
 
       shell: pwsh
