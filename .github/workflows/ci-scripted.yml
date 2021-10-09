@@ -87,17 +87,29 @@ jobs:
       max-parallel: 1
       matrix:
         os: [ubuntu-latest]
-        pin_terraform_version: [true, false]
-        # pin_provider_versions: [true, false]
-        pin_provider_versions: [true]
-        # upgrade_azure_cli: [false, true]
+        use_latest_versions: [true, false]
         include:
-        - pin_terraform_version: true
+        - use_latest_versions: false
+          pin_provider_versions: true
           terraform_apply: true
           terraform_version: ${{ needs.prepare.outputs.terraform_preferred_version }}
-        - pin_terraform_version: false
-          terraform_apply: false
+          upgrade_azure_cli: false
+        - use_latest_versions: true
+          pin_provider_versions: false
+          terraform_apply: true
           terraform_version: ${{ needs.prepare.outputs.terraform_latest_version }}
+          upgrade_azure_cli: true
+        # pin_terraform_version: [true, false]
+        # # pin_provider_versions: [true, false]
+        # pin_provider_versions: [true]
+        # # upgrade_azure_cli: [false, true]
+        # include:
+        # - pin_terraform_version: true
+        #   terraform_apply: true
+        #   terraform_version: ${{ needs.prepare.outputs.terraform_preferred_version }}
+        # - pin_terraform_version: false
+        #   terraform_apply: false
+        #   terraform_version: ${{ needs.prepare.outputs.terraform_latest_version }}
 
     name: Pin providers = ${{ matrix.pin_provider_versions }} - Terraform ${{ matrix.terraform_version }} - Upgrade az = ${{ matrix.upgrade_azure_cli }}
     runs-on: ${{ matrix.os }}
