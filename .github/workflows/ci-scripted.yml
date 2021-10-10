@@ -46,9 +46,9 @@ jobs:
     steps:
     - name: Checkout source
       uses: actions/checkout@v2
-    - name: Print the inputs
-      run: | 
-        echo "${{ fromJson(github.event.inputs) }}"
+    # - name: Print the inputs
+    #   run: | 
+    #     echo "${{ fromJson(github.event.inputs) }}"
 
     - name: Print environment variables
       run: | 
