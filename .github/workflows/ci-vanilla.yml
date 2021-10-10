@@ -169,8 +169,9 @@ jobs:
           }
         } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
         
-        az container show --ids ${{ steps.terraform-apply.outputs.container_group_id }} --query instanceView
-        az container logs --ids ${{ steps.terraform-apply.outputs.container_group_id }}
+        # BUG: https://github.com/Azure/azure-cli/issues/19475
+        # az container show --ids ${{ steps.terraform-apply.outputs.container_group_id }} --query instanceView
+        # az container logs --ids ${{ steps.terraform-apply.outputs.container_group_id }}
         # No tty
         # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "/health.sh" --container-name minecraft
       env:
@@ -182,8 +183,9 @@ jobs:
       run: | 
         # Wait for Minecraft to boot up
         while ! echo exit | nc $TF_OUT_minecraft_server_fqdn $TF_OUT_minecraft_server_port; do sleep 10; done
-        az container show --ids ${{ steps.terraform-apply.outputs.container_group_id }} --query instanceView
-        az container logs --ids ${{ steps.terraform-apply.outputs.container_group_id }}
+        # BUG: https://github.com/Azure/azure-cli/issues/19475
+        # az container show --ids ${{ steps.terraform-apply.outputs.container_group_id }} --query instanceView
+        # az container logs --ids ${{ steps.terraform-apply.outputs.container_group_id }}
         # No tty
         # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "/health.sh" --container-name minecraft
       shell: bash
