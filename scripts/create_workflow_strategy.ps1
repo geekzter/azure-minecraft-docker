@@ -24,19 +24,22 @@ function Parse-Input (
     [string]$InputText
 ) {
     switch -regex ($InputText) {
-        "false" {
+        "0" {
             return [UseLatest]::No
         }
-        "0" {
+        "false" {
             return [UseLatest]::No
         }
         "no" {  
             return [UseLatest]::No
         }
-        "true" {
+        "1" {
             return [UseLatest]::Yes
         }
-        "1" {
+        "ok" {
+            return [UseLatest]::Yes
+        }
+        "true" {
             return [UseLatest]::Yes
         }
         "yes" {  

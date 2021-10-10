@@ -48,7 +48,7 @@ jobs:
       uses: actions/checkout@v2
     - name: Print the inputs
       run: | 
-        echo ${{ fromJson(github.event.inputs) }}
+        echo "${{ fromJson(github.event.inputs) }}"
 
     - name: Print environment variables
       run: | 
