@@ -86,7 +86,6 @@ $matrixObject.include[1].terraform_version = ($upgradeTerraform ? $latestTerrafo
 $matrixObject.include[1].upgrade_azure_cli = $upgradeAzureCLI
 $matrixObject.include[1].azure_cli_version = ($upgradeAzureCLI ? $latestAzureCLIVersion : $installedAzureCLIVersion)
 
-
 if (($matrixObject.include[0].pin_provider_versions -eq $matrixObject.include[1].pin_provider_versions) -and `
     ($matrixObject.include[0].terraform_version     -eq $matrixObject.include[1].terraform_version) -and `
     ($matrixObject.include[0].upgrade_azure_cli     -eq $matrixObject.include[1].upgrade_azure_cli) -and `
