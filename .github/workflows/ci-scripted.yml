@@ -174,25 +174,34 @@ jobs:
         $env:MATRIX_CONTEXT   | ConvertFrom-Json | Format-List
       shell: pwsh
 
-    - name: Upgrade Azure CLI
-      id: az-upgrade
-      if: ${{ matrix.upgrade_azure_cli }}
-      run: |
-        az upgrade -y
-        az -v
+    # - name: Upgrade Azure CLI
+    #   id: az-upgrade
+    #   if: ${{ matrix.upgrade_azure_cli }}
+    #   run: |
+    #     az upgrade -y
+    #     az -v
       
     - name: Use Azure CLI
       uses: azure/login@v1
       with:
+        azcliversion: ${{ matrix.azure_cli_version }}
         creds: ${{ secrets.AZURE_CREDENTIALS }}
         enable-AzPSSession: false
 
+    - name: Show Azure CLI version
+      run: |
+        az -v
+      
     - name: Use Terraform
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: ${{matrix.terraform_version}}
         terraform_wrapper: false
 
+    - name: Show Terraform version
+      run: |
+        terraform -v
+      
     - name: Unpin Terraform provider versions
       id: terraform-version-check
       if: ${{ !matrix.pin_provider_versions }}

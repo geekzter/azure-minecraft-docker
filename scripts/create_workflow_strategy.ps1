@@ -1,4 +1,16 @@
 #!/usr/bin/env pwsh
+<# 
+.SYNOPSIS 
+    Create matrix workflow strategy for GitHub Actions
+ #> 
+#Requires -Version 7
+
+### Arguments
+param ( 
+    [parameter(Mandatory=$false)][switch]$UseLatestTerraformProviderVersions=$false,
+    [parameter(Mandatory=$false)][switch]$UseLatestTerraformVersion=$false,
+    [parameter(Mandatory=$false)][switch]$UseLatestAzureCLIVersion=$false
+) 
 
 $preferredTerraformVersion = (Get-Content $PSScriptRoot/../terraform/.terraform-version | Out-String) -replace "`n|`r"
 Write-Output "::set-output name=terraform_preferred_version::${preferredTerraformVersion}"
