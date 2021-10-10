@@ -7,9 +7,9 @@
 
 ### Arguments
 param ( 
-    [parameter(Mandatory=$false)][switch]$UseLatestTerraformProviderVersions=$false,
-    [parameter(Mandatory=$false)][switch]$UseLatestTerraformVersion=$false,
-    [parameter(Mandatory=$false)][switch]$UseLatestAzureCLIVersion=$false
+    [parameter(Mandatory=$false)][bool]$UseLatestTerraformProviderVersions,
+    [parameter(Mandatory=$false)][bool]$UseLatestTerraformVersion,
+    [parameter(Mandatory=$false)][bool]$UseLatestAzureCLIVersion
 ) 
 
 $preferredTerraformVersion = (Get-Content $PSScriptRoot/../terraform/.terraform-version | Out-String) -replace "`n|`r"
@@ -26,14 +26,22 @@ $matrixJSONTemplate = $(Get-Content $PSScriptRoot/../.github/workflows/ci-script
 $matrixObject = ($matrixJSONTemplate | ConvertFrom-Json) 
 
 # Current / preferred versions
-$matrixObject.include[0].terraform_version = $preferredTerraformVersion
-$matrixObject.include[0].azure_cli_version = $installedAzureCLIVersion
-$matrixObject.include[0].upgrade_azure_cli = false
+$pinTerraformProviderVersions = (!$PSBoundParameters.ContainsKey('UseLatestTerraformProviderVersions') -or ($PSBoundParameters.ContainsKey('UseLatestTerraformProviderVersions') -and !$UseLatestTerraformProviderVersions))
+$upgradeTerraform = ($PSBoundParameters.ContainsKey('UseLatestTerraformVersion') -and $UseLatestTerraformVersion)
+$upgradeAzureCLI = ($PSBoundParameters.ContainsKey('UseLatestAzureCLIVersion') -and $UseLatestAzureCLIVersion)
+$matrixObject.include[0].pin_provider_versions = $pinTerraformProviderVersions
+$matrixObject.include[0].terraform_version = ($upgradeTerraform ? $latestTerraformVersion : $preferredTerraformVersion)
+$matrixObject.include[0].upgrade_azure_cli = $upgradeAzureCLI
+$matrixObject.include[0].azure_cli_version = ($upgradeAzureCLI ? $latestAzureCLIVersion : $installedAzureCLIVersion)
 
 # Latest versions
-$matrixObject.include[1].terraform_version = $latestTerraformVersion
-$matrixObject.include[1].azure_cli_version = $latestAzureCLIVersion
-$matrixObject.include[0].upgrade_azure_cli = true
+$pinTerraformProviderVersions = ($PSBoundParameters.ContainsKey('UseLatestTerraformProviderVersions') -and !$UseLatestTerraformProviderVersions)
+$upgradeTerraform = (!$PSBoundParameters.ContainsKey('UseLatestTerraformVersion') -or ($PSBoundParameters.ContainsKey('UseLatestTerraformVersion') -and $UseLatestTerraformVersion))
+$upgradeAzureCLI = (!$PSBoundParameters.ContainsKey('UseLatestAzureCLIVersion') -or ($PSBoundParameters.ContainsKey('UseLatestAzureCLIVersion') -and $UseLatestAzureCLIVersion))
+$matrixObject.include[1].pin_provider_versions = $pinTerraformProviderVersions
+$matrixObject.include[1].terraform_version = ($upgradeTerraform ? $latestTerraformVersion : $preferredTerraformVersion)
+$matrixObject.include[1].upgrade_azure_cli = $upgradeAzureCLI
+$matrixObject.include[1].azure_cli_version = ($upgradeAzureCLI ? $latestAzureCLIVersion : $installedAzureCLIVersion)
 
 $matrixJSON = ($matrixObject | ConvertTo-Json -Compress)
 $matrixJSON | jq
