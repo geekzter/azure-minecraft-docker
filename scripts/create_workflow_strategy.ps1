@@ -92,6 +92,7 @@ if (($matrixObject.include[0].pin_provider_versions -eq $matrixObject.include[1]
     ($matrixObject.include[0].azure_cli_version     -eq $matrixObject.include[1].azure_cli_version)) {
     # Configurations are identical
     Write-Host "Configurations are identical"
+    $matrixObject.compatible = $matrixObject.compatible[0..0]
     $matrixObject.include = $matrixObject.include[0..0]
 }
 
