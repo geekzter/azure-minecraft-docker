@@ -86,6 +86,11 @@ $matrixObject.include[1].terraform_version = ($upgradeTerraform ? $latestTerrafo
 $matrixObject.include[1].upgrade_azure_cli = $upgradeAzureCLI
 $matrixObject.include[1].azure_cli_version = ($upgradeAzureCLI ? $latestAzureCLIVersion : $installedAzureCLIVersion)
 
+if ($matrixObject.include[0].GetHashCode().Equals($matrixObject.include[1].GetHashCode())) {
+    # Configurations are identical
+    $matrixObject.include.Remove[1]
+}
+
 $matrixJSON = ($matrixObject | ConvertTo-Json -Compress)
 $matrixJSON | jq
 
