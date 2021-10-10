@@ -2,10 +2,6 @@
   "os": [
     "ubuntu-latest"
   ],
-  "pin_provider_versions": [
-    true,
-    false
-  ],
   "include": [
     {
       "azure_cli_version": "latest",
