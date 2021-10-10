@@ -76,7 +76,8 @@ jobs:
         $latestAzureCLIVersion = (Invoke-WebRequest -Uri https://api.github.com/repos/Azure/azure-cli/releases/latest -UseBasicParsing | Select-Object -ExpandProperty Content | ConvertFrom-Json | Select-Object -ExpandProperty "name").split(" ")[-1]
         Write-Output "::set-output name=azure_cli_latest_version::${latestAzureCLIVersion}"
 
-        $matrixJSON = $(Get-Content ../.github/workflows/ci-scripted-strategy.json)
+        # $matrixJSON = $(Get-Content ../.github/workflows/ci-scripted-strategy.json)
+        $matrixJSON = $(Get-Content ../.github/workflows/ci-scripted-strategy.json -Raw)
         $matrixObject = ($matrixJSON | ConvertFrom-Json) 
 
         # # Current / preferred versions
@@ -91,8 +92,9 @@ jobs:
         $matrixObject | ConvertTo-Json | Out-File $matrixTempFile
 
         # $matrixJSON = ($matrixObject | ConvertTo-Json)
-        $matrixJSON = (Get-Content $matrixTempFile)
+        # $matrixJSON = (Get-Content $matrixTempFile)
 
+        $matrixJSON | jq
         Write-Output "::set-output name=matrix::${matrixJSON}"
 
       shell: pwsh
