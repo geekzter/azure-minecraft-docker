@@ -27,22 +27,22 @@ function Parse-Input (
         "0" {
             return [UseLatest]::No
         }
-        "false" {
+        "false.*" {
             return [UseLatest]::No
         }
-        "^no" {  
+        "^no.*" {  
             return [UseLatest]::No
         }
         "1" {
             return [UseLatest]::Yes
         }
-        "ok" {
+        "ok.*" {
             return [UseLatest]::Yes
         }
-        "true" {
+        "true.*" {
             return [UseLatest]::Yes
         }
-        "ye[s|p]" {  
+        "ye[s|p].*" {  
             return [UseLatest]::Yes
         }
         default {
@@ -96,7 +96,7 @@ if (($matrixObject.include[0].pin_provider_versions -eq $matrixObject.include[1]
     $matrixObject.include = $matrixObject.include[0..0]
 }
 
+Write-Verbose ($matrixObject | ConvertTo-Json)
 $matrixJSON = ($matrixObject | ConvertTo-Json -Compress)
-$matrixJSON | jq
 
 Write-Output "::set-output name=matrix::${matrixJSON}"
