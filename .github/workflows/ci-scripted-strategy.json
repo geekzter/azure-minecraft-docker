@@ -13,6 +13,7 @@
       "pin_provider_versions": true,
       "terraform_apply": true,
       "terraform_version": "latest",
+      "test_minecraft_connection": true,
       "upgrade_azure_cli": false
     },
     {
@@ -21,6 +22,7 @@
       "pin_provider_versions": false,
       "terraform_apply": true,
       "terraform_version": "latest",
+      "test_minecraft_connection": true,
       "upgrade_azure_cli": true
     }
   ]
