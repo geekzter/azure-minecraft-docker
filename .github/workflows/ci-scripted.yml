@@ -80,11 +80,11 @@ jobs:
     - name: Check matrix strategy definition
       run: |
         # echo ${{ needs.prepare.outputs.matrix }}
-        echo '${{ fromJson(needs.prepare.outputs.matrix) }}'
-        # matrix='${{ needs.prepare.outputs.matrix }}'
-        # echo $matrix
-        # echo $matrix | jq .
-        # echo $matrix | json2yaml
+        # echo '${{ fromJson(needs.prepare.outputs.matrix) }}'
+        matrix='${{ needs.prepare.outputs.matrix }}'
+        echo $matrix
+        echo $matrix | jq .
+        echo $matrix | json2yaml
 
   integrated:
     needs: prepare
