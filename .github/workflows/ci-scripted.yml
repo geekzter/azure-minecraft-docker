@@ -174,12 +174,12 @@ jobs:
         $env:MATRIX_CONTEXT   | ConvertFrom-Json | Format-List
       shell: pwsh
 
-    # - name: Upgrade Azure CLI
-    #   id: az-upgrade
-    #   if: ${{ matrix.upgrade_azure_cli }}
-    #   run: |
-    #     az upgrade -y
-    #     az -v
+    - name: Upgrade Azure CLI
+      id: az-upgrade
+      if: ${{ matrix.upgrade_azure_cli }}
+      run: |
+        az upgrade -y
+        az -v
       
     - name: Use Azure CLI
       uses: azure/login@v1

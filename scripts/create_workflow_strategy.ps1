@@ -28,10 +28,12 @@ $matrixObject = ($matrixJSONTemplate | ConvertFrom-Json)
 # Current / preferred versions
 $matrixObject.include[0].terraform_version = $preferredTerraformVersion
 $matrixObject.include[0].azure_cli_version = $installedAzureCLIVersion
+$matrixObject.include[0].upgrade_azure_cli = false
 
 # Latest versions
 $matrixObject.include[1].terraform_version = $latestTerraformVersion
 $matrixObject.include[1].azure_cli_version = $latestAzureCLIVersion
+$matrixObject.include[0].upgrade_azure_cli = true
 
 $matrixJSON = ($matrixObject | ConvertTo-Json -Compress)
 $matrixJSON | jq
