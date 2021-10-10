@@ -69,7 +69,7 @@ jobs:
 
     - name: Display matrix
       run: |
-        $matrixJSON = "${{ steps.create-matrix.outputs.matrix }}"
+        $matrixJSON = '${{ steps.create-matrix.outputs.matrix }}''
         Write-Host $matrixJSON
         Write-Host $matrixJSON | jq
         Write-Host $matrixJSON | json2yaml
