@@ -91,7 +91,7 @@ jobs:
         $matrixTempFile = (New-TemporaryFile).Name
         $matrixObject | ConvertTo-Json | Out-File $matrixTempFile
 
-        # $matrixJSON = ($matrixObject | ConvertTo-Json)
+        $matrixJSON = ($matrixObject | ConvertTo-Json -Compress)
         # $matrixJSON = (Get-Content $matrixTempFile)
 
         $matrixJSON | jq
