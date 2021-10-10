@@ -10,23 +10,18 @@ Write-Output "::set-output name=azure_cli_installed_version::${installedAzureCLI
 $latestAzureCLIVersion = (Invoke-WebRequest -Uri https://api.github.com/repos/Azure/azure-cli/releases/latest -UseBasicParsing | Select-Object -ExpandProperty Content | ConvertFrom-Json | Select-Object -ExpandProperty "name").split(" ")[-1]
 Write-Output "::set-output name=azure_cli_latest_version::${latestAzureCLIVersion}"
 
-$matrixJSON = $(Get-Content $PSScriptRoot/../.github/workflows/ci-scripted-strategy.json)
-# $matrixJSON = $(Get-Content $PSScriptRoot/../.github/workflows/ci-scripted-strategy.json -Raw)
-$matrixObject = ($matrixJSON | ConvertFrom-Json) 
+$matrixJSONTemplate = $(Get-Content $PSScriptRoot/../.github/workflows/ci-scripted-strategy.json)
+$matrixObject = ($matrixJSONTemplate | ConvertFrom-Json) 
 
-# # Current / preferred versions
-# $matrixObject.include[0].terraform_version = $preferredTerraformVersion
-# $matrixObject.include[0].azure_cli_version = $installedAzureCLIVersion
+# Current / preferred versions
+$matrixObject.include[0].terraform_version = $preferredTerraformVersion
+$matrixObject.include[0].azure_cli_version = $installedAzureCLIVersion
 
-# # Latest versions
-# $matrixObject.include[1].terraform_version = $latestTerraformVersion
-# $matrixObject.include[1].azure_cli_version = $latestAzureCLIVersion
-
-$matrixTempFile = (New-TemporaryFile).Name
-$matrixObject | ConvertTo-Json | Out-File $matrixTempFile
+# Latest versions
+$matrixObject.include[1].terraform_version = $latestTerraformVersion
+$matrixObject.include[1].azure_cli_version = $latestAzureCLIVersion
 
 $matrixJSON = ($matrixObject | ConvertTo-Json -Compress)
-# $matrixJSON = (Get-Content $matrixTempFile)
-
 $matrixJSON | jq
+
 Write-Output "::set-output name=matrix::${matrixJSON}"
