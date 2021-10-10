@@ -58,7 +58,11 @@ jobs:
     - name: Create matrix
       id: create-matrix
       run: |
-        ./create_workflow_strategy.ps1
+
+        $matrixJSONTemplate = $(Get-Content ../.github/workflows/ci-scripted-strategy.json)
+        Write-Output "::set-output name=matrix::${matrixJSONTemplate}"
+
+        # ./create_workflow_strategy.ps1
         # ./create_workflow_strategy.ps1 -UseLatestTerraformProviderVersionsInput ${{ github.event.inputs.upgrade_provider_versions }} `
         #                                -UseLatestTerraformVersionInput ${{ github.event.inputs.upgrade_terraform_version }} `
         #                                -UseLatestAzureCLIVersionInput ${{ github.event.inputs.upgrade_azure_cli }} 
