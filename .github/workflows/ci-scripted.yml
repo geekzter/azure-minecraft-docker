@@ -63,28 +63,22 @@ jobs:
                                        -UseLatestAzureCLIVersionInput ${{ github.event.inputs.upgrade_azure_cli }} 
       shell: pwsh
 
-    outputs:
-      matrix: ${{ steps.create-matrix.outputs.matrix }}
-      terraform_preferred_version: ${{ steps.terraform-version-check.outputs.terraform_preferred_version }}
-      terraform_latest_version: ${{ steps.terraform-version-check.outputs.terraform_latest_version }}
-
-  check-strategy:
-    needs: prepare
-    name: Check strategy
-    runs-on: ubuntu-latest
-    steps:
     - name: Install json2yaml
       run: |
         sudo npm install -g json2yaml
 
-    - name: Check matrix strategy definition
+    - name: Display matrix
       run: |
-        # echo ${{ needs.prepare.outputs.matrix }}
-        # echo '${{ fromJson(needs.prepare.outputs.matrix) }}'
-        matrix='${{ needs.prepare.outputs.matrix }}'
-        echo $matrix
-        echo $matrix | jq .
-        echo $matrix | json2yaml
+        $matrixJSON = "${{ steps.create-matrix.outputs.matrix }}"
+        Write-Host $matrixJSON
+        Write-Host $matrixJSON | jq
+        Write-Host $matrixJSON | json2yaml
+      shell: pwsh
+
+    outputs:
+      matrix: ${{ steps.create-matrix.outputs.matrix }}
+      terraform_preferred_version: ${{ steps.terraform-version-check.outputs.terraform_preferred_version }}
+      terraform_latest_version: ${{ steps.terraform-version-check.outputs.terraform_latest_version }}
 
   integrated:
     needs: prepare
