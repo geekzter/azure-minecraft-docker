@@ -63,18 +63,18 @@ jobs:
                                        -UseLatestAzureCLIVersionInput ${{ github.event.inputs.upgrade_azure_cli }} 
       shell: pwsh
 
-    - name: Install json2yaml
-      run: |
-        sudo npm install -g json2yaml
+    # - name: Install json2yaml
+    #   run: |
+    #     sudo npm install -g json2yaml
 
-    - name: Display matrix
-      run: |
-        $matrixJSON = '${{ steps.create-matrix.outputs.matrix }}'
-        $matrixJSON
-        $matrixJSON | jq
-        $matrixJSON | ConvertFrom-Json
-        $matrixJSON | json2yaml
-      shell: pwsh
+    # - name: Display matrix
+    #   run: |
+    #     $matrixJSON = '${{ steps.create-matrix.outputs.matrix }}'
+    #     $matrixJSON
+    #     $matrixJSON | jq
+    #     $matrixJSON | ConvertFrom-Json
+    #     $matrixJSON | json2yaml
+    #   shell: pwsh
 
     outputs:
       matrix: ${{ steps.create-matrix.outputs.matrix }}
