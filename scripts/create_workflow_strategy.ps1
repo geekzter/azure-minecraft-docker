@@ -30,7 +30,7 @@ function Parse-Input (
         "false" {
             return [UseLatest]::No
         }
-        "no" {  
+        "^no" {  
             return [UseLatest]::No
         }
         "1" {
@@ -42,7 +42,7 @@ function Parse-Input (
         "true" {
             return [UseLatest]::Yes
         }
-        "yes" {  
+        "ye[s|p]" {  
             return [UseLatest]::Yes
         }
         default {

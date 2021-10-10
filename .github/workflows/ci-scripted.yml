@@ -69,10 +69,11 @@ jobs:
 
     - name: Display matrix
       run: |
-        $matrixJSON = '${{ steps.create-matrix.outputs.matrix }}''
-        Write-Host $matrixJSON
-        Write-Host $matrixJSON | jq
-        Write-Host $matrixJSON | json2yaml
+        $matrixJSON = '${{ steps.create-matrix.outputs.matrix }}'
+        $matrixJSON
+        $matrixJSON | jq
+        $matrixJSON | ConvertFrom-Json
+        $matrixJSON | json2yaml
       shell: pwsh
 
     outputs:
