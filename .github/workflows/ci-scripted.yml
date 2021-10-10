@@ -59,7 +59,7 @@ jobs:
       id: create-matrix
       run: |
 
-        $matrixJSONTemplate = $(Get-Content ../.github/workflows/ci-scripted-strategy.json)
+        $matrixJSONTemplate = $(Get-Content ../.github/workflows/test.json)
         Write-Output "::set-output name=matrix::${matrixJSONTemplate}"
 
         # ./create_workflow_strategy.ps1
