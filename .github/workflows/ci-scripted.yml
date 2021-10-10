@@ -206,69 +206,69 @@ jobs:
       run: 
         npm i -g azure-functions-core-tools@3 --unsafe-perm true
         
-    # - name: Terraform Apply
-    #   id: terraform-apply
-    #   if: ${{ matrix.terraform_apply }}
-    #   run: ./deploy.ps1 -Apply -Force -NoCode
-    #   shell: pwsh
+    - name: Terraform Apply
+      id: terraform-apply
+      if: ${{ matrix.terraform_apply }}
+      run: ./deploy.ps1 -Apply -Force -NoCode
+      shell: pwsh
 
-    # - name: Deploy Azure Function
-    #   if: ${{ matrix.terraform_apply }}
-    #   run: ./deploy_functions.ps1
-    #   shell: pwsh
+    - name: Deploy Azure Function
+      if: ${{ matrix.terraform_apply }}
+      run: ./deploy_functions.ps1
+      shell: pwsh
 
-    # - name: Test connection to Minecraft Server
-    #   if: ${{ matrix.terraform_apply && matrix.test_minecraft_connection }}
-    #   run: | 
-    #     Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
-    #     $minecraftConfig  = (terraform output -json minecraft | ConvertFrom-Json -AsHashtable)
-    #     foreach ($minecraftConfigName in $minecraftConfig.Keys) {
-    #       Write-Host "Processing configuration '{$minecraftConfigName}''..."
-    #       $containerGroupID = $minecraftConfig[$minecraftConfigName].container_group_id
-    #       $serverFQDN       = $minecraftConfig[$minecraftConfigName].minecraft_server_fqdn
-    #       $serverPort       = $minecraftConfig[$minecraftConfigName].minecraft_server_port
+    - name: Test connection to Minecraft Server
+      if: ${{ matrix.terraform_apply && matrix.test_minecraft_connection }}
+      run: | 
+        Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
+        $minecraftConfig  = (terraform output -json minecraft | ConvertFrom-Json -AsHashtable)
+        foreach ($minecraftConfigName in $minecraftConfig.Keys) {
+          Write-Host "Processing configuration '{$minecraftConfigName}''..."
+          $containerGroupID = $minecraftConfig[$minecraftConfigName].container_group_id
+          $serverFQDN       = $minecraftConfig[$minecraftConfigName].minecraft_server_fqdn
+          $serverPort       = $minecraftConfig[$minecraftConfigName].minecraft_server_port
 
-    #       # Wait for Minecraft socket to open
-    #       $connectionAttempts = 0
-    #       do {
-    #         Start-Sleep -Seconds 10
-    #         Write-Host "Pinging ${serverFQDN} on port ${serverPort}..."
-    #         try {
-    #           $connectionAttempts++
-    #           $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($serverFQDN, $serverPort) -ErrorAction SilentlyContinue
-    #         } catch [System.Management.Automation.MethodInvocationException] {
-    #           Write-Warning $_
-    #         }
-    #       } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
-    #       # No tty
-    #       # az container exec --ids $containerGroupID --exec-command "/health.sh" --container-name minecraft
+          # Wait for Minecraft socket to open
+          $connectionAttempts = 0
+          do {
+            Start-Sleep -Seconds 10
+            Write-Host "Pinging ${serverFQDN} on port ${serverPort}..."
+            try {
+              $connectionAttempts++
+              $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($serverFQDN, $serverPort) -ErrorAction SilentlyContinue
+            } catch [System.Management.Automation.MethodInvocationException] {
+              Write-Warning $_
+            }
+          } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
+          # No tty
+          # az container exec --ids $containerGroupID --exec-command "/health.sh" --container-name minecraft
           
-    #       az container show --ids $containerGroupID --query instanceView
-    #       az container logs --ids $containerGroupID
-    #     }
-    #   shell: pwsh
+          az container show --ids $containerGroupID --query instanceView
+          az container logs --ids $containerGroupID
+        }
+      shell: pwsh
 
-    # - name: Remove backup items & resource locks
-    #   if: ${{ matrix.terraform_apply }}
-    #   run: | 
-    #     . (Join-Path $env:GITHUB_WORKSPACE scripts functions.ps1)
-    #     TearDown-Resources -Backups -Locks
-    #   shell: pwsh
+    - name: Remove backup items & resource locks
+      if: ${{ matrix.terraform_apply }}
+      run: | 
+        . (Join-Path $env:GITHUB_WORKSPACE scripts functions.ps1)
+        TearDown-Resources -Backups -Locks
+      shell: pwsh
 
-    # - name: Terraform Destroy
-    #   if: ${{ matrix.terraform_apply }}
-    #   run: ./deploy.ps1 -Destroy -Force
-    #   shell: pwsh
-    #   continue-on-error: false
+    - name: Terraform Destroy
+      if: ${{ matrix.terraform_apply }}
+      run: ./deploy.ps1 -Destroy -Force
+      shell: pwsh
+      continue-on-error: false
 
-    # - name: Upload artifacts
-    #   uses: actions/upload-artifact@v2
-    #   if: ${{ matrix.terraform_apply }}
-    #   with:
-    #     name: terraform
-    #     path: 'terraform'
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      if: ${{ matrix.terraform_apply }}
+      with:
+        name: terraform
+        path: 'terraform'
       
-    # - name: Teardown
-    #   if: ${{ always() }}
-    #   run: ./deploy.ps1 -Init -Teardown
-    #   shell: pwsh
+    - name: Teardown
+      if: ${{ always() }}
+      run: ./deploy.ps1 -Init -Teardown
+      shell: pwsh

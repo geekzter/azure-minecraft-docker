@@ -12,12 +12,12 @@ param (
     [parameter(Mandatory=$false)][string]$UseLatestTerraformVersionInput,
     [parameter(Mandatory=$false)][string]$UseLatestAzureCLIVersionInput
 ) 
-Write-Host $MyInvocation.line 
+Write-Host $MyInvocation.line
 
 enum UseLatest {
-    No = 1
-    Yes = 2
-    Strategy = 4
+    No
+    Yes
+    Strategy
 }
 
 function Parse-Input (
