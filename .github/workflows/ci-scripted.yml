@@ -113,7 +113,9 @@ jobs:
       id: az-upgrade
       if: ${{ matrix.upgrade_azure_cli }}
       run: |
-        # az upgrade -y # not reliable
+        sudo az upgrade -y # not reliable
+        az -v
+
         sudo apt-get update
         sudo apt-get install ca-certificates curl apt-transport-https lsb-release gnupg
         curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
