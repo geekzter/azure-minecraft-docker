@@ -114,6 +114,7 @@ jobs:
       if: ${{ matrix.upgrade_azure_cli }}
       run: |
         # az upgrade -y # not reliable
+        sudo apt-get update
         Write-Host "`nAzure CLI package data:"
         apt-cache show azure-cli
         Write-Host "`nAzure CLI package data for version ${{ matrix.azure_cli_version }}:"
