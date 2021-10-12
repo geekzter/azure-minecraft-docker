@@ -113,8 +113,13 @@ jobs:
       id: az-upgrade
       if: ${{ matrix.upgrade_azure_cli }}
       run: |
-        az upgrade -y
+        # az upgrade -y # not reliable
+        $packageName = $(apt-cache show azure-cli | Select-String 'Version: ${{ matrix.azure_cli_version }}')
+        sudo apt-get install --allow-downgrades azure-cli=$packageName
+
         az -v
+      continue-on-error: true
+      shell: pwsh
       
     - name: Use Azure CLI
       uses: azure/login@v1

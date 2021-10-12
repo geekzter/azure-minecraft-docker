@@ -11,7 +11,7 @@
       "compatible": "backward",
       "azure_cli_version": "latest",
       "pin_provider_versions": true,
-      "terraform_apply": true,
+      "terraform_apply": false,
       "terraform_version": "latest",
       "upgrade_azure_cli": false
     },
@@ -19,7 +19,7 @@
       "compatible": "forward",
       "azure_cli_version": "latest",
       "pin_provider_versions": false,
-      "terraform_apply": true,
+      "terraform_apply": false,
       "terraform_version": "latest",
       "upgrade_azure_cli": true
     }
