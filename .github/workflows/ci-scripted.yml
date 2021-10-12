@@ -122,11 +122,13 @@ jobs:
         echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
         sudo apt-get update
 
-        Write-Host "`nAzure CLI package data:"
-        apt-cache show azure-cli
-        Write-Host "`nAzure CLI package data for version ${{ matrix.azure_cli_version }}:"
-        apt-cache show azure-cli | Select-String 'Version: ${{ matrix.azure_cli_version }}'
-        $packageName = $(apt-cache show azure-cli | Select-String 'Version: ${{ matrix.azure_cli_version }}' | Out-String).Split(" ")[-1].Trim()
+        # Write-Host "`nAzure CLI package data:"
+        # apt-cache show azure-cli
+        # Write-Host "`nAzure CLI package versions:"
+        # apt-cache show azure-cli | Select-String 'Version:'
+        # Write-Host "`nAzure CLI package data for version ${{ matrix.azure_cli_version }}:"
+        # apt-cache show azure-cli | Select-String 'Version: ${{ matrix.azure_cli_version }}'
+        $packageName = ($(apt-cache show azure-cli | Select-String 'Version: ${{ matrix.azure_cli_version }}.*$') -split ' ' | Select-Object -Last 1)
         Write-Host "`npackageName: $packageName"
         if ($packageName) {
           sudo apt-get install --allow-downgrades azure-cli=$packageName
