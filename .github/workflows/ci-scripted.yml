@@ -113,13 +113,27 @@ jobs:
       id: az-upgrade
       if: ${{ matrix.upgrade_azure_cli }}
       run: |
-        az upgrade -y
+        # sudo az upgrade -y # not reliable
+
+        curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
+        echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
+        sudo apt-get update
+
+        $packageName = ($(apt-cache show azure-cli | Select-String 'Version: ${{ matrix.azure_cli_version }}.*$') -split ' ' | Select-Object -Last 1)
+        Write-Host "`nAzure CLI package: $packageName"
+        if ($packageName) {
+          sudo apt-get install --allow-downgrades azure-cli=$packageName
+        } else {
+          Write-Host "Azure CLI version ${{ matrix.azure_cli_version }} not found"
+        }
+
         az -v
+      continue-on-error: true
+      shell: pwsh
       
     - name: Use Azure CLI
       uses: azure/login@v1
       with:
-        azcliversion: ${{ matrix.azure_cli_version }}
         creds: ${{ secrets.AZURE_CREDENTIALS }}
         enable-AzPSSession: false
 
@@ -218,12 +232,22 @@ jobs:
               Write-Warning $_
             }
           } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
-          # No tty
-          # az container exec --ids $containerGroupID --exec-command "/health.sh" --container-name minecraft
+          if ($mineCraftConnection.Connected) {
+              Write-Host "Connected to ${serverFQDN}:${serverPort}"
+              $mineCraftConnection.Close()
+          } else {
+              Write-Warning "Could not connect to ${serverFQDN}:${serverPort}!"
+          }
           
           # BUG: https://github.com/Azure/azure-cli/issues/19475
-          # az container show --ids $containerGroupID --query instanceView
-          # az container logs --ids $containerGroupID
+          if ([version]$(az version --query '\"azure-cli\"' -o tsv) -ge [version]"2.29") {
+            # No tty / ioctl device
+            # az container exec --ids $containerGroupID --exec-command "/health.sh" --container-name minecraft
+            script --return --quiet -c "az container exec --ids $containerGroupID --exec-command '/health.sh' --container-name minecraft" /dev/null
+
+            az container show --ids $containerGroupID --query instanceView
+            az container logs --ids $containerGroupID
+          }
         }
       shell: pwsh
 
