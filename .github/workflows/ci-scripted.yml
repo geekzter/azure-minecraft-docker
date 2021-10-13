@@ -232,12 +232,16 @@ jobs:
               Write-Warning $_
             }
           } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
-          # No tty
-          # az container exec --ids $containerGroupID --exec-command "/health.sh" --container-name minecraft
           
           # BUG: https://github.com/Azure/azure-cli/issues/19475
-          # az container show --ids $containerGroupID --query instanceView
-          # az container logs --ids $containerGroupID
+          if ([version]$(az version --query '\"azure-cli\"' -o tsv) -ge [version]"2.29") {
+            az container show --ids $containerGroupID --query instanceView
+            az container logs --ids $containerGroupID
+          }
+
+          # No tty / ioctl device
+          # az container exec --ids $containerGroupID --exec-command "/health.sh" --container-name minecraft
+          script --return --quiet -c "az container exec --ids $containerGroupID --exec-command '/health.sh' --container-name minecraft" /dev/null
         }
       shell: pwsh
 
