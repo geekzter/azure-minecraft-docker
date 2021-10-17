@@ -35,4 +35,12 @@ resource azurerm_storage_share minecraft_share {
   name                         = var.container_data_share_name
   storage_account_name         = var.storage_account_name
   quota                        = 50
+
+  acl {
+    id                         = uuid()
+
+    access_policy {
+      permissions              = "rwdl"
+    }
+  }
 }

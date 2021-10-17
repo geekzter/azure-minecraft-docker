@@ -45,7 +45,7 @@ resource azurerm_container_group minecraft_server {
   os_type                      = "linux"
 
   container {
-    cpu                        = "2" # Bedrock
+    cpu                        = "1"
     name                       = "minecraft"
     environment_variables      = local.environment_variables
     image                      = local.container_image
@@ -61,7 +61,7 @@ resource azurerm_container_group minecraft_server {
     #   success_threshold        = 1
     #   timeout_seconds          = 10
     # }
-    memory                     = "4" # Bedrock
+    memory                     = "2"
     ports {
       port                     = 80
       protocol                 = "TCP"
@@ -74,14 +74,14 @@ resource azurerm_container_group minecraft_server {
       port                     = 19133
       protocol                 = "UDP" # Bedrock
     }
-    # volume {
-    #   mount_path               = "/data"
-    #   name                     = "data"
-    #   read_only                = false
-    #   share_name               = azurerm_storage_share.minecraft_share.name
-    #   storage_account_name     = var.storage_account_name
-    #   storage_account_key      = var.storage_account_key
-    # }
+    volume {
+      mount_path               = "/data"
+      name                     = "data"
+      read_only                = false
+      share_name               = azurerm_storage_share.minecraft_share.name
+      storage_account_name     = var.storage_account_name
+      storage_account_key      = var.storage_account_key
+    }
   }
   
   diagnostics {
