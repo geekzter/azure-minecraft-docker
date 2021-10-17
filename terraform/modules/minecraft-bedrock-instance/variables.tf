@@ -59,22 +59,19 @@ variable log_analytics_workspace_workspace_key {}
 
 variable log_filter_jar {}
 
-variable minecraft_server_port {
-  type                         = number
-  default                      = 25565
+variable minecraft_members {
+  type                         = list
+  default                      = []
 }
-# https://github.com/itzg/docker-minecraft-server#opadministrator-players
 variable minecraft_ops {
   type                         = list
   default                      = []
 }
-# https://github.com/itzg/docker-minecraft-server#timezone-configuration
 variable minecraft_timezone {
   type                         = string
   default                      = "Europe/Amsterdam"
 }
-# https://github.com/itzg/docker-minecraft-server#whitelist-players
-variable minecraft_users {
+variable minecraft_user_names {
   type                         = list
   default                      = []
 }

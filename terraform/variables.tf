@@ -50,12 +50,12 @@ variable minecraft_bedrock_config {
       container_image_tag      = "latest"
       environment_variables    = {
         ALLOW_CHEATS           = false
+        DEBUG                  = "true" # Bedrock is Alpha software
         DIFFICULTY             = "easy"
         EULA                   = true
         GAMEMODE               = "creative"
-        # LEVEL_TYPE
         MAX_PLAYERS            = 10
-        # ONLINE_MODE
+        OVERRIDE_SERVER_PROPERTIES = true
         VERSION                = "LATEST"
       }
       minecraft_server_port    = 19132
@@ -64,6 +64,16 @@ variable minecraft_bedrock_config {
       vanity_hostname_prefix   = "bedrock"
     }
   }
+}
+variable minecraft_bedrock_ops {
+  type                         = list
+  default                      = []
+  description                  = "Bedrock requires users to be specified as XUID (XBoX Live User ID)"
+}
+variable minecraft_bedrock_members {
+  type                         = list
+  default                      = []
+  description                  = "Bedrock requires users to be specified as XUID (XBoX Live User ID)"
 }
 
 variable minecraft_config {
@@ -119,6 +129,7 @@ variable minecraft_timezone {
 variable minecraft_users {
   type                         = list
   default                      = []
+  description                  = "Java & Bedrock allow list works with regular usernames / gamer tags"
 }
 
 variable provisoner_email_address {

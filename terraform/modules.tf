@@ -102,10 +102,10 @@ module minecraft_bedrock {
   log_analytics_workspace_workspace_key = azurerm_log_analytics_workspace.monitor.primary_shared_key
   log_filter_jar               = var.log_filter_jar
 
-  minecraft_ops                = var.minecraft_ops
-  minecraft_server_port        = lookup(each.value, "minecraft_server_port", 25565)
+  minecraft_members            = var.minecraft_bedrock_members
+  minecraft_ops                = var.minecraft_bedrock_ops
   minecraft_timezone           = var.minecraft_timezone
-  minecraft_users              = var.minecraft_users
+  minecraft_user_names         = var.minecraft_users
 
   monitor_action_group_id      = azurerm_monitor_action_group.arm_roles.id
 
@@ -151,6 +151,7 @@ module functions {
   suffix                       = local.suffix
   tags                         = module.minecraft[each.key].tags
 
+  # Function tests only cover Java edition
   for_each                     = var.minecraft_config
 }
 

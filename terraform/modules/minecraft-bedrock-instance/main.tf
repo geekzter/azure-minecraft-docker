@@ -5,8 +5,6 @@ locals {
     var.tags,
     {
       container_group_id       = azurerm_container_group.minecraft_server.id
-      minecraft_ops            = join(",",var.minecraft_ops)
-      minecraft_users          = join(",",var.minecraft_users)
       vanity_dns_zone_id       = var.vanity_dns_zone_id
       vanity_hostname_prefix   = var.vanity_hostname_prefix
     }
@@ -18,12 +16,12 @@ locals {
       OPS                      = join(",",var.minecraft_ops)
       TZ                       = var.minecraft_timezone
       # Bedrock
-      # MEMBERS
+      MEMBERS                  = var.allow_ops_only ? join(",",var.minecraft_ops) : join(",",var.minecraft_members)
       # VISITORS
-      # ALLOW_LIST_USERS         = var.allow_ops_only ? join(",",var.minecraft_ops) : join(",",var.minecraft_users)
-      # WHITE_LIST_USERS         = var.allow_ops_only ? join(",",var.minecraft_ops) : join(",",var.minecraft_users)
-      ALLOW_LIST               = var.allow_ops_only ? join(",",var.minecraft_ops) : join(",",var.minecraft_users)
-      WHITE_LIST               = var.allow_ops_only ? join(",",var.minecraft_ops) : join(",",var.minecraft_users)
+      ALLOW_LIST_USERS         = join(",",var.minecraft_user_names)
+      WHITE_LIST_USERS         = join(",",var.minecraft_user_names)
+      # ALLOW_LIST               = var.allow_ops_only ? join(",",var.minecraft_ops) : join(",",var.minecraft_users)
+      # WHITE_LIST               = var.allow_ops_only ? join(",",var.minecraft_ops) : join(",",var.minecraft_users)      
     }
   )  
   # https://github.com/itzg/docker-minecraft-server

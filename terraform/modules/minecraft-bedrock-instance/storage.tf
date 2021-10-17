@@ -28,7 +28,7 @@ resource azurerm_storage_blob minecraft_user_configuration {
   storage_account_name         = var.storage_account_name
   storage_container_name       = var.configuration_storage_container_name
   type                         = "Block"
-  source_content               = jsonencode(var.minecraft_users)
+  source_content               = jsonencode(var.minecraft_user_names)
 }
 
 resource azurerm_storage_share minecraft_share {
