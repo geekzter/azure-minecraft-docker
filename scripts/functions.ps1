@@ -548,7 +548,7 @@ function WaitFor-MinecraftServer (
         Push-Location $tfdirectory
         
         # Cater for multiple servers
-        $minecraftConfig  = (terraform output -json minecraft | ConvertFrom-Json -AsHashtable)
+        $minecraftConfig  = (terraform output -json minecraft_java | ConvertFrom-Json -AsHashtable)
         Write-Debug "`$minecraftConfig: $minecraftConfig"
         Write-Debug "`$minecraftConfig: $($minecraftConfig | ConvertTo-Json)"
         $resourceGroup    = (Get-TerraformOutput "resource_group")

@@ -45,47 +45,43 @@ resource azurerm_container_group minecraft_server {
   os_type                      = "linux"
 
   container {
-    cpu                        = "1"
+    cpu                        = "2" # Bedrock
     name                       = "minecraft"
     environment_variables      = local.environment_variables
     image                      = local.container_image
-    liveness_probe {
-      exec                     = [
-        "/bin/bash",
-        "-c",
-        "/health.sh",
-      ]
-      failure_threshold        = 3
-      initial_delay_seconds    = 300
-      period_seconds           = 10 # 300
-      success_threshold        = 1
-      timeout_seconds          = 10
-    }
-    memory                     = "2"
+    # liveness_probe {
+    #   exec                     = [
+    #     "/bin/bash",
+    #     "-c",
+    #     "/usr/local/bin/mc-monitor",
+    #   ]
+    #   failure_threshold        = 3
+    #   initial_delay_seconds    = 300
+    #   period_seconds           = 10 # 300
+    #   success_threshold        = 1
+    #   timeout_seconds          = 10
+    # }
+    memory                     = "4" # Bedrock
     ports {
       port                     = 80
       protocol                 = "TCP"
     }
     ports {
-      port                     = var.minecraft_server_port
-      protocol                 = "TCP"
+      port                     = 19132
+      protocol                 = "UDP" # Bedrock
     }
-    volume {
-      mount_path               = "/data"
-      name                     = "azurefile"
-      read_only                = false
-      share_name               = azurerm_storage_share.minecraft_share.name
-      storage_account_name     = var.storage_account_name
-      storage_account_key      = var.storage_account_key
+    ports {
+      port                     = 19133
+      protocol                 = "UDP" # Bedrock
     }
-    volume {
-      mount_path               = "/modpacks"
-      name                     = "modpacks"
-      read_only                = false
-      share_name               = azurerm_storage_share.minecraft_modpacks.name
-      storage_account_name     = var.storage_account_name
-      storage_account_key      = var.storage_account_key
-    }
+    # volume {
+    #   mount_path               = "/data"
+    #   name                     = "data"
+    #   read_only                = false
+    #   share_name               = azurerm_storage_share.minecraft_share.name
+    #   storage_account_name     = var.storage_account_name
+    #   storage_account_key      = var.storage_account_key
+    # }
   }
   
   diagnostics {
@@ -101,11 +97,6 @@ resource azurerm_container_group minecraft_server {
   }
 
   tags                         = local.tags
-
-  depends_on                   = [
-    azurerm_storage_share_file.log_filter_config,
-    azurerm_storage_share_file.log_filter_jar,
-  ]
 }
 
 data azurerm_dns_zone vanity_domain {
