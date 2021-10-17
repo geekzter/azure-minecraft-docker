@@ -20,6 +20,8 @@ locals {
       # Bedrock
       # MEMBERS
       # VISITORS
+      # ALLOW_LIST_USERS         = var.allow_ops_only ? join(",",var.minecraft_ops) : join(",",var.minecraft_users)
+      # WHITE_LIST_USERS         = var.allow_ops_only ? join(",",var.minecraft_ops) : join(",",var.minecraft_users)
       ALLOW_LIST               = var.allow_ops_only ? join(",",var.minecraft_ops) : join(",",var.minecraft_users)
       WHITE_LIST               = var.allow_ops_only ? join(",",var.minecraft_ops) : join(",",var.minecraft_users)
     }

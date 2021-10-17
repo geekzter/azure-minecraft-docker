@@ -47,7 +47,6 @@ variable minecraft_bedrock_config {
     bedrock                    = {
       allow_ops_only           = false
       container_image          = "itzg/minecraft-bedrock-server"
-      # container_image_tag      = "multiarch-latest"
       container_image_tag      = "latest"
       environment_variables    = {
         ALLOW_CHEATS           = false
