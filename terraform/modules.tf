@@ -83,14 +83,13 @@ module minecraft_bedrock {
 
   container_image              = lookup(each.value, "container_image", "itzg/minecraft-bedrock-server")
   container_image_tag          = lookup(each.value, "container_image_tag", "latest")
-  container_data_share_name    = replace("minecraft-aci-${each.key}-data-${local.suffix}","-primary","")
-  container_modpacks_share_name= replace("minecraft-aci-${each.key}-modpacks-${local.suffix}","-primary","")
+  container_data_share_name    = replace("minecraft-aci-bedrock-${each.key}-data-${local.suffix}","-primary","")
+  container_modpacks_share_name= replace("minecraft-aci-bedrock-${each.key}-modpacks-${local.suffix}","-primary","")
   environment_variables        = each.value["environment_variables"]
 
   environment                  = local.environment
 
   enable_backup                = var.enable_backup
-  enable_log_filter            = var.enable_log_filter
   enable_auto_startstop        = var.enable_auto_startstop
   start_time                   = lookup(each.value, "start_time", "07:00")
   stop_time                    = lookup(each.value, "stop_time", "00:01")
@@ -100,8 +99,7 @@ module minecraft_bedrock {
   log_analytics_workspace_id   = azurerm_log_analytics_workspace.monitor.id
   log_analytics_workspace_workspace_id = azurerm_log_analytics_workspace.monitor.workspace_id
   log_analytics_workspace_workspace_key = azurerm_log_analytics_workspace.monitor.primary_shared_key
-  log_filter_jar               = var.log_filter_jar
-
+  
   minecraft_members            = var.minecraft_bedrock_members
   minecraft_ops                = var.minecraft_bedrock_ops
   minecraft_timezone           = var.minecraft_timezone

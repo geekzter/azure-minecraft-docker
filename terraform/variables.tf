@@ -44,7 +44,7 @@ variable log_filter_jar {
 variable minecraft_bedrock_config {
   type                         = map
   default                      = {
-    bedrock                    = {
+    primary                    = {
       allow_ops_only           = false
       container_image          = "itzg/minecraft-bedrock-server"
       container_image_tag      = "latest"
@@ -68,12 +68,12 @@ variable minecraft_bedrock_config {
 variable minecraft_bedrock_ops {
   type                         = list
   default                      = []
-  description                  = "Bedrock requires users to be specified as XUID (XBoX Live User ID)"
+  description                  = "Bedrock requires users to be specified as XUID (XBox Live User ID)"
 }
 variable minecraft_bedrock_members {
   type                         = list
   default                      = []
-  description                  = "Bedrock requires users to be specified as XUID (XBoX Live User ID)"
+  description                  = "Bedrock requires users to be specified as XUID (XBox Live User ID)"
 }
 
 variable minecraft_config {

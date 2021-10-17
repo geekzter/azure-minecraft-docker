@@ -24,11 +24,6 @@ variable enable_backup {
   type                         = bool
   default                      = false
 }
-variable enable_log_filter {
-  type                         = bool
-  default                      = false
-  description                  = "Enable log filter (bukkit/paper/spigot) that is configured to hide chat messages for improved privacy, and hide plugin stats"
-}
 
 variable environment {}
 
@@ -56,8 +51,6 @@ variable location {}
 variable log_analytics_workspace_id {}
 variable log_analytics_workspace_workspace_id {}
 variable log_analytics_workspace_workspace_key {}
-
-variable log_filter_jar {}
 
 variable minecraft_members {
   type                         = list
