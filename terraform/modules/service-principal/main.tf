@@ -25,7 +25,7 @@ resource time_rotating secret_expiration {
 
 resource azuread_service_principal_password spnsecret {
   rotate_when_changed          = {
-    rotation                   = time_rotating.secret_expiration.id
+    rotation                   = timeadd(time_rotating.secret_expiration.id, "8760h") # One year from now
   }
 
   service_principal_id         = azuread_service_principal.spn.id
