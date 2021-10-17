@@ -1,17 +1,10 @@
-resource random_string password {
-  length                       = 12
-  upper                        = true
-  lower                        = true
-  number                       = true
-  special                      = true
-  override_special             = "." 
-}
+data azuread_client_config current {}
 
 resource azuread_application app {
   display_name                 = var.name
-  identifier_uris              = ["http://${var.name}"]
+  owners                       = [data.azuread_client_config.current.object_id]
   sign_in_audience             = "AzureADMyOrg"
-
+  
   web {
     homepage_url               = "https://${var.name}"
     implicit_grant {
@@ -23,6 +16,7 @@ resource azuread_application app {
 
 resource azuread_service_principal spn {
   application_id               = azuread_application.app.application_id
+  owners                       = [data.azuread_client_config.current.object_id]
 }
 
 resource time_rotating secret_expiration {
@@ -30,7 +24,9 @@ resource time_rotating secret_expiration {
 }
 
 resource azuread_service_principal_password spnsecret {
+  rotate_when_changed          = {
+    rotation                   = time_rotating.secret_expiration.id
+  }
+
   service_principal_id         = azuread_service_principal.spn.id
-  value                        = random_string.password.result
-  end_date                     = timeadd(time_rotating.secret_expiration.id, "8760h") # One year from now
 }
