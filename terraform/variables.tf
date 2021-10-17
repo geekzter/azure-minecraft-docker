@@ -41,6 +41,32 @@ variable log_filter_jar {
   default                      = "https://media.forgecdn.net/files/3106/184/ConsoleSpamFix-1.8.5.jar"
 }
 
+variable minecraft_bedrock_config {
+  type                         = map
+  default                      = {
+    bedrock                    = {
+      allow_ops_only           = false
+      container_image          = "itzg/minecraft-bedrock-server"
+      # container_image_tag      = "multiarch-latest"
+      container_image_tag      = "latest"
+      environment_variables    = {
+        ALLOW_CHEATS           = false
+        DIFFICULTY             = "easy"
+        EULA                   = true
+        GAMEMODE               = "creative"
+        # LEVEL_TYPE
+        MAX_PLAYERS            = 10
+        # ONLINE_MODE
+        VERSION                = "LATEST"
+      }
+      minecraft_server_port    = 19132
+      start_time               = ""
+      stop_time                = "00:01"
+      vanity_hostname_prefix   = "bedrock"
+    }
+  }
+}
+
 variable minecraft_config {
   type                         = map
   default                      = {
