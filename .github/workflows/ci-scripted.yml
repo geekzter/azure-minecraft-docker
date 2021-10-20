@@ -22,7 +22,7 @@ on:
         description: 'Upgrade Azure CLI to latest version'
         required: false
       destroy:
-        description: 'Destroy infrastucture'
+        description: 'Destroy Infrastucture'
         required: false
         default: 'true'
 
@@ -214,7 +214,7 @@ jobs:
       if: ${{ matrix.terraform_apply }}
       run: | 
         Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
-        $minecraftConfig  = (terraform output -json minecraft | ConvertFrom-Json -AsHashtable)
+        $minecraftConfig  = (terraform output -json minecraft_java | ConvertFrom-Json -AsHashtable)
         foreach ($minecraftConfigName in $minecraftConfig.Keys) {
           Write-Host "Processing configuration '{$minecraftConfigName}''..."
           $containerGroupID = $minecraftConfig[$minecraftConfigName].container_group_id
