@@ -15,15 +15,16 @@ on:
       upgrade_provider_versions:
         description: 'Upgrade Terraform provider versions'
         required: false
-        type: boolean
       upgrade_terraform_version:
         description: 'Upgrade Terraform version'
         required: false
-        type: boolean
       upgrade_azure_cli:
         description: 'Upgrade Azure CLI to latest version'
         required: false
-        type: boolean
+      destroy:
+        description: 'Destroy Infrastucture'
+        required: false
+        default: 'true'
 
 env:
   ARM_SAS_TOKEN: ${{ secrets.ARM_SAS_TOKEN }}
@@ -213,7 +214,7 @@ jobs:
       if: ${{ matrix.terraform_apply }}
       run: | 
         Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
-        $minecraftConfig  = (terraform output -json minecraft | ConvertFrom-Json -AsHashtable)
+        $minecraftConfig  = (terraform output -json minecraft_java | ConvertFrom-Json -AsHashtable)
         foreach ($minecraftConfigName in $minecraftConfig.Keys) {
           Write-Host "Processing configuration '{$minecraftConfigName}''..."
           $containerGroupID = $minecraftConfig[$minecraftConfigName].container_group_id
@@ -252,14 +253,14 @@ jobs:
       shell: pwsh
 
     - name: Remove backup items & resource locks
-      if: ${{ matrix.terraform_apply }}
+      if: ${{ matrix.terraform_apply && github.event.inputs.destroy != 'false' }}
       run: | 
         . (Join-Path $env:GITHUB_WORKSPACE scripts functions.ps1)
         TearDown-Resources -Backups -Locks
       shell: pwsh
 
     - name: Terraform Destroy
-      if: ${{ matrix.terraform_apply }}
+      if: ${{ matrix.terraform_apply && github.event.inputs.destroy != 'false' }}
       run: ./deploy.ps1 -Destroy -Force
       shell: pwsh
       continue-on-error: false
@@ -272,6 +273,6 @@ jobs:
         path: 'terraform'
       
     - name: Teardown
-      if: ${{ always() }}
+      if: ${{ github.event.inputs.destroy != 'false' }}
       run: ./deploy.ps1 -Init -Teardown
       shell: pwsh
