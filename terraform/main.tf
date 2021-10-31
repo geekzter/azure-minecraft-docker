@@ -18,7 +18,9 @@ locals {
     application                = "Minecraft"
     environment                = local.environment
     provisioner                = "terraform"
-    provisoner-email           = var.provisoner_email_address
+    provisioner-email          = var.provisoner_email_address
+    provisioner-client-id      = data.azurerm_client_config.current.client_id
+    provisioner-object-id      = data.azurerm_client_config.current.object_id
     repository                 = "azure-minecraft-docker"
     runid                      = var.run_id
     suffix                     = local.suffix
