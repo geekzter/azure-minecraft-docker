@@ -15,16 +15,22 @@ on:
       upgrade_provider_versions:
         description: 'Upgrade Terraform provider versions'
         required: false
+        type: boolean
+        default: false
       upgrade_terraform_version:
         description: 'Upgrade Terraform version'
         required: false
+        type: boolean
+        default: false
       upgrade_azure_cli:
         description: 'Upgrade Azure CLI to latest version'
         required: false
+        default: false
       destroy:
         description: 'Destroy Infrastucture'
         required: false
-        default: 'true'
+        type: boolean
+        default: true
 
 env:
   ARM_SAS_TOKEN: ${{ secrets.ARM_SAS_TOKEN }}
