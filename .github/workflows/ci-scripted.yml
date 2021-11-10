@@ -25,6 +25,7 @@ on:
       upgrade_azure_cli:
         description: 'Upgrade Azure CLI to latest version'
         required: false
+        type: boolean
         default: false
       destroy:
         description: 'Destroy Infrastucture'
