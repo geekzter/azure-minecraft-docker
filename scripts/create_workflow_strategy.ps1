@@ -11,7 +11,7 @@ param (
     [parameter(Mandatory=$false)][string]$UseLatestTerraformProviderVersionsInput,
     [parameter(Mandatory=$false)][string]$UseLatestTerraformVersionInput,
     [parameter(Mandatory=$false)][string]$UseLatestAzureCLIVersionInput,
-    [parameter(Mandatory=$false)][bool]$Destroy=$true
+    [parameter(Mandatory=$false)][string]$DestroyInput
 ) 
 Write-Host $MyInvocation.line
 
@@ -21,7 +21,37 @@ enum UseLatest {
     Strategy
 }
 
-function Parse-Input (
+function Parse-Boolean (
+    [string]$InputText
+) {
+    switch -regex ($InputText) {
+        "0" {
+            return $false
+        }
+        "false.*" {
+            return $false
+        }
+        "^no.*" {  
+            return $false
+        }
+        "1" {
+            return $true
+        }
+        "ok.*" {
+            return $true
+        }
+        "true.*" {
+            return $true
+        }
+        "ye[s|p].*" {  
+            return $true
+        }
+        default {
+            return $true
+        }
+    }
+}
+function Parse-Strategy (
     [string]$InputText
 ) {
     switch -regex ($InputText) {
@@ -52,9 +82,10 @@ function Parse-Input (
     }
 }
 
-[UseLatest]$useLatestTerraformProviderVersions = (Parse-Input -InputText "$UseLatestTerraformProviderVersionsInput")
-[UseLatest]$useLatestTerraformVersion = (Parse-Input -InputText "$UseLatestTerraformVersionInput")
-[UseLatest]$useLatestAzureCLIVersion = (Parse-Input -InputText "$UseLatestAzureCLIVersionInput")
+[UseLatest]$useLatestTerraformProviderVersions = (Parse-Strategy -InputText "$UseLatestTerraformProviderVersionsInput")
+[UseLatest]$useLatestTerraformVersion = (Parse-Strategy -InputText "$UseLatestTerraformVersionInput")
+[UseLatest]$useLatestAzureCLIVersion = (Parse-Strategy -InputText "$UseLatestAzureCLIVersionInput")
+$destroy = (Parse-Boolean -InputText $DestroyInput)
 
 $preferredTerraformVersion = (Get-Content $PSScriptRoot/../terraform/.terraform-version | Out-String) -replace "`n|`r"
 Write-Output "::set-output name=terraform_preferred_version::${preferredTerraformVersion}"
@@ -74,7 +105,7 @@ Write-Debug ($matrixObject | ConvertTo-Json)
 $pinTerraformProviderVersions = ($useLatestTerraformProviderVersions -ne [UseLatest]::Yes)
 $upgradeTerraform = ($useLatestTerraformVersion -eq [UseLatest]::Yes)
 $upgradeAzureCLI = ($useLatestAzureCLIVersion -eq [UseLatest]::Yes)
-$matrixObject.include[0].destroy = $Destroy
+$matrixObject.include[0].destroy = $destroy
 $matrixObject.include[0].pin_provider_versions = $pinTerraformProviderVersions
 $matrixObject.include[0].terraform_version = ($upgradeTerraform ? $latestTerraformVersion : $preferredTerraformVersion)
 $matrixObject.include[0].upgrade_azure_cli = $upgradeAzureCLI
@@ -84,7 +115,7 @@ $matrixObject.include[0].azure_cli_version = ($upgradeAzureCLI ? $latestAzureCLI
 $pinTerraformProviderVersions = ($useLatestTerraformProviderVersions -eq [UseLatest]::No)
 $upgradeTerraform = ($useLatestTerraformVersion -ne [UseLatest]::No)
 $upgradeAzureCLI = ($useLatestAzureCLIVersion -ne [UseLatest]::No)
-$matrixObject.include[1].destroy = $Destroy
+$matrixObject.include[1].destroy = $destroy
 $matrixObject.include[1].pin_provider_versions = $pinTerraformProviderVersions
 $matrixObject.include[1].terraform_version = ($upgradeTerraform ? $latestTerraformVersion : $preferredTerraformVersion)
 $matrixObject.include[1].upgrade_azure_cli = $upgradeAzureCLI
