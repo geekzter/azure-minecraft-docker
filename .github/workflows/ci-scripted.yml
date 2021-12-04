@@ -280,6 +280,6 @@ jobs:
         path: 'terraform'
       
     - name: Teardown
-      if: ${{ matrix.terraform_apply && github.event.inputs.destroy != 'false' }}
+      if: ${{ (matrix.terraform_apply && github.event.inputs.destroy != 'false') || failure() }}
       run: ./deploy.ps1 -Init -Teardown
       shell: pwsh
