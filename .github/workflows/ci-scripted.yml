@@ -68,7 +68,8 @@ jobs:
       run: |
         ./create_workflow_strategy.ps1 -UseLatestTerraformProviderVersionsInput "${{ github.event.inputs.upgrade_provider_versions }}" `
                                        -UseLatestTerraformVersionInput "${{ github.event.inputs.upgrade_terraform_version }}" `
-                                       -UseLatestAzureCLIVersionInput "${{ github.event.inputs.upgrade_azure_cli }}" 
+                                       -UseLatestAzureCLIVersionInput "${{ github.event.inputs.upgrade_azure_cli }}" ` 
+                                       -Destroy:$${{ github.event.inputs.destroy }}`
       shell: pwsh
 
     - name: Install json2yaml
@@ -260,14 +261,14 @@ jobs:
       shell: pwsh
 
     - name: Remove backup items & resource locks
-      if: ${{ matrix.terraform_apply && github.event.inputs.destroy != false }}
+      if: ${{ matrix.terraform_apply && matrix.destroy }}
       run: | 
         . (Join-Path $env:GITHUB_WORKSPACE scripts functions.ps1)
         TearDown-Resources -Backups -Locks
       shell: pwsh
 
     - name: Terraform Destroy
-      if: ${{ matrix.terraform_apply && github.event.inputs.destroy != false }}
+      if: ${{ matrix.terraform_apply && matrix.destroy }}
       run: ./deploy.ps1 -Destroy -Force
       shell: pwsh
       continue-on-error: false
@@ -280,6 +281,6 @@ jobs:
         path: 'terraform'
       
     - name: Teardown
-      if: ${{ matrix.terraform_apply && github.event.inputs.destroy != false }}
+      if: ${{ matrix.terraform_apply && matrix.destroy }}
       run: ./deploy.ps1 -Init -Teardown
       shell: pwsh

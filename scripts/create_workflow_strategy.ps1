@@ -10,7 +10,8 @@ param (
     # Fuzzy logic as GitHub actions do not have types inputs (yet)
     [parameter(Mandatory=$false)][string]$UseLatestTerraformProviderVersionsInput,
     [parameter(Mandatory=$false)][string]$UseLatestTerraformVersionInput,
-    [parameter(Mandatory=$false)][string]$UseLatestAzureCLIVersionInput
+    [parameter(Mandatory=$false)][string]$UseLatestAzureCLIVersionInput,
+    [parameter(Mandatory=$false)][switch]$Destroy
 ) 
 Write-Host $MyInvocation.line
 
@@ -72,6 +73,7 @@ $matrixObject = ($matrixJSONTemplate | ConvertFrom-Json)
 $pinTerraformProviderVersions = ($useLatestTerraformProviderVersions -ne [UseLatest]::Yes)
 $upgradeTerraform = ($useLatestTerraformVersion -eq [UseLatest]::Yes)
 $upgradeAzureCLI = ($useLatestAzureCLIVersion -eq [UseLatest]::Yes)
+$matrixObject.include[0].destroy = $Destroy
 $matrixObject.include[0].pin_provider_versions = $pinTerraformProviderVersions
 $matrixObject.include[0].terraform_version = ($upgradeTerraform ? $latestTerraformVersion : $preferredTerraformVersion)
 $matrixObject.include[0].upgrade_azure_cli = $upgradeAzureCLI
@@ -81,6 +83,7 @@ $matrixObject.include[0].azure_cli_version = ($upgradeAzureCLI ? $latestAzureCLI
 $pinTerraformProviderVersions = ($useLatestTerraformProviderVersions -eq [UseLatest]::No)
 $upgradeTerraform = ($useLatestTerraformVersion -ne [UseLatest]::No)
 $upgradeAzureCLI = ($useLatestAzureCLIVersion -ne [UseLatest]::No)
+$matrixObject.include[1].destroy = $Destroy
 $matrixObject.include[1].pin_provider_versions = $pinTerraformProviderVersions
 $matrixObject.include[1].terraform_version = ($upgradeTerraform ? $latestTerraformVersion : $preferredTerraformVersion)
 $matrixObject.include[1].upgrade_azure_cli = $upgradeAzureCLI
