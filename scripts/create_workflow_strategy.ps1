@@ -11,7 +11,7 @@ param (
     [parameter(Mandatory=$false)][string]$UseLatestTerraformProviderVersionsInput,
     [parameter(Mandatory=$false)][string]$UseLatestTerraformVersionInput,
     [parameter(Mandatory=$false)][string]$UseLatestAzureCLIVersionInput,
-    [parameter(Mandatory=$false)][switch]$Destroy
+    [parameter(Mandatory=$false)][bool]$Destroy=$true
 ) 
 Write-Host $MyInvocation.line
 
@@ -68,6 +68,7 @@ Write-Output "::set-output name=azure_cli_latest_version::${latestAzureCLIVersio
 
 $matrixJSONTemplate = $(Get-Content $PSScriptRoot/../.github/workflows/ci-scripted-strategy.json)
 $matrixObject = ($matrixJSONTemplate | ConvertFrom-Json) 
+Write-Debug ($matrixObject | ConvertTo-Json)
 
 # Backward compatible
 $pinTerraformProviderVersions = ($useLatestTerraformProviderVersions -ne [UseLatest]::Yes)
@@ -99,7 +100,7 @@ if (($matrixObject.include[0].pin_provider_versions -eq $matrixObject.include[1]
     $matrixObject.include = $matrixObject.include[0..0]
 }
 
-Write-Verbose ($matrixObject | ConvertTo-Json)
+Write-Debug ($matrixObject | ConvertTo-Json)
 $matrixJSON = ($matrixObject | ConvertTo-Json -Compress)
 
 Write-Output "::set-output name=matrix::${matrixJSON}"
