@@ -261,14 +261,14 @@ jobs:
       shell: pwsh
 
     - name: Remove backup items & resource locks
-      if: ${{ matrix.terraform_apply && matrix.destroy }}
+      if: ${{ matrix.destroy }}
       run: | 
         . (Join-Path $env:GITHUB_WORKSPACE scripts functions.ps1)
         TearDown-Resources -Backups -Locks
       shell: pwsh
 
     - name: Terraform Destroy
-      if: ${{ matrix.terraform_apply && matrix.destroy }}
+      if: ${{ matrix.destroy }}
       run: ./deploy.ps1 -Destroy -Force
       shell: pwsh
       continue-on-error: false
@@ -280,7 +280,7 @@ jobs:
         name: terraform
         path: 'terraform'
       
-    - name: Teardown
-      if: ${{ matrix.terraform_apply && matrix.destroy }}
+    - name: Teardownn
+      if: ${{ matrix.destroy }}
       run: ./deploy.ps1 -Init -Teardown
       shell: pwsh
