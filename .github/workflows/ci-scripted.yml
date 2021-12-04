@@ -282,6 +282,6 @@ jobs:
         path: 'terraform'
       
     - name: Teardown
-      if: ${{ true }}
+      if: ${{ matrix.destroy || failure() }}
       run: ./deploy.ps1 -Init -Teardown
       shell: pwsh
