@@ -169,26 +169,20 @@ jobs:
           }
         } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
         
-        # BUG: https://github.com/Azure/azure-cli/issues/19475
-        # az container show --ids ${{ steps.terraform-apply.outputs.container_group_id }} --query instanceView
-        # az container logs --ids ${{ steps.terraform-apply.outputs.container_group_id }}
         # No tty
         # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "/health.sh" --container-name minecraft
       env:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       shell: pwsh
 
-    - name: Test connection to Minecraft Server (bash)
-      if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
-      run: | 
-        # Wait for Minecraft to boot up
-        while ! echo exit | nc $TF_OUT_minecraft_server_fqdn $TF_OUT_minecraft_server_port; do sleep 10; done
-        # BUG: https://github.com/Azure/azure-cli/issues/19475
-        # az container show --ids ${{ steps.terraform-apply.outputs.container_group_id }} --query instanceView
-        # az container logs --ids ${{ steps.terraform-apply.outputs.container_group_id }}
-        # No tty
-        # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "/health.sh" --container-name minecraft
-      shell: bash
+    # - name: Test connection to Minecraft Server (bash)
+    #   if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+    #   run: | 
+    #     # Wait for Minecraft to boot up
+    #     while ! echo exit | nc $TF_OUT_minecraft_server_fqdn $TF_OUT_minecraft_server_port; do sleep 10; done
+    #     # No tty
+    #     # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "/health.sh" --container-name minecraft
+    #   shell: bash
 
     - name: Terraform Destroy
       if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
