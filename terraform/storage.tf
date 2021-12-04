@@ -65,6 +65,8 @@ resource azurerm_storage_blob minecraft_workspace_vars_configuration {
   depends_on                   = [azurerm_role_assignment.terraform_storage_owner]
 }
 
+# BUG: (azurerm 2.88) 
+#      Error: parsing "***storecze-lock": parsing scope prefix: unable to find the scope prefix from the value "***storecze-lock" with the regex "^((.)***1,***)/providers/Microsoft.Authorization/locks/(.)***1,***"
 resource azurerm_management_lock minecraft_data_lock {
   name                         = "${azurerm_storage_account.minecraft.name}-lock"
   scope                        = azurerm_storage_account.minecraft.id

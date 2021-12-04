@@ -10,6 +10,7 @@
     {
       "compatible": "backward",
       "azure_cli_version": "latest",
+      "destroy": true,
       "pin_provider_versions": true,
       "terraform_apply": true,
       "terraform_version": "latest",
@@ -18,6 +19,7 @@
     {
       "compatible": "forward",
       "azure_cli_version": "latest",
+      "destroy": true,
       "pin_provider_versions": false,
       "terraform_apply": true,
       "terraform_version": "latest",

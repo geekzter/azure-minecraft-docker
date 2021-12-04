@@ -1,13 +1,13 @@
 terraform {
   required_providers {
-    azuread                    = "~> 2.7"
-    azurerm                    = "~> 2.71"
+    azuread                    = "~> 2.12"
+    azurerm                    = "~> 2.87, != 2.88, != 2.88.1"
     http                       = "~> 2.1"
     null                       = "~> 3.1"
     random                     = "~> 3.1"
     time                       = "~> 0.7"
   }
-  required_version             = ">= 0.14.0"
+  required_version             = "~> 1.0"
 }
 
 # Microsoft Azure Resource Manager Provider
