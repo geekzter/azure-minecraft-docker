@@ -54,7 +54,8 @@ jobs:
     steps:
     - name: Checkout source
       uses: actions/checkout@v2
-    # - name: Print the inputs
+
+    # - name: Print inputs
     #   run: | 
     #     echo "${{ fromJson(github.event.inputs) }}"
 
@@ -68,7 +69,9 @@ jobs:
       run: |
         ./create_workflow_strategy.ps1 -DestroyInput "${{ github.event.inputs.destroy }}" `
                                        -UseLatestTerraformProviderVersionsInput "${{ github.event.inputs.upgrade_provider_versions }}" `
-                                       -UseLatestTerraformVersionInput "${{ github.event.inputs.upgrade_terraform_version }}" `
+                                      #  -UseLatestTerraformVersionInput "${{ github.event.inputs.upgrade_terraform_version }}" `
+                                      # BUG: https://github.com/hashicorp/terraform/issues/30110
+                                       -UseLatestTerraformVersionInput false `
                                        -UseLatestAzureCLIVersionInput "${{ github.event.inputs.upgrade_azure_cli }}" 
                                        
       shell: pwsh
