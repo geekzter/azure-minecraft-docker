@@ -32,7 +32,16 @@ on:
         required: false
         type: boolean
         default: true
-
+      workspace:
+        type: choice
+        required: true
+        description: 'Terraform Workspace'
+        default: ci
+        options: 
+        - ci
+        - ci1
+        - ci2
+        - ci3
 env:
   ARM_SAS_TOKEN: ${{ secrets.ARM_SAS_TOKEN }}
   TF_STATE_backend_storage_container: ${{ secrets.TF_STATE_BACKEND_STORAGE_CONTAINER }}
@@ -40,7 +49,7 @@ env:
   TF_STATE_backend_resource_group: ${{ secrets.TF_STATE_BACKEND_RESOURCE_GROUP }}
   TF_IN_AUTOMATION: true
   TF_INPUT: 0
-  TF_WORKSPACE: ci
+  TF_WORKSPACE: ${{ github.event.inputs.workspace || 'ci' }}
 
 name: ci-scripted
 
@@ -56,7 +65,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Print inputs
-      if: ${{ github.event_name == 'workflow_dispatch' }}
+      if: github.event_name == 'workflow_dispatch'
       run: | 
         echo "${{ fromJson(github.event.inputs) }}"
 
