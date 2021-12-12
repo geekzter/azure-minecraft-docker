@@ -55,9 +55,10 @@ jobs:
     - name: Checkout source
       uses: actions/checkout@v2
 
-    # - name: Print inputs
-    #   run: | 
-    #     echo "${{ fromJson(github.event.inputs) }}"
+    - name: Print inputs
+      if: ${{ github.event_name == 'workflow_dispatch' }}
+      run: | 
+        echo "${{ fromJson(github.event.inputs) }}"
 
     - name: Print environment variables
       run: | 
