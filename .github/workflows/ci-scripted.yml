@@ -32,7 +32,16 @@ on:
         required: false
         type: boolean
         default: true
-
+      workspace:
+        type: choice
+        required: true
+        description: 'Terraform Workspace'
+        default: ci
+        options: 
+        - ci
+        - ci1
+        - ci2
+        - ci3
 env:
   ARM_SAS_TOKEN: ${{ secrets.ARM_SAS_TOKEN }}
   TF_STATE_backend_storage_container: ${{ secrets.TF_STATE_BACKEND_STORAGE_CONTAINER }}
@@ -40,7 +49,7 @@ env:
   TF_STATE_backend_resource_group: ${{ secrets.TF_STATE_BACKEND_RESOURCE_GROUP }}
   TF_IN_AUTOMATION: true
   TF_INPUT: 0
-  TF_WORKSPACE: ci
+  TF_WORKSPACE: ${{ github.event.inputs.workspace || 'ci' }}
 
 name: ci-scripted
 
@@ -54,7 +63,9 @@ jobs:
     steps:
     - name: Checkout source
       uses: actions/checkout@v2
-    # - name: Print the inputs
+
+    # - name: Print inputs
+    #   if: ${{ github.event_name == 'workflow_dispatch' }}
     #   run: | 
     #     echo "${{ fromJson(github.event.inputs) }}"
 
@@ -67,9 +78,11 @@ jobs:
       id: create-matrix
       run: |
         ./create_workflow_strategy.ps1 -DestroyInput "${{ github.event.inputs.destroy }}" `
+                                       -UseLatestAzureCLIVersionInput "${{ github.event.inputs.upgrade_azure_cli }}" `
                                        -UseLatestTerraformProviderVersionsInput "${{ github.event.inputs.upgrade_provider_versions }}" `
-                                       -UseLatestTerraformVersionInput "${{ github.event.inputs.upgrade_terraform_version }}" `
-                                       -UseLatestAzureCLIVersionInput "${{ github.event.inputs.upgrade_azure_cli }}" 
+                                       -UseLatestTerraformVersionInput false 
+                                      #  -UseLatestTerraformVersionInput "${{ github.event.inputs.upgrade_terraform_version }}" `
+                                      # BUG: https://github.com/hashicorp/terraform/issues/30110
                                        
       shell: pwsh
 
