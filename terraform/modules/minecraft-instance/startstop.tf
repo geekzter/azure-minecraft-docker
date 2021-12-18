@@ -57,6 +57,52 @@ resource azurerm_monitor_diagnostic_setting start_workflow {
   }
   count                        = var.enable_auto_startstop && var.start_time != null && var.start_time != "" ? 1 : 0
 }
+resource azurerm_logic_app_trigger_recurrence workweek_start_trigger {
+  name                         = "workweek_start"
+  logic_app_id                 = azurerm_logic_app_workflow.start.0.id
+  frequency                    = "Week"
+  interval                     = 1
+  schedule {
+    at_these_hours             = [tonumber(split(":",var.start_time)[0])]
+    at_these_minutes           = [tonumber(split(":",var.start_time)[1])]
+    on_these_days              = [
+      "Monday",
+      "Tuesday", 
+      "Wednesday", 
+      "Thursday", 
+      "Friday",
+    ]
+  }
+# start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T00:00:00Z"
+  time_zone                    = var.timezone
+
+  count                        = var.enable_auto_startstop && var.start_time != null && var.start_time != "" ? 1 : 0
+  depends_on                   = [
+    azurerm_resource_group_template_deployment.start_workflow
+  ]
+}
+resource azurerm_logic_app_trigger_recurrence weekend_start_trigger {
+  name                         = "weekend_start"
+  logic_app_id                 = azurerm_logic_app_workflow.start.0.id
+  frequency                    = "Week"
+  interval                     = 1
+  schedule {
+    at_these_hours             = [tonumber(split(":",var.start_time_weekend)[0])]
+    at_these_minutes           = [tonumber(split(":",var.start_time_weekend)[1])]
+    on_these_days              = [
+      "Saturday",
+      "Sunday",
+    ]
+  }
+# start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T00:00:00Z"
+  time_zone                    = var.timezone
+
+  count                        = var.enable_auto_startstop && var.start_time_weekend != null && var.start_time_weekend != "" ? 1 : 0
+  depends_on                   = [
+    azurerm_logic_app_trigger_recurrence.workweek_start_trigger,
+    azurerm_resource_group_template_deployment.start_workflow
+  ]
+}
 
 resource azurerm_logic_app_workflow stop {
   name                         = "${var.name}-stop"
@@ -101,24 +147,52 @@ resource azurerm_monitor_diagnostic_setting stop_workflow {
 
   count                        = var.enable_auto_startstop && var.stop_time != null && var.stop_time != "" ? 1 : 0
 }
-# resource azurerm_logic_app_trigger_recurrence stop_trigger {
-#   name                         = "stop"
-#   logic_app_id                 = azurerm_logic_app_workflow.stop.0.id
-#   frequency                    = "Week"
-#   interval                     = 1
-#   start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T${var.start_time}:00"
-#   schedule {
-#     on_these_days              = [
-#       "Monday",
-#       "Tuesday", 
-#       "Wednesday", 
-#       "Thursday", 
-#       "Friday",
-#     ]
-#   }
+resource azurerm_logic_app_trigger_recurrence workweek_stop_trigger {
+  name                         = "workweek_stop"
+  logic_app_id                 = azurerm_logic_app_workflow.stop.0.id
+  frequency                    = "Week"
+  interval                     = 1
+  schedule {
+    at_these_hours             = [tonumber(split(":",var.stop_time)[0])]
+    at_these_minutes           = [tonumber(split(":",var.stop_time)[1])]
+    on_these_days              = [
+      "Monday",
+      "Tuesday", 
+      "Wednesday", 
+      "Thursday", 
+      "Friday",
+    ]
+  }
+# start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T00:00:00Z"
+  time_zone                    = var.timezone
 
-#   count                        = var.enable_auto_startstop && var.stop_time != null && var.stop_time != "" ? 1 : 0
-# }
+  count                        = var.enable_auto_startstop && var.stop_time != null && var.stop_time != "" ? 1 : 0
+  depends_on                   = [
+    azurerm_resource_group_template_deployment.stop_workflow
+  ]
+}
+resource azurerm_logic_app_trigger_recurrence weekend_stop_trigger {
+  name                         = "weekend_stop"
+  logic_app_id                 = azurerm_logic_app_workflow.stop.0.id
+  frequency                    = "Week"
+  interval                     = 1
+  schedule {
+    at_these_hours             = [tonumber(split(":",var.stop_time_weekend)[0])]
+    at_these_minutes           = [tonumber(split(":",var.stop_time_weekend)[1])]
+    on_these_days              = [
+      "Saturday",
+      "Sunday",
+    ]
+  }
+# start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T00:00:00Z"
+  time_zone                    = var.timezone
+
+  count                        = var.enable_auto_startstop && var.stop_time_weekend != null && var.stop_time_weekend != "" ? 1 : 0
+  depends_on                   = [
+    azurerm_logic_app_trigger_recurrence.workweek_stop_trigger,
+    azurerm_resource_group_template_deployment.stop_workflow
+  ]
+}
 
 resource azurerm_resource_group_template_deployment container_instance_api_connection {
   name                         = "${var.name}-aci-connection"
