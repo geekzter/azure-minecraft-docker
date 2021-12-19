@@ -73,7 +73,7 @@ resource azurerm_logic_app_trigger_recurrence workweek_start_trigger {
       "Friday",
     ]
   }
-# start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T00:00:00Z"
+  start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T${var.start_time}:00Z"
   time_zone                    = var.timezone
 
   count                        = var.enable_auto_startstop && var.start_time != null && var.start_time != "" ? 1 : 0
@@ -94,7 +94,7 @@ resource azurerm_logic_app_trigger_recurrence weekend_start_trigger {
       "Sunday",
     ]
   }
-# start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T00:00:00Z"
+  start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T${var.start_time_weekend}:00Z"
   time_zone                    = var.timezone
 
   count                        = var.enable_auto_startstop && var.start_time_weekend != null && var.start_time_weekend != "" ? 1 : 0
@@ -163,7 +163,7 @@ resource azurerm_logic_app_trigger_recurrence workweek_stop_trigger {
       "Friday",
     ]
   }
-# start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T00:00:00Z"
+  start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T${var.stop_time}:00Z"
   time_zone                    = var.timezone
 
   count                        = var.enable_auto_startstop && var.stop_time != null && var.stop_time != "" ? 1 : 0
@@ -184,7 +184,7 @@ resource azurerm_logic_app_trigger_recurrence weekend_stop_trigger {
       "Sunday",
     ]
   }
-# start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T00:00:00Z"
+  start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T${var.stop_time_weekend}:00Z"
   time_zone                    = var.timezone
 
   count                        = var.enable_auto_startstop && var.stop_time_weekend != null && var.stop_time_weekend != "" ? 1 : 0
@@ -231,8 +231,6 @@ resource azurerm_resource_group_template_deployment start_workflow {
     container_group_id         = azurerm_container_group.minecraft_server.id
     location                   = var.location
     operation                  = "start"
-    start_time                 = "${formatdate("YYYY-MM-DD",timestamp())}T${var.start_time}"
-    time_zone                  = var.timezone
     workflow_name              = azurerm_logic_app_workflow.start.0.name
   })
 
@@ -255,8 +253,6 @@ resource azurerm_resource_group_template_deployment stop_workflow {
     container_group_id         = azurerm_container_group.minecraft_server.id
     location                   = var.location       
     operation                  = "stop"
-    start_time                 = "${formatdate("YYYY-MM-DD",timestamp())}T${var.stop_time}"
-    time_zone                  = var.timezone
     workflow_name              = azurerm_logic_app_workflow.stop.0.name
   })
 

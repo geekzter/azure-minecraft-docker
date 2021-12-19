@@ -82,7 +82,15 @@ variable start_time {
   default                      = "07:00"
   description                  = "Daily (weekdays) start time in hh:mm:ss format"
 }
+variable start_time_weekend {
+  default                      = "07:00"
+  description                  = "Daily (weekdays) start time in hh:mm:ss format"
+}
 variable stop_time {
+  default                      = "00:01"
+  description                  = "Daily (weekdays) start time in hh:mm:ss format"
+}
+variable stop_time_weekend {
   default                      = "00:01"
   description                  = "Daily (weekdays) start time in hh:mm:ss format"
 }
