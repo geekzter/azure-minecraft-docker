@@ -390,35 +390,42 @@ function TearDown-Resources (
 
             $resourceGroupIDs = $(az group list --query "$tagQuery" -o tsv)
             if ($resourceGroupIDs) {
-                $resourceGroup = $resourceGroupIDs.Split("/")[-1]
+                foreach ($resourceGroupID in $resourceGroupIDs) {
+                    $resourceGroup = $resourceGroupID.Split("/")[-1]
 
-                if ($All -or $Backups) {
-                    $backupVaultID = $(az backup vault list -g $resourceGroup --query "[].id" -o tsv)
-                    if ($backupVaultID) {
-                        $backupVault = $backupVaultID.Split("/")[-1]
+                    # Delete resource lock using naming convention, in case Terraform state already got erased
+                    $resourceLocks = $(az group lock list -g $resourceGroup --query "[?starts_with(name,'minecraftstor') && ends_with(name,'-lock')].id" -o tsv)
+                    Write-Host "Removing resource locks named 'minecraftstor*-lock' in resource group '${resourceGroup}'..."
+                    az resource lock delete --ids $resourceLocks -o none
 
-                        Write-Host "Disabling purge protection on backup vault '${backupVault}'..."
-                        az backup vault backup-properties set --ids $backupVaultID --soft-delete-feature-state Disable --query "properties" -o table
+                    if ($All -or $Backups) {
+                        $backupVaultID = $(az backup vault list -g $resourceGroup --query "[].id" -o tsv)
+                        if ($backupVaultID) {
+                            $backupVault = $backupVaultID.Split("/")[-1]
 
-                        $backupItemIDs = $(az backup item list -g $resourceGroup -v $backupVault --query "[].id" -o tsv)
-                        if ($backupItemIDs) {
-                            Write-Host "Removing backup items from backup vault '${backupVault}'..."
-                            az backup protection disable --ids $backupItemIDs --backup-management-type AzureStorage --workload-type AzureFileShare --delete-backup-data true --yes --query "[].properties.extendedInfo.propertyBag" -o table
-                        }
+                            Write-Host "Disabling purge protection on backup vault '${backupVault}'..."
+                            az backup vault backup-properties set --ids $backupVaultID --soft-delete-feature-state Disable --query "properties" -o table
 
-                        $backupContainerIDs = $(az backup container list --resource-group $resourceGroup --vault-name $backupVault --backup-management-type AzureStorage --query "[].id" -o tsv)
-                        if ($backupContainerIDs) {
-                            Write-Host "Unregistering backup containers from vault '${backupVault}'..."
-                            az backup container unregister --backup-management-type AzureStorage --ids $backupContainerIDs --yes
+                            $backupItemIDs = $(az backup item list -g $resourceGroup -v $backupVault --query "[].id" -o tsv)
+                            if ($backupItemIDs) {
+                                Write-Host "Removing backup items from backup vault '${backupVault}'..."
+                                az backup protection disable --ids $backupItemIDs --backup-management-type AzureStorage --workload-type AzureFileShare --delete-backup-data true --yes --query "[].properties.extendedInfo.propertyBag" -o table
+                            }
+
+                            $backupContainerIDs = $(az backup container list --resource-group $resourceGroup --vault-name $backupVault --backup-management-type AzureStorage --query "[].id" -o tsv)
+                            if ($backupContainerIDs) {
+                                Write-Host "Unregistering backup containers from vault '${backupVault}'..."
+                                az backup container unregister --backup-management-type AzureStorage --ids $backupContainerIDs --yes
+                            } else {
+                                Write-Information "No storage accounts found registered with vault '${backupVault}'"
+                            }
                         } else {
-                            Write-Information "No storage accounts found registered with vault '${backupVault}'"
+                            Write-Information "No backup vault found in resource group '${resourceGroup}'"
                         }
-                    } else {
-                        Write-Information "No backup vault found in resource group '${resourceGroup}'"
                     }
                 }
                 if ($All -or $Resources) {
-                    Write-Host "Removing resource group identified by `"$tagQuery`"..."
+                    Write-Host "Removing resource group(s) identified by `"$tagQuery`"..."
                     Write-Information "az resource delete --ids ${resourceGroupIDs}..."
                     az resource delete --ids $resourceGroupIDs --verbose
                 }
