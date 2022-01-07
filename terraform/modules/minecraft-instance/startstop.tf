@@ -73,6 +73,8 @@ resource azurerm_logic_app_trigger_recurrence workweek_start_trigger {
       "Friday",
     ]
   }
+
+  # BUG: https://github.com/hashicorp/terraform-provider-azurerm/issues/14657
   start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T${var.start_time}:00Z"
   time_zone                    = var.timezone
 
@@ -163,6 +165,7 @@ resource azurerm_logic_app_trigger_recurrence workweek_stop_trigger {
       "Friday",
     ]
   }
+  # BUG: https://github.com/hashicorp/terraform-provider-azurerm/issues/14657
   start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T${var.stop_time}:00Z"
   time_zone                    = var.timezone
 
