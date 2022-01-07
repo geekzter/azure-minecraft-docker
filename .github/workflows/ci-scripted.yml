@@ -80,8 +80,7 @@ jobs:
         ./create_workflow_strategy.ps1 -DestroyInput "${{ github.event.inputs.destroy }}" `
                                        -UseLatestAzureCLIVersionInput "${{ github.event.inputs.upgrade_azure_cli }}" `
                                        -UseLatestTerraformProviderVersionsInput "${{ github.event.inputs.upgrade_provider_versions }}" `
-                                       -UseLatestTerraformVersionInput false 
-                                       -UseLatestTerraformVersionInput "${{ github.event.inputs.upgrade_terraform_version }}" `
+                                       -UseLatestTerraformVersionInput "${{ github.event.inputs.upgrade_terraform_version }}" 
                                        
       shell: pwsh
 
