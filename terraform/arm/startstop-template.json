@@ -21,26 +21,7 @@
                             "type": "Object"
                         }
                     },
-                    "triggers": {
-                        "${operation}": {
-                            "recurrence": {
-                                "frequency": "Week",
-                                "interval": 1,
-                                "schedule": {
-                                    "weekDays": [
-                                        "Monday",
-                                        "Tuesday",
-                                        "Wednesday",
-                                        "Thursday",
-                                        "Friday"
-                                    ]
-                                },
-                                "startTime": "${start_time}",
-                                "timeZone": "${time_zone}"
-                            },
-                            "type": "Recurrence"
-                        }
-                    },
+                    "triggers": {},
                     "actions": {
                         "${operation}_minecraft": {
                             "runAfter": {},

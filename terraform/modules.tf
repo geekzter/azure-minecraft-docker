@@ -27,7 +27,9 @@ module minecraft {
   enable_log_filter            = var.enable_log_filter
   enable_auto_startstop        = var.enable_auto_startstop
   start_time                   = lookup(each.value, "start_time", "07:00")
+  start_time_weekend           = lookup(each.value, "start_time_weekend", lookup(each.value, "start_time", "07:00"))
   stop_time                    = lookup(each.value, "stop_time", "00:01")
+  stop_time_weekend            = lookup(each.value, "stop_time_weekend", lookup(each.value, "stop_time", "00:01"))
   timezone                     = var.timezone
 
   location                     = var.location
@@ -92,7 +94,9 @@ module minecraft_bedrock {
   enable_backup                = var.enable_backup
   enable_auto_startstop        = var.enable_auto_startstop
   start_time                   = lookup(each.value, "start_time", "07:00")
+  start_time_weekend           = lookup(each.value, "start_time_weekend", lookup(each.value, "start_time", "07:00"))
   stop_time                    = lookup(each.value, "stop_time", "00:01")
+  stop_time_weekend            = lookup(each.value, "stop_time_weekend", lookup(each.value, "stop_time", "00:01"))
   timezone                     = var.timezone
 
   location                     = var.location
