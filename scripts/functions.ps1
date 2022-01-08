@@ -569,13 +569,13 @@ function WaitFor-MinecraftServer (
                 Write-Debug "`$minecraft: $minecraft"
                 $containerGroupName = $minecraft.container_group_name
                 if ($StartServer) {
+                    Write-Host "Starting ${containerGroupName}..."
                     # Workaround for issue https://github.com/Azure/azure-cli/issues/19530, still prevalent in Azure CLI 2.32
                     az container show -n $containerGroupName -g $resourceGroup --subscription $subscriptionID --query "containers[0].instanceView.currentState.state" -o tsv | Set-Variable containerState
                     Write-Verbose "containerState: $containerState"
                     if (@("Running","Waiting") -icontains $containerState) {
                         Write-Host "${containerGroupName} is already in state '${containerState}'"
                     } else {
-                        Write-Host "Starting ${containerGroupName}..."
                         Write-Verbose "az container start -n $containerGroupName -g $resourceGroup --subscription $subscriptionID"
                         az container start -n $containerGroupName -g $resourceGroup --subscription $subscriptionID
                         Write-Debug "Started ${containerGroupName}"    
