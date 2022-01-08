@@ -73,7 +73,9 @@ resource azurerm_logic_app_trigger_recurrence workweek_start_trigger {
       "Friday",
     ]
   }
-  start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T${var.start_time}:00Z"
+  # BUG: https://github.com/hashicorp/terraform-provider-azurerm/issues/14657
+  # start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T${var.start_time}:00Z"
+  start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T00:00:01Z"
   time_zone                    = var.timezone
 
   count                        = var.enable_auto_startstop && var.start_time != null && var.start_time != "" ? 1 : 0
@@ -94,7 +96,9 @@ resource azurerm_logic_app_trigger_recurrence weekend_start_trigger {
       "Sunday",
     ]
   }
-  start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T${var.start_time_weekend}:00Z"
+  # BUG: https://github.com/hashicorp/terraform-provider-azurerm/issues/14657
+  # start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T${var.start_time_weekend}:00Z"
+  start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T00:00:01Z"
   time_zone                    = var.timezone
 
   count                        = var.enable_auto_startstop && var.start_time_weekend != null && var.start_time_weekend != "" ? 1 : 0
@@ -163,7 +167,9 @@ resource azurerm_logic_app_trigger_recurrence workweek_stop_trigger {
       "Friday",
     ]
   }
-  start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T${var.stop_time}:00Z"
+  # BUG: https://github.com/hashicorp/terraform-provider-azurerm/issues/14657
+  # start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T${var.stop_time}:00Z"
+  start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T23:59:59Z"
   time_zone                    = var.timezone
 
   count                        = var.enable_auto_startstop && var.stop_time != null && var.stop_time != "" ? 1 : 0
@@ -184,7 +190,9 @@ resource azurerm_logic_app_trigger_recurrence weekend_stop_trigger {
       "Sunday",
     ]
   }
-  start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T${var.stop_time_weekend}:00Z"
+  # BUG: https://github.com/hashicorp/terraform-provider-azurerm/issues/14657
+  # start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T${var.stop_time_weekend}:00Z"
+  start_time                   = "${formatdate("YYYY-MM-DD",timestamp())}T23:59:59Z"
   time_zone                    = var.timezone
 
   count                        = var.enable_auto_startstop && var.stop_time_weekend != null && var.stop_time_weekend != "" ? 1 : 0
