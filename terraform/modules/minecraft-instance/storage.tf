@@ -1,5 +1,5 @@
 locals {
-  config_directory             = "${formatdate("YYYY",timestamp())}/${formatdate("MM",timestamp())}/${formatdate("DD",timestamp())}/${formatdate("hhmm",timestamp())}/${var.name}"
+  config_directory             = var.name
 }
 
 data azurerm_storage_account minecraft {

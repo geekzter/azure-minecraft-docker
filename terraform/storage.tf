@@ -1,5 +1,5 @@
 locals {
-  config_directory             = "${formatdate("YYYY",timestamp())}/${formatdate("MM",timestamp())}/${formatdate("DD",timestamp())}/${formatdate("hhmm",timestamp())}"
+  config_directory             = ""
 }
 
 resource azurerm_storage_account minecraft {
@@ -13,6 +13,7 @@ resource azurerm_storage_account minecraft {
     delete_retention_policy {
       days                     = 365
     }
+    versioning_enabled         = true
   }
 
   tags                         = local.tags
