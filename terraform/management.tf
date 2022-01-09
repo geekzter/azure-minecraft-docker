@@ -3,7 +3,7 @@ resource azurerm_log_analytics_workspace monitor {
   resource_group_name          = azurerm_resource_group.minecraft.name
   location                     = azurerm_resource_group.minecraft.location
   sku                          = "PerGB2018"
-  retention_in_days            = 30
+  retention_in_days            = 365
 
   tags                         = local.tags
 }
