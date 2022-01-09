@@ -1,0 +1,6 @@
+ContainerInstanceLog_CL 
+| where TimeGenerated > ago(365d)
+| where Message contains "UUID of player" 
+| parse Message with * "UUID of player " PlayerName " is " PlayerUUID
+| distinct PlayerUUID, PlayerName
+| order by PlayerUUID
