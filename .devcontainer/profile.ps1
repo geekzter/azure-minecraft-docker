@@ -18,4 +18,4 @@ $env:SHELL = (Get-Command pwsh).Source
 Set-Location $repoDirectory
 Write-Host "$($PSStyle.Bold)1)$($PSStyle.Reset) To provision infrastructure, run $($PSStyle.Bold)$repoDirectory/scripts/deploy.ps1 -apply$($PSStyle.Reset)"
 Write-Host "$($PSStyle.Bold)2)$($PSStyle.Reset) To destroy infrastructure, run $($PSStyle.Bold)$repoDirectory/scripts/deploy.ps1 destroy$($PSStyle.Reset)"
-Write-Host "$($PSStyle.Bold)3)$($PSStyle.Reset) To update Codespace configuration, run $repoDirectory/.devcontainer/createorupdate.ps1"
+Write-Host "$($PSStyle.Bold)3)$($PSStyle.Reset) To update Codespace configuration, run $($PSStyle.Bold)$repoDirectory/.devcontainer/createorupdate.ps1$($PSStyle.Reset)"
