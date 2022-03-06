@@ -44,15 +44,14 @@ Pop-Location
 
 # Use geekzter/bootstrap-os for PowerShell setup
 if (Test-Path ~/bootstrap-os) {
-    Push-Location ~/bootstrap-os/linux
-    ./bootstrap_linux.sh --skip-packages
-    Pop-Location
     # This has been run before, upgrade packages
     sudo apt-get upgrade -y
 } else {
     git clone https://github.com/geekzter/bootstrap-os.git ~/bootstrap-os
 }
-. ~/bootstrap-os/common/common_setup.ps1 -NoPackages
+Push-Location ~/bootstrap-os/linux
+./bootstrap_linux.sh --skip-packages
+Pop-Location
 . ~/bootstrap-os/common/functions/functions.ps1
 AddorUpdateModule Posh-Git
 
