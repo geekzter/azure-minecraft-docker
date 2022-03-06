@@ -536,7 +536,7 @@ function Validate-Plan (
                 [System.Management.Automation.Host.ChoiceDescription]::new("&Continue", "Deploy infrastructure")
                 [System.Management.Automation.Host.ChoiceDescription]::new("&Exit", "Abort infrastructure deployment")
             )
-            $decision = $Host.UI.PromptForChoice("Continue", "Do you wish to proceed executing Terraform plan $$File in workspace $workspace?", $choices, $defaultChoice)
+            $decision = $Host.UI.PromptForChoice("Continue", "Do you wish to proceed executing Terraform plan $File in workspace $workspace?", $choices, $defaultChoice)
 
             if ($decision -eq 0) {
                 Write-Host "$($choices[$decision].HelpMessage)"
