@@ -16,25 +16,17 @@ function AzLogin (
     }
 
     # Are we logged in?
-    Invoke-Command -ScriptBlock {
-        $Private:ErrorActionPreference = "Continue"
-        # Test whether we are logged in
-        $script:loginError = $(az account show -o none 2>&1)
-        if (!$loginError) {
-            $Script:userType = $(az account show --query "user.type" -o tsv)
-            if ($userType -ieq "user") {
-                # Test whether credentials have expired
-                $Script:userError = $(az ad signed-in-user show -o none 2>&1)
-            } 
-        }
-    }
-    $login = ($loginError -or $userError)
+    $account = $null
+    az account show 2>$null | ConvertFrom-Json | Set-Variable account
     # Set Azure CLI context
-    if ($login) {
+    if (-not $account) {
+        if ($env:CODESPACES -ieq "true") {
+            $azLoginSwitches = "--use-device-code"
+        }
         if ($env:ARM_TENANT_ID) {
-            az login -t $env:ARM_TENANT_ID -o none
+            az login -t $env:ARM_TENANT_ID -o none $($azLoginSwitches)
         } else {
-            az login -o none
+            az login -o none $($azLoginSwitches)
         }
     }
 
