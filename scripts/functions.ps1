@@ -357,7 +357,7 @@ function TearDown-Resources (
                 [System.Management.Automation.Host.ChoiceDescription]::new("&Continue", "Tear down resources")
                 [System.Management.Automation.Host.ChoiceDescription]::new("&Exit", "Abort teardown")
             )
-            $decision = $Host.UI.PromptForChoice("Continue", "Do you wish to proceed teardown resources in workspace ${env:TF_WORKSPACE}?", $choices, 1)
+            $decision = $Host.UI.PromptForChoice("Continue", "Do you wish to proceed tear down resources in workspace ${env:TF_WORKSPACE}?", $choices, 1)
 
             if ($decision -eq 0) {
                 Write-Host "$($choices[$decision].HelpMessage)"
@@ -394,8 +394,10 @@ function TearDown-Resources (
 
                     # Delete resource lock using naming convention, in case Terraform state already got erased
                     $resourceLocks = $(az group lock list -g $resourceGroup --query "[?starts_with(name,'minecraftstor') && ends_with(name,'-lock')].id" -o tsv)
-                    Write-Host "Removing resource locks named 'minecraftstor*-lock' in resource group '${resourceGroup}'..."
-                    az resource lock delete --ids $resourceLocks -o none
+                    if ($resourceLocks) {
+                        Write-Host "Removing resource locks named 'minecraftstor*-lock' in resource group '${resourceGroup}'..."
+                        az resource lock delete --ids $resourceLocks -o none
+                    }
 
                     if ($All -or $Backups) {
                         $backupVaultID = $(az backup vault list -g $resourceGroup --query "[].id" -o tsv)
