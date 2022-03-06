@@ -16,25 +16,17 @@ function AzLogin (
     }
 
     # Are we logged in?
-    Invoke-Command -ScriptBlock {
-        $Private:ErrorActionPreference = "Continue"
-        # Test whether we are logged in
-        $script:loginError = $(az account show -o none 2>&1)
-        if (!$loginError) {
-            $Script:userType = $(az account show --query "user.type" -o tsv)
-            if ($userType -ieq "user") {
-                # Test whether credentials have expired
-                $Script:userError = $(az ad signed-in-user show -o none 2>&1)
-            } 
-        }
-    }
-    $login = ($loginError -or $userError)
+    $account = $null
+    az account show 2>$null | ConvertFrom-Json | Set-Variable account
     # Set Azure CLI context
-    if ($login) {
+    if (-not $account) {
+        if ($env:CODESPACES -ieq "true") {
+            $azLoginSwitches = "--use-device-code"
+        }
         if ($env:ARM_TENANT_ID) {
-            az login -t $env:ARM_TENANT_ID -o none
+            az login -t $env:ARM_TENANT_ID -o none $($azLoginSwitches)
         } else {
-            az login -o none
+            az login -o none $($azLoginSwitches)
         }
     }
 
@@ -237,10 +229,13 @@ function Migrate-StorageShareState (
         $tfdirectory=$(Join-Path (Split-Path -Parent -Path $PSScriptRoot) "terraform")
         Push-Location $tfdirectory
     
-        $backupResources   = $(terraform state list | Select-String -Pattern "^azurerm_backup_protected_file_share.minecraft_data\[0\]")
-        $functionResources = $(terraform state list | Select-String -Pattern "^module.functions.azurerm_app_service_plan.functions")
-        $obsoleteResources = $(terraform state list | Select-String -Pattern "^azurerm_monitor_diagnostic_setting.*workflow")
-        $shareResources    = $(terraform state list | Select-String -Pattern "^azurerm_storage_share")
+        if (terraform state list 2>$null) {
+            # Terraform state exists, perform inspection
+            $backupResources   = $(terraform state list | Select-String -Pattern "^azurerm_backup_protected_file_share.minecraft_data\[0\]")
+            $functionResources = $(terraform state list | Select-String -Pattern "^module.functions.azurerm_app_service_plan.functions")
+            $obsoleteResources = $(terraform state list | Select-String -Pattern "^azurerm_monitor_diagnostic_setting.*workflow")
+            $shareResources    = $(terraform state list | Select-String -Pattern "^azurerm_storage_share")    
+        }
         if ($backupResources -or $functionResources -or $obsoleteResources -or $shareResources) {
             Write-Warning "Terraform needs to move resources within its state, as resources have been modularized to accomodate multiple Minecraft instances running side-by-side. This will move resources within Terraform state, not within Azure."
             $obsoleteResources | Write-Information
@@ -358,13 +353,17 @@ function TearDown-Resources (
 
         if ($env:TF_IN_AUTOMATION -ine "true") {
             # Prompt to continue
-            Write-Warning "This will tear down all resources in workspace '${env:TF_WORKSPACE}' for repository '${repository}'!"
-            Write-Host "If you wish to proceed tearing down resources, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
-            $proceedanswer = Read-Host 
+            $choices = @(
+                [System.Management.Automation.Host.ChoiceDescription]::new("&Continue", "Tear down resources")
+                [System.Management.Automation.Host.ChoiceDescription]::new("&Exit", "Abort teardown")
+            )
+            $decision = $Host.UI.PromptForChoice("Continue", "Do you wish to proceed tear down resources in workspace ${env:TF_WORKSPACE}?", $choices, 1)
 
-            if ($proceedanswer -ne "yes") {
-                Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
-                exit
+            if ($decision -eq 0) {
+                Write-Host "$($choices[$decision].HelpMessage)"
+            } else {
+                Write-Host "$($PSStyle.Formatting.Warning)$($choices[$decision].HelpMessage)$($PSStyle.Reset)"
+                exit                    
             }
         }
         Invoke-Command -ScriptBlock {
@@ -395,8 +394,10 @@ function TearDown-Resources (
 
                     # Delete resource lock using naming convention, in case Terraform state already got erased
                     $resourceLocks = $(az group lock list -g $resourceGroup --query "[?starts_with(name,'minecraftstor') && ends_with(name,'-lock')].id" -o tsv)
-                    Write-Host "Removing resource locks named 'minecraftstor*-lock' in resource group '${resourceGroup}'..."
-                    az resource lock delete --ids $resourceLocks -o none
+                    if ($resourceLocks) {
+                        Write-Host "Removing resource locks named 'minecraftstor*-lock' in resource group '${resourceGroup}'..."
+                        az resource lock delete --ids $resourceLocks -o none
+                    }
 
                     if ($All -or $Backups) {
                         $backupVaultID = $(az backup vault list -g $resourceGroup --query "[].id" -o tsv)
@@ -478,6 +479,7 @@ function Validate-Plan (
     }
     Write-Verbose "Converting $File into JSON so we can perform some inspection..."
     $planJSON = (terraform show -json $File)
+    $defaultChoice = 0
 
     # Validation
     # Check whether key resources will be replaced
@@ -495,9 +497,11 @@ function Validate-Plan (
 
     if ($serverFQDNIDsToReplace) {
         Write-Warning "You're about to change the Minecraft Server hostname in workspace '${workspace}'!!!"
+        $defaultChoice = 1
     }
 
     if ($minecraftDataIDsToReplace) {
+        $defaultChoice = 1
         if ($workspace -ieq "prod") {
             Write-Error "You're about to delete Minecraft world data in workspace '${workspace}'!!! Please figure out another way of doing so, exiting..."
             Write-Information $minecraftDataIDsToReplace
@@ -517,6 +521,7 @@ function Validate-Plan (
                 $runningContainerGroupIDsToReplace = $(az container show --ids $containerGroupIDsToReplace --query "[{state:containers[?name=='minecraft'].instanceView.currentState.state | [0], id:id}] | @[?state=='Running'].id | [0]" -o tsv)
             }
             if ($runningContainerGroupIDsToReplace) {
+                $defaultChoice = 1
                 Write-Warning "You're about to replace running Minecraft container(s) in workspace '${workspace}'!:`n${runningContainerGroupIDsToReplace}`nInform users so they can bail out."
                 if ($Force) {
                     $Force = $false
@@ -529,12 +534,17 @@ function Validate-Plan (
 
         if (!$Force -or $containerGroupReplaced -or $minecraftDataReplaced) {
             # Prompt to continue
-            Write-Host "If you wish to proceed executing Terraform plan $File in workspace $workspace, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
-            $proceedanswer = Read-Host 
+            $choices = @(
+                [System.Management.Automation.Host.ChoiceDescription]::new("&Continue", "Deploy infrastructure")
+                [System.Management.Automation.Host.ChoiceDescription]::new("&Exit", "Abort infrastructure deployment")
+            )
+            $decision = $Host.UI.PromptForChoice("Continue", "Do you wish to proceed executing Terraform plan $File in workspace $workspace?", $choices, $defaultChoice)
 
-            if ($proceedanswer -ne "yes") {
-                Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
-                exit
+            if ($decision -eq 0) {
+                Write-Host "$($choices[$decision].HelpMessage)"
+            } else {
+                Write-Host "$($PSStyle.Formatting.Warning)$($choices[$decision].HelpMessage)$($PSStyle.Reset)"
+                exit                    
             }
         }
     }
