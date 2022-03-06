@@ -229,10 +229,13 @@ function Migrate-StorageShareState (
         $tfdirectory=$(Join-Path (Split-Path -Parent -Path $PSScriptRoot) "terraform")
         Push-Location $tfdirectory
     
-        $backupResources   = $(terraform state list | Select-String -Pattern "^azurerm_backup_protected_file_share.minecraft_data\[0\]")
-        $functionResources = $(terraform state list | Select-String -Pattern "^module.functions.azurerm_app_service_plan.functions")
-        $obsoleteResources = $(terraform state list | Select-String -Pattern "^azurerm_monitor_diagnostic_setting.*workflow")
-        $shareResources    = $(terraform state list | Select-String -Pattern "^azurerm_storage_share")
+        if (terraform state list 2>$null) {
+            # Terraform state exists, perform inspection
+            $backupResources   = $(terraform state list | Select-String -Pattern "^azurerm_backup_protected_file_share.minecraft_data\[0\]")
+            $functionResources = $(terraform state list | Select-String -Pattern "^module.functions.azurerm_app_service_plan.functions")
+            $obsoleteResources = $(terraform state list | Select-String -Pattern "^azurerm_monitor_diagnostic_setting.*workflow")
+            $shareResources    = $(terraform state list | Select-String -Pattern "^azurerm_storage_share")    
+        }
         if ($backupResources -or $functionResources -or $obsoleteResources -or $shareResources) {
             Write-Warning "Terraform needs to move resources within its state, as resources have been modularized to accomodate multiple Minecraft instances running side-by-side. This will move resources within Terraform state, not within Azure."
             $obsoleteResources | Write-Information
