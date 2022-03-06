@@ -1,4 +1,5 @@
 #!/usr/bin/env pwsh
+#Requires -Version 7.2
 
 $repoDirectory = (Split-Path (Split-Path (Get-Item $MyInvocation.MyCommand.Path).Target -Parent) -Parent)
 $scriptDirectory = (Join-Path $repoDirectory "scripts")
@@ -15,8 +16,6 @@ $env:PATH = $pathList -Join ":"
 $env:SHELL = (Get-Command pwsh).Source
 
 Set-Location $repoDirectory
-Write-Host "To update Codespace configuration, run $repoDirectory/.devcontainer/createorupdate.ps1"
-Write-Host "To provision infrastructure, make sure you're logged in with Azure CLI e.g. run 'az login' and 'az account set --subscription 00000000-0000-0000-0000-000000000000'. Then, either:"
-Write-Host " - change to the $repoDirectory/terraform directory and run 'terraform apply', or:"
-Write-Host " - run $repoDirectory/scripts/deploy.ps1 -apply"
-Write-Host "To destroy infrastructure, replace 'apply' with 'destroy' in above statements"
+Write-Host "$($PSStyle.Bold)1)$($PSStyle.Reset) To provision infrastructure, run $($PSStyle.Bold)$repoDirectory/scripts/deploy.ps1 -apply$($PSStyle.Reset)"
+Write-Host "$($PSStyle.Bold)2)$($PSStyle.Reset) To destroy infrastructure, run $($PSStyle.Bold)$repoDirectory/scripts/deploy.ps1 destroy$($PSStyle.Reset)"
+Write-Host "$($PSStyle.Bold)3)$($PSStyle.Reset) To update Codespace configuration, run $repoDirectory/.devcontainer/createorupdate.ps1"
