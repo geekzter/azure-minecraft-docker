@@ -358,13 +358,17 @@ function TearDown-Resources (
 
         if ($env:TF_IN_AUTOMATION -ine "true") {
             # Prompt to continue
-            Write-Warning "This will tear down all resources in workspace '${env:TF_WORKSPACE}' for repository '${repository}'!"
-            Write-Host "If you wish to proceed tearing down resources, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
-            $proceedanswer = Read-Host 
+            $choices = @(
+                [System.Management.Automation.Host.ChoiceDescription]::new("&Continue", "Tear down resources")
+                [System.Management.Automation.Host.ChoiceDescription]::new("&Exit", "Abort teardown")
+            )
+            $decision = $Host.UI.PromptForChoice("Continue", "Do you wish to proceed teardown resources in workspace ${env:TF_WORKSPACE}?", $choices, 1)
 
-            if ($proceedanswer -ne "yes") {
-                Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
-                exit
+            if ($decision -eq 0) {
+                Write-Host "$($choices[$decision].HelpMessage)"
+            } else {
+                Write-Host "$($PSStyle.Formatting.Warning)$($choices[$decision].HelpMessage)$($PSStyle.Reset)"
+                exit                    
             }
         }
         Invoke-Command -ScriptBlock {
@@ -478,6 +482,7 @@ function Validate-Plan (
     }
     Write-Verbose "Converting $File into JSON so we can perform some inspection..."
     $planJSON = (terraform show -json $File)
+    $defaultChoice = 0
 
     # Validation
     # Check whether key resources will be replaced
@@ -495,9 +500,11 @@ function Validate-Plan (
 
     if ($serverFQDNIDsToReplace) {
         Write-Warning "You're about to change the Minecraft Server hostname in workspace '${workspace}'!!!"
+        $defaultChoice = 1
     }
 
     if ($minecraftDataIDsToReplace) {
+        $defaultChoice = 1
         if ($workspace -ieq "prod") {
             Write-Error "You're about to delete Minecraft world data in workspace '${workspace}'!!! Please figure out another way of doing so, exiting..."
             Write-Information $minecraftDataIDsToReplace
@@ -517,6 +524,7 @@ function Validate-Plan (
                 $runningContainerGroupIDsToReplace = $(az container show --ids $containerGroupIDsToReplace --query "[{state:containers[?name=='minecraft'].instanceView.currentState.state | [0], id:id}] | @[?state=='Running'].id | [0]" -o tsv)
             }
             if ($runningContainerGroupIDsToReplace) {
+                $defaultChoice = 1
                 Write-Warning "You're about to replace running Minecraft container(s) in workspace '${workspace}'!:`n${runningContainerGroupIDsToReplace}`nInform users so they can bail out."
                 if ($Force) {
                     $Force = $false
@@ -529,12 +537,17 @@ function Validate-Plan (
 
         if (!$Force -or $containerGroupReplaced -or $minecraftDataReplaced) {
             # Prompt to continue
-            Write-Host "If you wish to proceed executing Terraform plan $File in workspace $workspace, please reply 'yes' - null or N aborts" -ForegroundColor Cyan
-            $proceedanswer = Read-Host 
+            $choices = @(
+                [System.Management.Automation.Host.ChoiceDescription]::new("&Continue", "Deploy infrastructure")
+                [System.Management.Automation.Host.ChoiceDescription]::new("&Exit", "Abort infrastructure deployment")
+            )
+            $decision = $Host.UI.PromptForChoice("Continue", "Do you wish to proceed executing Terraform plan $$File in workspace $workspace?", $choices, $defaultChoice)
 
-            if ($proceedanswer -ne "yes") {
-                Write-Host "`nReply is not 'yes' - Aborting " -ForegroundColor Yellow
-                exit
+            if ($decision -eq 0) {
+                Write-Host "$($choices[$decision].HelpMessage)"
+            } else {
+                Write-Host "$($PSStyle.Formatting.Warning)$($choices[$decision].HelpMessage)$($PSStyle.Reset)"
+                exit                    
             }
         }
     }
