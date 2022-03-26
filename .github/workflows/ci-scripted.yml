@@ -204,7 +204,17 @@ jobs:
         # List environment variables
         Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,INPUT_*,TF_* | Sort-Object -Property Name
         # Save environment variable setup for subsequent steps
-        Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
+        Get-ChildItem -Path Env: -Recurse -Include ARM_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
+        foreach ($tfvar in $(Get-ChildItem -Path Env: -Recurse -Include TF_VAR_*)) {
+          $terraformVariableName = $tfvar.Name.Substring(7).ToLowerInvariant()
+          $terraformVariableValue = $tfVar.Value
+          if ($terraformVariableValue -imatch "^\W*(true|false|\[[^\]]*\]|\{[^\}]*\})\W*$") {
+            # Boolean or List, write as-is
+            Write-Output "${terraformVariableName}=${terraformVariableValue}"     >> $env:GITHUB_ENV
+          } else {
+            Write-Output "${terraformVariableName}=`"${terraformVariableValue}`"" >> $env:GITHUB_ENV
+          }
+        } 
       shell: pwsh
 
     - name: Terraform Init & Plan
