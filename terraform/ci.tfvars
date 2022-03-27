@@ -4,8 +4,9 @@ enable_log_filter              = false
 
 minecraft_config               = {
   primary                      = {
+    # Minecraft upgraded 1.16 -> 1.17 -> 1.18
     allow_ops_only             = "false"
-    container_image_tag        = "java16-openj9"
+    container_image_tag        = "latest"
     environment_variables      = {
       ALLOW_NETHER             = true
       ANNOUNCE_PLAYER_ACHIEVEMENTS = "true"
@@ -15,21 +16,24 @@ minecraft_config               = {
       ICON                     = null # "https://raw.githubusercontent.com/geekzter/azure-minecraft-docker/main/visuals/aci.png"
       MAX_PLAYERS              = 10
       MODS                     = null
-      MODE                     = "creative"
+      MODE                     = "survival"
       MOTD                     = "Minecraft Server powered by Docker and Azure Container Instance"
-      OVERRIDE_SERVER_PROPERTIES = true # Use these settings over server.roperties every time the container starts
+      OVERRIDE_SERVER_PROPERTIES = true # Use these settings over server.properties every time the container starts
       SNOOPER_ENABLED          = "false"
       TYPE                     = "PAPER"
-      VERSION                  = "1.16.5"
+      VERSION                  = "LATEST" # https://papermc.io/api/v2/projects/paper
     }
     minecraft_server_port      = 25565
-    start_time                 = "12:00"
-    stop_time                  = "00:01"
-    vanity_hostname_prefix     = "minecraft116"
+    start_time                 = "15:20"
+    stop_time                  = "21:00"
+    start_time_weekend         = "10:30"
+    stop_time_weekend          = "22:00"
+    vanity_hostname_prefix     = "primary"
   }
   experimental                 = {
-    allow_ops_only             = "true"
-    container_image_tag        = "multiarch-latest"
+    # Minecraft 1.17 clean
+    allow_ops_only             = "false"
+    container_image_tag        = ""
     environment_variables      = {
       ALLOW_NETHER             = true
       ANNOUNCE_PLAYER_ACHIEVEMENTS = "true"
@@ -39,17 +43,19 @@ minecraft_config               = {
       ICON                     = null
       MAX_PLAYERS              = 10
       MODS                     = null
-      MODE                     = "creative"
-      MOTD                     = "Experimental server, data will be lost!!!"
+      MODE                     = "survival"
+      MOTD                     = "Minecraft Server powered by Docker and Azure Container Instance"
       OVERRIDE_SERVER_PROPERTIES = true
       SNOOPER_ENABLED          = "false"
       TYPE                     = "PAPER"
       VERSION                  = "LATEST"
     }
     minecraft_server_port      = 25565
-    start_time                 = ""
-    stop_time                  = "00:01"
-    vanity_hostname_prefix     = "minecraft117"
+    start_time                 = "15:20"
+    stop_time                  = "21:00"
+    start_time_weekend         = "10:30"
+    stop_time_weekend          = "22:00"
+    vanity_hostname_prefix     = "experimental"
   }
 }
 provisoner_email_address       = "nobody@no.no"

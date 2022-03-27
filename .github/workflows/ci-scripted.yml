@@ -187,6 +187,7 @@ jobs:
     - name: Prepare environment variables
       env:
         AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+        ENVIRONMENT_VARIABLES: ${{ secrets.ENVIRONMENT_VARIABLES }}
       run: | 
         # Parse Azure secret into Terraform variables
         $servicePrincipal = ($env:AZURE_CREDENTIALS | ConvertFrom-Json)
@@ -201,10 +202,18 @@ jobs:
         $env:TF_VAR_workflow_sp_application_secret = $servicePrincipal.clientSecret
         $env:TF_VAR_workflow_sp_object_id = $servicePrincipal.objectId
         
-        # List environment variables
-        Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,INPUT_*,TF_* | Sort-Object -Property Name
+        $env:ENVIRONMENT_VARIABLES >> $env:GITHUB_ENV
+
         # Save environment variable setup for subsequent steps
         Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
+      shell: pwsh
+
+    - name: Show environment variables
+      run: | 
+        Write-Host "Environment (sorted):"
+        Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,INPUT_*,TF_* | Sort-Object -Property Name
+        Write-Host "Environment (unsorted):"
+        Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,INPUT_*,TF_*
       shell: pwsh
 
     - name: Terraform Init & Plan
