@@ -26,6 +26,7 @@ env:
   FUNCTIONS_ARTIFACT_NAME: 'functions'
   TF_IN_AUTOMATION: true
   TF_INPUT: 0
+  TF_VAR_location: ${{ secrets.TF_VAR_LOCATION }}
   TF_WORKSPACE: cinobak # Not using Terraform backend, use same # of vowels as 'default'
 
 name: ci-vanilla
