@@ -18,7 +18,7 @@ variable custom_alert_subject {
 
 variable location {
   type                         = string
-  default                      = "westeurope" # Amsterdam
+  default                      = "northeurope" # Amsterdam
 }
 
 variable enable_auto_startstop {
