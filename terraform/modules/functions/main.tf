@@ -29,7 +29,7 @@ resource azurerm_function_app ping_test {
   https_only                   = true
   storage_account_name         = azurerm_storage_account.functions.name
   storage_account_access_key   = azurerm_storage_account.functions.primary_access_key
-  version                      = "~3"
+  version                      = "~4"
 
   lifecycle {
     ignore_changes             = [
