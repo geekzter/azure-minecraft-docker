@@ -137,6 +137,10 @@ jobs:
       run: | 
         Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
         terraform apply -auto-approve 'ci.tfplan'
+        $exitCode = $LASTEXITCODE
+        if ($exitCode -ne 0) {
+            throw "'terraform apply' exited with status $exitCode"
+        }        
 
         # Export Terraform output as step output
         $terraformOutput = (terraform output -json | ConvertFrom-Json -AsHashtable)     
