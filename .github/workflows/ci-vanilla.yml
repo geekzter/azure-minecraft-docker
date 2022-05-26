@@ -22,7 +22,7 @@ on:
 
 env:
   AZURE_FUNCTIONAPP_PACKAGE_PATH: 'functions'
-  DOTNET_VERSION: '3.1.x'  
+  DOTNET_VERSION: '6.0.x'  
   FUNCTIONS_ARTIFACT_NAME: 'functions'
   TF_IN_AUTOMATION: true
   TF_INPUT: 0

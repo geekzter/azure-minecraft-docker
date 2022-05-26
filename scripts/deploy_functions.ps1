@@ -7,14 +7,6 @@
 
 . (Join-Path $PSScriptRoot functions.ps1)
 
-if ($IsMacOS -and ($PSVersionTable.OS -match "ARM64")) {
-    # M1 Mac, .NET Core 3.1 SDK tool is in a different path than .NET 6
-    # BUG: https://github.com/isen-ng/homebrew-dotnet-sdk-versions/issues/182
-    if ($env:PATH -notmatch "/usr/local/share/dotnet/x64") {
-        $env:PATH = "/usr/local/share/dotnet/x64:${env:PATH}"
-    }
-}
-
 if (!(Get-Command func -ErrorAction SilentlyContinue)) {
     Write-Warning "Azure Function Tools not found, exiting..."
     exit
