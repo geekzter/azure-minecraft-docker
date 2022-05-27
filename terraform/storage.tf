@@ -208,6 +208,19 @@ resource azurerm_backup_container_storage_account minecraft {
   count                        = var.enable_backup ? 1 : 0
 }
 
+# Delay azurerm_backup_protected_file_share to mitigate race condition
+resource time_sleep backup_container_sleep {
+  create_duration              = "${var.backup_container_sleep_seconds}s"
+  depends_on                   = [
+                                  azurerm_backup_container_storage_account.minecraft,
+                                  azurerm_backup_policy_file_share.nightly,
+                                  azurerm_recovery_services_vault.backup,
+                                  azurerm_resource_group.minecraft,
+                                  azurerm_storage_account.minecraft,
+                                  module.minecraft
+  ]
+}
+
 # BUG: https://github.com/terraform-providers/terraform-provider-azurerm/issues/11184#issuecomment-870535683
 #      [ERROR] fileshare 'minecraft-aci-experimental-data-xxxx' not found in protectable or protected fileshares, make sure Storage Account "minecraftstorxxxx" is registered with Recovery Service Vault "Minecraft-default-xxxx-backup" (Resource Group "Minecraft-default-xxxx")
 resource azurerm_backup_protected_file_share minecraft_data {
@@ -217,7 +230,10 @@ resource azurerm_backup_protected_file_share minecraft_data {
   source_file_share_name       = module.minecraft[each.key].container_data_share_name
   backup_policy_id             = azurerm_backup_policy_file_share.nightly.0.id
 
-  depends_on                   = [azurerm_backup_container_storage_account.minecraft]
+  depends_on                   = [
+    azurerm_backup_container_storage_account.minecraft,
+    time_sleep.backup_container_sleep
+  ]
 
   for_each                     = var.enable_backup ? toset(keys(var.minecraft_config)) : []
 }
