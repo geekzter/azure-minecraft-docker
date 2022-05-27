@@ -1,6 +1,6 @@
-variable backup_container_sleep_seconds {
+variable backup_container_sleep_minutes {
   type                         = number
-  default                      = 9
+  default                      = 1
 }
 
 variable container_image_tag {

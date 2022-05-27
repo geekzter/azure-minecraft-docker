@@ -210,7 +210,7 @@ resource azurerm_backup_container_storage_account minecraft {
 
 # Delay azurerm_backup_protected_file_share to mitigate race condition
 resource time_sleep backup_container_sleep {
-  create_duration              = "${var.backup_container_sleep_seconds}s"
+  create_duration              = "${var.backup_container_sleep_minutes}m"
   depends_on                   = [
                                   azurerm_backup_container_storage_account.minecraft,
                                   azurerm_backup_policy_file_share.nightly,
