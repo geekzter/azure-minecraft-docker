@@ -49,6 +49,7 @@ env:
   TF_STATE_backend_storage_container: ${{ secrets.TF_STATE_BACKEND_STORAGE_CONTAINER }}
   TF_STATE_backend_storage_account: ${{ secrets.TF_STATE_BACKEND_STORAGE_ACCOUNT }}
   TF_STATE_backend_resource_group: ${{ secrets.TF_STATE_BACKEND_RESOURCE_GROUP }}
+  TF_VAR_backup_container_sleep_seconds: 1000
   TF_VAR_location: ${{ secrets.TF_VAR_LOCATION }}
   TF_WORKSPACE: ${{ github.event.inputs.workspace || 'ci' }}
 
