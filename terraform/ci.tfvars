@@ -30,32 +30,5 @@ minecraft_config               = {
     stop_time_weekend          = "22:00"
     vanity_hostname_prefix     = "primary"
   }
-  experimental                 = {
-    # Minecraft 1.17 clean
-    allow_ops_only             = "false"
-    container_image_tag        = ""
-    environment_variables      = {
-      ALLOW_NETHER             = true
-      ANNOUNCE_PLAYER_ACHIEVEMENTS = "true"
-      DIFFICULTY               = "easy"
-      ENABLE_COMMAND_BLOCK     = true
-      EULA                     = true
-      ICON                     = null
-      MAX_PLAYERS              = 10
-      MODS                     = null
-      MODE                     = "survival"
-      MOTD                     = "Minecraft Server powered by Docker and Azure Container Instance"
-      OVERRIDE_SERVER_PROPERTIES = true
-      SNOOPER_ENABLED          = "false"
-      TYPE                     = "PAPER"
-      VERSION                  = "LATEST"
-    }
-    minecraft_server_port      = 25565
-    start_time                 = "15:20"
-    stop_time                  = "21:00"
-    start_time_weekend         = "10:30"
-    stop_time_weekend          = "22:00"
-    vanity_hostname_prefix     = "experimental"
-  }
 }
 provisoner_email_address       = "nobody@no.no"
