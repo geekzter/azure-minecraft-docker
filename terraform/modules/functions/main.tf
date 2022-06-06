@@ -20,23 +20,26 @@ resource azurerm_storage_account functions {
   tags                         = var.tags
 }
 
-resource azurerm_function_app ping_test {
+resource azurerm_linux_function_app ping_test {
   name                         = var.function_name
   resource_group_name          = var.resource_group_name
   location                     = var.location
-  app_service_plan_id          = var.app_service_plan_id
+
   app_settings                 = local.app_service_settings
+  functions_extension_version  = "~4"
   https_only                   = true
-  storage_account_name         = azurerm_storage_account.functions.name
+  service_plan_id              = var.app_service_plan_id
   storage_account_access_key   = azurerm_storage_account.functions.primary_access_key
-  version                      = "~4"
+  storage_account_name         = azurerm_storage_account.functions.name
+
+  site_config {
+  }
 
   lifecycle {
     ignore_changes             = [
       # Ignore Visual Studio Code modifications
                                  app_settings["WEBSITE_CONTENTAZUREFILECONNECTIONSTRING"], 
-                                 app_settings["WEBSITE_CONTENTSHARE"], 
-                                 os_type
+                                 app_settings["WEBSITE_CONTENTSHARE"]
     ]
   }  
 
@@ -45,7 +48,7 @@ resource azurerm_function_app ping_test {
 
 resource azurerm_monitor_diagnostic_setting function_logs {
   name                         = "Function_Logs"
-  target_resource_id           = azurerm_function_app.ping_test.id
+  target_resource_id           = azurerm_linux_function_app.ping_test.id
   log_analytics_workspace_id   = var.log_analytics_workspace_resource_id
 
   log {
