@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     azuread                    = "~> 2.12"
-    azurerm                    = "~> 2.87, != 2.88, != 2.88.1"
+    azurerm                    = "~> 3.0"
     http                       = "~> 2.1"
     null                       = "~> 3.1"
     random                     = "~> 3.1"
@@ -24,6 +24,9 @@ provider azuread {
 }
 provider azurerm {
   features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
     template_deployment {
       delete_nested_items_during_deletion = true
     }

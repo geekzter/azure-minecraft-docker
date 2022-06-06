@@ -18,7 +18,7 @@ resource azurerm_application_insights insights {
   tags                         = azurerm_resource_group.minecraft.tags
 }
 
-resource azurerm_dashboard minecraft_dashboard {
+resource azurerm_portal_dashboard minecraft_dashboard {
   name                         = "${azurerm_resource_group.minecraft.name}-dashboard"
   resource_group_name          = azurerm_resource_group.minecraft.name
   location                     = azurerm_resource_group.minecraft.location
@@ -44,23 +44,12 @@ resource azurerm_dashboard minecraft_dashboard {
   )
 }
 
-resource azurerm_app_service_plan functions {
+resource azurerm_service_plan functions {
   name                         = "${azurerm_resource_group.minecraft.name}-functions"
   resource_group_name          = azurerm_resource_group.minecraft.name
   location                     = azurerm_resource_group.minecraft.location
-  kind                         = "FunctionApp"
-  reserved                     = true
-
-  sku {
-    tier                       = "Dynamic"
-    size                       = "Y1"
-  }
-
-  lifecycle {
-    ignore_changes             = [
-      kind
-    ]
-  }
+  os_type                      = "Linux"
+  sku_name                     = "Y1"
 
   tags                         = azurerm_resource_group.minecraft.tags
 }

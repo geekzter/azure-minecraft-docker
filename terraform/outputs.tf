@@ -16,10 +16,10 @@ output container_log_command {
 }
 
 output dashboard_id {
-  value       = azurerm_dashboard.minecraft_dashboard.id
+  value       = azurerm_portal_dashboard.minecraft_dashboard.id
 }
 output dashboard_url {
-  value       = "https://portal.azure.com/#@/dashboard/arm${azurerm_dashboard.minecraft_dashboard.id}"
+  value       = "https://portal.azure.com/#@/dashboard/arm${azurerm_portal_dashboard.minecraft_dashboard.id}"
 }
 
 output environment {

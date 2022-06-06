@@ -40,9 +40,9 @@ resource azurerm_container_group minecraft_server {
   name                         = var.name
   resource_group_name          = var.resource_group_name
   location                     = var.location
-  ip_address_type              = "public"
+  ip_address_type              = "Public"
   dns_name_label               = var.name
-  os_type                      = "linux"
+  os_type                      = "Linux"
 
   container {
     cpu                        = "1"

@@ -141,7 +141,7 @@ module minecraft_bedrock {
 
 module functions {
   source                       = "./modules/functions"
-  app_service_plan_id          = azurerm_app_service_plan.functions.id
+  app_service_plan_id          = azurerm_service_plan.functions.id
   appinsights_id               = azurerm_application_insights.insights.id
   appinsights_instrumentation_key = azurerm_application_insights.insights.instrumentation_key
   function_name                = "${azurerm_resource_group.minecraft.name}-${each.key}-ping-test"
