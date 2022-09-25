@@ -66,11 +66,6 @@ jobs:
     - name: Checkout source
       uses: actions/checkout@v2
 
-    # - name: Print inputs
-    #   if: ${{ github.event_name == 'workflow_dispatch' }}
-    #   run: | 
-    #     echo "${{ fromJson(github.event.inputs) }}"
-
     - name: Print environment variables
       run: | 
         Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,INPUT_*,TF_* | Sort-Object -Property Name
@@ -293,7 +288,7 @@ jobs:
       if: ${{ matrix.destroy }}
       run: ./deploy.ps1 -Destroy -Force
       shell: pwsh
-      continue-on-error: false
+      continue-on-error: ${{ matrix.ignore_destroy_failure }}
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
