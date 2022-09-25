@@ -155,6 +155,10 @@ module functions {
 
   # Function tests only cover Java edition
   for_each                     = var.minecraft_config
+
+  depends_on                   = [
+    module.minecraft
+  ]
 }
 
 # module functions {
