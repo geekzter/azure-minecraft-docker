@@ -90,7 +90,7 @@ jobs:
       id: terraform-version-check
       run: | 
         $terraformVersion = (Get-Content .terraform-version)
-        Write-Output "::set-output name=TERRAFORM_VERSION::${terraformVersion}"
+        Write-Output "TERRAFORM_VERSION=${terraformVersion}" >> $env:GITHUB_OUTPUT
       shell: pwsh
     - name: Use Terraform
       uses: hashicorp/setup-terraform@v1
@@ -146,7 +146,7 @@ jobs:
         $terraformOutput = (terraform output -json | ConvertFrom-Json -AsHashtable)     
         foreach ($key in $terraformOutput.Keys) {
           $outputVariableValue = $terraformOutput[$key].value
-          Write-Output "::set-output name=${key}::${outputVariableValue}"
+          Write-Output "${key}=${outputVariableValue}" >> $env:GITHUB_OUTPUT
           Write-Output "TF_OUT_${key}=${outputVariableValue}" >> $env:GITHUB_ENV
         } 
       shell: pwsh

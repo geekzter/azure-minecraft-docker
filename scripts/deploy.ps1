@@ -168,7 +168,7 @@ try {
         $terraformOutput = (terraform output -json | ConvertFrom-Json -AsHashtable)     
         foreach ($key in $terraformOutput.Keys) {
             $outputVariableValue = $terraformOutput[$key].value
-            Write-Output "::set-output name=${key}::${outputVariableValue}"
+            Write-Output "${key}=${outputVariableValue}" >> $env:GITHUB_OUTPUT
             Write-Output "TF_OUT_${key}=${outputVariableValue}" >> $env:GITHUB_ENV
         } 
     }
