@@ -7,5 +7,5 @@ brew "hashicorp/tap/terraform"
 brew "jq"
 brew "tfenv"
 
-cask "dotnet-sdk6-0-400" # LTS
+cask "dotnet-sdk6"
 cask "powershell"
