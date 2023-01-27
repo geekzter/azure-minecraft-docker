@@ -213,11 +213,7 @@ function Invoke (
 ) {
     Write-Host "`n$cmd" -ForegroundColor Green 
     Invoke-Expression $cmd
-    $exitCode = $LASTEXITCODE
-    if ($exitCode -ne 0) {
-        Write-Warning "'$cmd' exited with status $exitCode"
-        exit $exitCode
-    }
+    Validate-ExitCode $cmd
 }
 
 function Migrate-StorageShareState (
@@ -471,6 +467,16 @@ function TearDown-Resources (
     }
 }
 
+function Validate-ExitCode (
+    [string]$cmd
+) {
+    $exitCode = $LASTEXITCODE
+    if ($exitCode -ne 0) {
+        Write-Warning "'$cmd' exited with status $exitCode"
+        exit $exitCode
+    }
+}
+
 function Validate-Plan (
     [parameter(Mandatory=$true)][string]$File
 ) {
@@ -484,9 +490,18 @@ function Validate-Plan (
     # Validation
     # Check whether key resources will be replaced
     if (Get-Command jq -ErrorAction SilentlyContinue) {
-        $containerGroupIDsToReplace = $planJSON | jq '.resource_changes[] | select(.address|endswith(\"azurerm_container_group.minecraft_server\"))    | select(.change.actions[]|contains(\"delete\")) | .change.before.id' | ConvertFrom-Json
-        $serverFQDNIDsToReplace     = $planJSON | jq '.resource_changes[] | select(.address|endswith(\"azurerm_dns_cname_record.vanity_hostname[0]\")) | select(.change.actions[]|contains(\"delete\")) | .change.before.id' | ConvertFrom-Json
-        $minecraftDataIDsToReplace  = $planJSON | jq '.resource_changes[] | select(.address|endswith(\"azurerm_storage_share.minecraft_share\"))       | select(.change.actions[]|contains(\"delete\")) | .change.before.id' | ConvertFrom-Json
+        $psNativeCommandArgumentPassingBackup = $PSNativeCommandArgumentPassing
+        try {
+            $PSNativeCommandArgumentPassing = "Legacy"
+            $containerGroupIDsToReplace = $planJSON | jq -r '.resource_changes[] | select(.address|endswith(\"azurerm_container_group.minecraft_server\"))    | select( any (.change.actions[];contains(\"delete\"))) | .change.before.id'
+            Validate-ExitCode "jq"
+            $serverFQDNIDsToReplace     = $planJSON | jq -r '.resource_changes[] | select(.address|endswith(\"azurerm_dns_cname_record.vanity_hostname[0]\")) | select( any (.change.actions[];contains(\"delete\"))) | .change.before.id'
+            Validate-ExitCode "jq"
+            $minecraftDataIDsToReplace  = $planJSON | jq -r '.resource_changes[] | select(.address|endswith(\"azurerm_storage_share.minecraft_share\"))       | select( any (.change.actions[];contains(\"delete\"))) | .change.before.id'
+            Validate-ExitCode "jq"
+        } finally {
+            $PSNativeCommandArgumentPassing = $psNativeCommandArgumentPassingBackup
+        }
     } else {
         Write-Warning "jq not found, plan validation skipped. Look at the plan carefully before approving"
         if ($Force) {

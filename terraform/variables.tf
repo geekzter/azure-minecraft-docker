@@ -48,27 +48,7 @@ variable log_filter_jar {
 
 variable minecraft_bedrock_config {
   type                         = map
-  default                      = {
-    primary                    = {
-      allow_ops_only           = false
-      container_image          = "itzg/minecraft-bedrock-server"
-      container_image_tag      = "latest"
-      environment_variables    = {
-        ALLOW_CHEATS           = false
-        DEBUG                  = "true" # Bedrock is Alpha software
-        DIFFICULTY             = "easy"
-        EULA                   = true
-        GAMEMODE               = "creative"
-        MAX_PLAYERS            = 10
-        OVERRIDE_SERVER_PROPERTIES = true
-        VERSION                = "LATEST"
-      }
-      minecraft_server_port    = 19132
-      start_time               = ""
-      stop_time                = "00:01"
-      vanity_hostname_prefix   = "bedrock"
-    }
-  }
+  default                      = {}
 }
 variable minecraft_bedrock_ops {
   type                         = list
