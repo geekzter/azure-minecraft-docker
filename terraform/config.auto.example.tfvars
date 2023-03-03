@@ -17,7 +17,7 @@
 #     GAMEMODE                   = "creative"
 #     MAX_PLAYERS                = 10
 #     OVERRIDE_SERVER_PROPERTIES = true
-#     VERSION                    = "LATEST"
+#     VERSION                    = "1.19.2"
 #     }
 #     minecraft_server_port      = 19132
 #     start_time                 = ""
@@ -43,7 +43,7 @@
 #       MOTD                     = "Minecraft Server powered by Docker and Azure Container Instance"
 #       OVERRIDE_SERVER_PROPERTIES = true # Use these settings over server.roperties every time the container starts
 #       SNOOPER_ENABLED          = "false"
-#       TYPE                     = "PAPER"
+#       TYPE                     = "FABRIC"
 #       VERSION                  = "1.16.5"
 #     }
 #     minecraft_server_port      = 25565
@@ -67,8 +67,8 @@
 #       MOTD                     = "Experimental server, data will be lost!!!"
 #       OVERRIDE_SERVER_PROPERTIES = true
 #       SNOOPER_ENABLED          = "false"
-#       TYPE                     = "PAPER"
-#       VERSION                  = "LATEST"
+#       TYPE                     = "FABRIC"
+#       VERSION                  = "1.19.2"
 #     }
 #     minecraft_server_port      = 25565
 #     start_time                 = ""
