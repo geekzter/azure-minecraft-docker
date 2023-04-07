@@ -96,63 +96,56 @@ resource azurerm_monitor_diagnostic_setting backup_vault {
   target_resource_id           = azurerm_recovery_services_vault.backup.0.id
   log_analytics_workspace_id   = azurerm_log_analytics_workspace.monitor.id
 
-  log {
+  enabled_log {
     category                   = "AddonAzureBackupAlerts"
-    enabled                    = true
 
     retention_policy {
       enabled                  = true
       days                     = 365
     }
   }
-  log {
+  enabled_log {
     category                   = "AddonAzureBackupJobs"
-    enabled                    = true
 
     retention_policy {
       enabled                  = true
       days                     = 365
     }
   }
-  log {
+  enabled_log {
     category                   = "AddonAzureBackupPolicy"
-    enabled                    = true
 
     retention_policy {
       enabled                  = true
       days                     = 365
     }
   }
-  log {
+  enabled_log {
     category                   = "AddonAzureBackupProtectedInstance"
-    enabled                    = true
 
     retention_policy {
       enabled                  = true
       days                     = 365
     }
   }
-  log {
+  enabled_log {
     category                   = "AddonAzureBackupStorage"
-    enabled                    = true
 
     retention_policy {
       enabled                  = true
       days                     = 365
     }
   }
-  log {
+  enabled_log {
     category                   = "AzureBackupReport"
-    enabled                    = true
 
     retention_policy {
       enabled                  = true
       days                     = 365
     }
   }
-  log {
+  enabled_log {
     category                   = "CoreAzureBackup"
-    enabled                    = true
 
     retention_policy {
       enabled                  = true

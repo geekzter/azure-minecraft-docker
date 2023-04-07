@@ -51,9 +51,8 @@ resource azurerm_monitor_diagnostic_setting function_logs {
   target_resource_id           = azurerm_linux_function_app.ping_test.id
   log_analytics_workspace_id   = var.log_analytics_workspace_resource_id
 
-  log {
+  enabled_log {
     category                   = "FunctionAppLogs"
-    enabled                    = true
 
     retention_policy {
       enabled                  = false
