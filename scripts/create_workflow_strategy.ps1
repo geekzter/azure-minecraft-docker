@@ -105,7 +105,7 @@ $requestParameters = @{
     UseBasicParsing = $true
 }
 if ($GitHubToken) {
-    $requestParameters['Authorization'] = 'Bearer'
+    $requestParameters['Authentication'] = 'Bearer'
     $requestParameters['Token'] = $GitHubToken
 }
 $latestAzureCLIVersion = (Invoke-WebRequest @requestParameters | Select-Object -ExpandProperty Content | ConvertFrom-Json | Select-Object -ExpandProperty "name").split(" ")[-1]
