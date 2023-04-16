@@ -12,7 +12,7 @@ param (
     [parameter(Mandatory=$false)][string]$UseLatestTerraformVersionInput,
     [parameter(Mandatory=$false)][string]$UseLatestAzureCLIVersionInput,
     [parameter(Mandatory=$false)][string]$DestroyInput,
-    [parameter(Mandatory=$false)][System.Security.SecureString"]$GitHubToken
+    [parameter(Mandatory=$false)][System.Security.SecureString]$GitHubToken
 ) 
 Write-Host $MyInvocation.line
 
