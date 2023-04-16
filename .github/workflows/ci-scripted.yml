@@ -74,7 +74,9 @@ jobs:
     - name: Create matrix
       id: create-matrix
       run: |
-        ./create_workflow_strategy.ps1 -DestroyInput "${{ github.event.inputs.destroy }}" `
+        ConvertTo-SecureString -AsPlainText -String '${{ secrets.GITHUB_TOKEN }}' | Set-Variable gitHubToken
+        ./create_workflow_strategy.ps1 -GitHubToken $gitHubToken `
+                                       -DestroyInput "${{ github.event.inputs.destroy }}" `
                                        -UseLatestAzureCLIVersionInput "${{ github.event.inputs.upgrade_azure_cli }}" `
                                        -UseLatestTerraformProviderVersionsInput "${{ github.event.inputs.upgrade_provider_versions }}" `
                                        -UseLatestTerraformVersionInput "${{ github.event.inputs.upgrade_terraform_version }}" 
