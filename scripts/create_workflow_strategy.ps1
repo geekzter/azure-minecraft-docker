@@ -11,7 +11,8 @@ param (
     [parameter(Mandatory=$false)][string]$UseLatestTerraformProviderVersionsInput,
     [parameter(Mandatory=$false)][string]$UseLatestTerraformVersionInput,
     [parameter(Mandatory=$false)][string]$UseLatestAzureCLIVersionInput,
-    [parameter(Mandatory=$false)][string]$DestroyInput
+    [parameter(Mandatory=$false)][string]$DestroyInput,
+    [parameter(Mandatory=$false)][string]$GitHubToken
 ) 
 Write-Host $MyInvocation.line
 
@@ -93,9 +94,21 @@ Write-Output "terraform_preferred_version=${preferredTerraformVersion}" >> $env:
 $latestTerraformVersion = (Invoke-WebRequest -Uri https://checkpoint-api.hashicorp.com/v1/check/terraform -UseBasicParsing | Select-Object -ExpandProperty Content | ConvertFrom-Json | Select-Object -ExpandProperty "current_version")
 Write-Output "terraform_latest_version=${latestTerraformVersion}" >> $env:GITHUB_OUTPUT
 
+$psNativeCommandArgumentPassingBackup = $PSNativeCommandArgumentPassing
+$PSNativeCommandArgumentPassing = "Legacy"
 $installedAzureCLIVersion = $(az version --query '\"azure-cli\"' -o tsv)
+$PSNativeCommandArgumentPassing = $psNativeCommandArgumentPassingBackup
 Write-Output "azure_cli_installed_version=${installedAzureCLIVersion}" >> $env:GITHUB_OUTPUT
-$latestAzureCLIVersion = (Invoke-WebRequest -Uri https://api.github.com/repos/Azure/azure-cli/releases/latest -UseBasicParsing | Select-Object -ExpandProperty Content | ConvertFrom-Json | Select-Object -ExpandProperty "name").split(" ")[-1]
+
+$requestParameters = @{
+    Uri = "https://api.github.com/repos/Azure/azure-cli/releases/latest"
+    UseBasicParsing = $true
+}
+if ($GitHubToken) {
+    $requestParameters['Authorization'] = 'Bearer'
+    $requestParameters['Token'] = $GitHubToken
+}
+$latestAzureCLIVersion = (Invoke-WebRequest @requestParameters | Select-Object -ExpandProperty Content | ConvertFrom-Json | Select-Object -ExpandProperty "name").split(" ")[-1]
 Write-Output "azure_cli_latest_version=${latestAzureCLIVersion}" >> $env:GITHUB_OUTPUT
 
 $matrixJSONTemplate = $(Get-Content $PSScriptRoot/../.github/workflows/ci-scripted-strategy.json)
