@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     azuread                    = "~> 2.12"
-    azurerm                    = "~> 3.0, != 3.52.0" # BUG: Crashes
+    azurerm                    = "~> 3.53, != 3.55.0" # BUG: https://github.com/hashicorp/terraform-provider-azurerm/issues/21663
     http                       = "~> 3.0"
     null                       = "~> 3.1"
     random                     = "~> 3.1"
