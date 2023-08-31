@@ -40,19 +40,9 @@ resource azurerm_monitor_diagnostic_setting start_workflow {
 
   enabled_log {
     category                   = "WorkflowRuntime"
-
-    retention_policy {
-      enabled                  = true
-      days                     = 30
-    }
   }
   metric {
     category                   = "AllMetrics"
-
-    retention_policy {
-      enabled                  = true
-      days                     = 30
-    }
   }
   count                        = var.enable_auto_startstop && var.start_time != null && var.start_time != "" ? 1 : 0
 }
@@ -133,19 +123,9 @@ resource azurerm_monitor_diagnostic_setting stop_workflow {
 
   enabled_log {
     category                   = "WorkflowRuntime"
-
-    retention_policy {
-      enabled                  = true
-      days                     = 30
-    }
   }
   metric {
     category                   = "AllMetrics"
-
-    retention_policy {
-      enabled                  = true
-      days                     = 30
-    }
   }
 
   count                        = var.enable_auto_startstop && var.stop_time != null && var.stop_time != "" ? 1 : 0

@@ -98,59 +98,24 @@ resource azurerm_monitor_diagnostic_setting backup_vault {
 
   enabled_log {
     category                   = "AddonAzureBackupAlerts"
-
-    retention_policy {
-      enabled                  = true
-      days                     = 365
-    }
   }
   enabled_log {
     category                   = "AddonAzureBackupJobs"
-
-    retention_policy {
-      enabled                  = true
-      days                     = 365
-    }
   }
   enabled_log {
     category                   = "AddonAzureBackupPolicy"
-
-    retention_policy {
-      enabled                  = true
-      days                     = 365
-    }
   }
   enabled_log {
     category                   = "AddonAzureBackupProtectedInstance"
-
-    retention_policy {
-      enabled                  = true
-      days                     = 365
-    }
   }
   enabled_log {
     category                   = "AddonAzureBackupStorage"
-
-    retention_policy {
-      enabled                  = true
-      days                     = 365
-    }
   }
   enabled_log {
     category                   = "AzureBackupReport"
-
-    retention_policy {
-      enabled                  = true
-      days                     = 365
-    }
   }
   enabled_log {
     category                   = "CoreAzureBackup"
-
-    retention_policy {
-      enabled                  = true
-      days                     = 365
-    }
   }
 
   count                        = var.enable_backup ? 1 : 0

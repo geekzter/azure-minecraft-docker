@@ -53,16 +53,8 @@ resource azurerm_monitor_diagnostic_setting function_logs {
 
   enabled_log {
     category                   = "FunctionAppLogs"
-
-    retention_policy {
-      enabled                  = false
-    }
   }
   metric {
     category                   = "AllMetrics"
-
-    retention_policy {
-      enabled                  = false
-    }
   }
 }
