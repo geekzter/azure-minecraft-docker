@@ -7,7 +7,7 @@ on:
     - 'visuals/**'
 
   schedule:
-  - cron:  '0 2 * * *'
+  - cron:  '0 2 * * Thu,Sat'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
