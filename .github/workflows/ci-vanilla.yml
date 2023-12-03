@@ -21,6 +21,7 @@ on:
   workflow_dispatch:
 
 env:
+  ARM_USE_CLI: true
   AZURE_FUNCTIONAPP_PACKAGE_PATH: 'functions'
   DOTNET_VERSION: '6.0.x'  
   FUNCTIONS_ARTIFACT_NAME: 'functions'
@@ -100,13 +101,6 @@ jobs:
 
     - name: Terraform Init
       run: | 
-        # Parse Azure secret into Terraform variables
-        $servicePrincipal = ($env:AZURE_CREDENTIALS | ConvertFrom-Json)
-        $env:ARM_CLIENT_ID = $servicePrincipal.clientId
-        $env:ARM_CLIENT_SECRET = $servicePrincipal.clientSecret
-        $env:ARM_SUBSCRIPTION_ID = $servicePrincipal.subscriptionId
-        $env:ARM_TENANT_ID = $servicePrincipal.tenantId
-
         $env:TF_VAR_run_id=$env:GITHUB_RUN_ID
         # We may not be able to create a Service Principal with a Service Principal, reuse Terraform SP for Logic App:
         $env:TF_VAR_workflow_sp_application_id = $servicePrincipal.clientId
