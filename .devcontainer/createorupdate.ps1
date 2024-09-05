@@ -28,7 +28,8 @@ if (!(Get-Command tfenv -ErrorAction SilentlyContinue)) {
     Write-Host 'Installing tfenv...'
     git clone https://github.com/tfutils/tfenv.git ~/.tfenv
     sudo ln -s ~/.tfenv/bin/* /usr/local/bin
-} else {
+}
+else {
     Write-Host 'Upgrading tfenv...'
     git -C ~/.tfenv pull
 }
@@ -46,7 +47,8 @@ Pop-Location
 if (Test-Path ~/bootstrap-os) {
     # This has been run before, upgrade packages
     sudo apt-get upgrade -y
-} else {
+}
+else {
     git clone https://github.com/geekzter/bootstrap-os.git ~/bootstrap-os
 }
 Push-Location ~/bootstrap-os/linux
