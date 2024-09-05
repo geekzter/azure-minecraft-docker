@@ -22,18 +22,15 @@ on:
 
 env:
   AZURE_FUNCTIONAPP_PACKAGE_PATH: "./functions"
-  DOTNET_VERSION: "6.0.x"
 
 jobs:
   dotnet:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup .NET
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v4
       - name: Restore dependencies
         run: |
           pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
