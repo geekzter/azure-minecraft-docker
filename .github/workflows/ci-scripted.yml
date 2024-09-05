@@ -152,7 +152,7 @@ jobs:
         shell: pwsh
 
       - name: Use Azure CLI
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           enable-AzPSSession: false
@@ -162,7 +162,7 @@ jobs:
           az -v
 
       - name: Use Terraform
-        uses: hashicorp/setup-terraform@v1
+        uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{matrix.terraform_version}}
           terraform_wrapper: false
@@ -219,7 +219,7 @@ jobs:
 
       - name: Use Node.js
         if: ${{ matrix.terraform_apply }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
       - name: Install Azure Functions Core Tools
         if: ${{ matrix.terraform_apply }}
         run: npm i -g azure-functions-core-tools@3 --unsafe-perm true
