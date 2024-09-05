@@ -1,4 +1,7 @@
 {
+  "features": {
+    "ghcr.io/devcontainers/features/powershell:1": {}
+  },
   // Install extensions
   "customizations": {
     "vscode": {
