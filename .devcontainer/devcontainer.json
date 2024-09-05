@@ -1,18 +1,13 @@
 {
   "features": {
-    "ghcr.io/devcontainers/features/powershell:1": {}
+    "ghcr.io/devcontainers/features/azure-cli:1": {},
+    "ghcr.io/devcontainers/features/dotnet:1": {},
+    "ghcr.io/devcontainers/features/powershell:1": {},
+    "ghcr.io/devcontainers/features/terraform:1": {}
   },
   // Install extensions
   "customizations": {
     "vscode": {
-      "extensions": [
-        "4ops.terraform",
-        "ms-azuretools.vscode-azurefunctions",
-        "ms-azuretools.vscode-azureterraform",
-        "ms-dotnettools.csharp",
-        "ms-vscode.azurecli",
-        "ms-vscode.PowerShell"
-      ],
       "settings": {
         // "terminal.integrated.cwd": "/home/codespace/workspace,
         "terminal.integrated.shell.linux": "/usr/bin/pwsh"
