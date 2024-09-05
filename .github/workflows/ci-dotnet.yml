@@ -3,50 +3,49 @@ name: ci-dotnet
 on:
   push:
     branches:
-    - '**'
+      - "**"
     paths:
-    - '.github/workflows/ci-function.yml'
-    - 'functions/**'
+      - ".github/workflows/ci-function.yml"
+      - "functions/**"
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
-    - '**/README.md'
-    - '**/LICENSE'
-    - 'visuals/**'
+      - "**/README.md"
+      - "**/LICENSE"
+      - "visuals/**"
 
   schedule:
-  - cron:  '0 2 * * *'
+    - cron: "0 2 * * *"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: './functions'
-  DOTNET_VERSION: '6.0.x'
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: "./functions"
+  DOTNET_VERSION: "6.0.x"
 
 jobs:
   dotnet:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-    - name: Restore dependencies
-      run: |
-        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-        dotnet restore
-        popd
-    - name: Build
-      run: |
-        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-        dotnet build --no-restore --output ./bin/publish
-        popd
-    - name: Test
-      run: |
-        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-        dotnet test --no-build --verbosity normal
-        popd
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Restore dependencies
+        run: |
+          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+          dotnet restore
+          popd
+      - name: Build
+        run: |
+          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+          dotnet build --no-restore --output ./bin/publish
+          popd
+      - name: Test
+        run: |
+          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+          dotnet test --no-build --verbosity normal
+          popd

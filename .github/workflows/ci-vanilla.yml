@@ -1,29 +1,29 @@
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
-    - '**/README.md'
-    - '**/LICENSE'
-    - 'visuals/**'
+      - "**/README.md"
+      - "**/LICENSE"
+      - "visuals/**"
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
-    - '**/README.md'
-    - '**/LICENSE'
-    - 'visuals/**'
+      - "**/README.md"
+      - "**/LICENSE"
+      - "visuals/**"
 
   schedule:
-  - cron:  '0 3 * * Fri,Sun'
+    - cron: "0 3 * * Fri,Sun"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'functions'
-  DOTNET_VERSION: '6.0.x'  
-  FUNCTIONS_ARTIFACT_NAME: 'functions'
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: "functions"
+  DOTNET_VERSION: "6.0.x"
+  FUNCTIONS_ARTIFACT_NAME: "functions"
   TF_IN_AUTOMATION: true
   TF_INPUT: 0
   TF_VAR_location: ${{ secrets.TF_VAR_LOCATION }}
@@ -38,31 +38,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-    - name: Restore dependencies
-      run: |
-        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-        dotnet restore
-        popd
-    - name: Build
-      run: |
-        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-        dotnet build --no-restore --output ./bin/publish
-        popd
-    - name: Test
-      run: |
-        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-        dotnet test --no-build --verbosity normal
-        popd
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ env.FUNCTIONS_ARTIFACT_NAME }}
-        path: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/bin/publish'
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Restore dependencies
+        run: |
+          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+          dotnet restore
+          popd
+      - name: Build
+        run: |
+          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+          dotnet build --no-restore --output ./bin/publish
+          popd
+      - name: Test
+        run: |
+          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+          dotnet test --no-build --verbosity normal
+          popd
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.FUNCTIONS_ARTIFACT_NAME }}
+          path: "${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/bin/publish"
 
   terraform:
     needs: dotnet
@@ -72,159 +72,159 @@ jobs:
         working-directory: terraform
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout source
-      uses: actions/checkout@v2
+      - name: Checkout source
+        uses: actions/checkout@v2
 
-    - name: Download artifacts from previous job
-      uses: actions/download-artifact@v2
-      with:
-        name: ${{ env.FUNCTIONS_ARTIFACT_NAME }}
-        path: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/bin/publish'
-    
-    - name: Use Azure CLI
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Download artifacts from previous job
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ env.FUNCTIONS_ARTIFACT_NAME }}
+          path: "${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/bin/publish"
 
-    - name: Detect desired Terraform version
-      id: terraform-version-check
-      run: | 
-        $terraformVersion = (Get-Content .terraform-version)
-        Write-Output "TERRAFORM_VERSION=${terraformVersion}" >> $env:GITHUB_OUTPUT
-      shell: pwsh
-    - name: Use Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: ${{ steps.terraform-version-check.outputs.TERRAFORM_VERSION }}
-        terraform_wrapper: false
+      - name: Use Azure CLI
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Terraform Init
-      run: | 
-        # Parse Azure secret into Terraform variables
-        $servicePrincipal = ($env:AZURE_CREDENTIALS | ConvertFrom-Json)
-        $env:ARM_CLIENT_ID = $servicePrincipal.clientId
-        $env:ARM_CLIENT_SECRET = $servicePrincipal.clientSecret
-        $env:ARM_SUBSCRIPTION_ID = $servicePrincipal.subscriptionId
-        $env:ARM_TENANT_ID = $servicePrincipal.tenantId
+      - name: Detect desired Terraform version
+        id: terraform-version-check
+        run: |
+          $terraformVersion = (Get-Content .terraform-version)
+          Write-Output "TERRAFORM_VERSION=${terraformVersion}" >> $env:GITHUB_OUTPUT
+        shell: pwsh
+      - name: Use Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: ${{ steps.terraform-version-check.outputs.TERRAFORM_VERSION }}
+          terraform_wrapper: false
 
-        $env:TF_VAR_run_id=$env:GITHUB_RUN_ID
-        # We may not be able to create a Service Principal with a Service Principal, reuse Terraform SP for Logic App:
-        $env:TF_VAR_workflow_sp_application_id = $servicePrincipal.clientId
-        $env:TF_VAR_workflow_sp_application_secret = $servicePrincipal.clientSecret
-        $env:TF_VAR_workflow_sp_object_id = $servicePrincipal.objectId
-        
-        # List environment variables
-        Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
-        # Save environment variable setup for subsequent steps
-        Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
+      - name: Terraform Init
+        run: |
+          # Parse Azure secret into Terraform variables
+          $servicePrincipal = ($env:AZURE_CREDENTIALS | ConvertFrom-Json)
+          $env:ARM_CLIENT_ID = $servicePrincipal.clientId
+          $env:ARM_CLIENT_SECRET = $servicePrincipal.clientSecret
+          $env:ARM_SUBSCRIPTION_ID = $servicePrincipal.subscriptionId
+          $env:ARM_TENANT_ID = $servicePrincipal.tenantId
 
-        Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
-        Get-Location
-        terraform init
-      env:
-        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-      shell: pwsh
+          $env:TF_VAR_run_id=$env:GITHUB_RUN_ID
+          # We may not be able to create a Service Principal with a Service Principal, reuse Terraform SP for Logic App:
+          $env:TF_VAR_workflow_sp_application_id = $servicePrincipal.clientId
+          $env:TF_VAR_workflow_sp_application_secret = $servicePrincipal.clientSecret
+          $env:TF_VAR_workflow_sp_object_id = $servicePrincipal.objectId
 
-    - name: Terraform Plan
-      run: | 
-        Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
-        terraform plan -out='ci.tfplan'
-      shell: pwsh
+          # List environment variables
+          Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,TF_* | Sort-Object -Property Name
+          # Save environment variable setup for subsequent steps
+          Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
 
-    - name: Terraform Apply
-      if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
-      id: terraform-apply
-      run: | 
-        Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
-        terraform apply -auto-approve 'ci.tfplan'
-        $exitCode = $LASTEXITCODE
-        if ($exitCode -ne 0) {
-            throw "'terraform apply' exited with status $exitCode"
-        }        
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
+          Get-Location
+          terraform init
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+        shell: pwsh
 
-        # Export Terraform output as step output
-        $terraformOutput = (terraform output -json | ConvertFrom-Json -AsHashtable)     
-        foreach ($key in $terraformOutput.Keys) {
-          $outputVariableValue = $terraformOutput[$key].value
-          Write-Output "${key}=${outputVariableValue}" >> $env:GITHUB_OUTPUT
-          Write-Output "TF_OUT_${key}=${outputVariableValue}" >> $env:GITHUB_ENV
-        } 
-      shell: pwsh
-        
-    - name: 'Publish Monitor Function'
-      if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
-      uses: azure/functions-action@v1
-      with:
-        app-name: ${{ steps.terraform-apply.outputs.function_name }}
-        package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/bin/publish'
+      - name: Terraform Plan
+        run: |
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
+          terraform plan -out='ci.tfplan'
+        shell: pwsh
 
-    - name: Test connection to Minecraft Server (pwsh)
-      if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
-      run: | 
-        # Wait for Minecraft to boot up
-        $connectionAttempts = 0
-        do {
-          Start-Sleep -Seconds 10
-          Write-Host "Pinging ${env:TF_OUT_minecraft_server_fqdn} on port ${env:TF_OUT_minecraft_server_port}..."
-          try {
-            $connectionAttempts++
-            $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($env:TF_OUT_minecraft_server_fqdn, $env:TF_OUT_minecraft_server_port) -ErrorAction SilentlyContinue
-          } catch [System.Management.Automation.MethodInvocationException] {
-            Write-Warning $_
+      - name: Terraform Apply
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+        id: terraform-apply
+        run: |
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
+          terraform apply -auto-approve 'ci.tfplan'
+          $exitCode = $LASTEXITCODE
+          if ($exitCode -ne 0) {
+              throw "'terraform apply' exited with status $exitCode"
+          }        
+
+          # Export Terraform output as step output
+          $terraformOutput = (terraform output -json | ConvertFrom-Json -AsHashtable)     
+          foreach ($key in $terraformOutput.Keys) {
+            $outputVariableValue = $terraformOutput[$key].value
+            Write-Output "${key}=${outputVariableValue}" >> $env:GITHUB_OUTPUT
+            Write-Output "TF_OUT_${key}=${outputVariableValue}" >> $env:GITHUB_ENV
           }
-        } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
-        
-        # No tty
-        # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "/health.sh" --container-name minecraft
-      env:
-        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-      shell: pwsh
+        shell: pwsh
 
-    # - name: Test connection to Minecraft Server (bash)
-    #   if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
-    #   run: | 
-    #     # Wait for Minecraft to boot up
-    #     while ! echo exit | nc $TF_OUT_minecraft_server_fqdn $TF_OUT_minecraft_server_port; do sleep 10; done
-    #     # No tty
-    #     # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "/health.sh" --container-name minecraft
-    #   shell: bash
+      - name: "Publish Monitor Function"
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+        uses: azure/functions-action@v1
+        with:
+          app-name: ${{ steps.terraform-apply.outputs.function_name }}
+          package: "${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/bin/publish"
 
-    - name: Terraform Destroy
-      if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
-      run: | 
-        Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
-        terraform destroy -auto-approve
-      shell: pwsh
+      - name: Test connection to Minecraft Server (pwsh)
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          # Wait for Minecraft to boot up
+          $connectionAttempts = 0
+          do {
+            Start-Sleep -Seconds 10
+            Write-Host "Pinging ${env:TF_OUT_minecraft_server_fqdn} on port ${env:TF_OUT_minecraft_server_port}..."
+            try {
+              $connectionAttempts++
+              $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($env:TF_OUT_minecraft_server_fqdn, $env:TF_OUT_minecraft_server_port) -ErrorAction SilentlyContinue
+            } catch [System.Management.Automation.MethodInvocationException] {
+              Write-Warning $_
+            }
+          } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: terraform
-        path: 'terraform'
-      
-    - name: Clean Up
-      if: ${{ always() }}
-      run: |
-        $ErrorActionPreference = "Continue"
-        Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
+          # No tty
+          # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "/health.sh" --container-name minecraft
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+        shell: pwsh
 
-        # Remove resource locks first
-        $resourceLocksJSON = $(terraform output -json resource_locks 2>$null)
-        if ($resourceLocksJSON -and ($resourceLocksJSON -match "^\[.*\]$")) {
-          $resourceLocks = ($resourceLocksJSON | ConvertFrom-JSON)
-          az resource lock delete --ids $resourceLocks --verbose
-        }
+      # - name: Test connection to Minecraft Server (bash)
+      #   if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+      #   run: |
+      #     # Wait for Minecraft to boot up
+      #     while ! echo exit | nc $TF_OUT_minecraft_server_fqdn $TF_OUT_minecraft_server_port; do sleep 10; done
+      #     # No tty
+      #     # az container exec --ids ${{ steps.terraform-apply.outputs.container_group_id }} --exec-command "/health.sh" --container-name minecraft
+      #   shell: bash
 
-        # Build JMESPath expression
-        $repository = ($env:GITHUB_REPOSITORY).Split("/")[-1]
-        $tagQuery = "[?tags.repository == '${repository}' && tags.workspace == '${env:TF_WORKSPACE}' && tags.runid == '${env:GITHUB_RUN_ID}' && properties.provisioningState != 'Deleting'].id"
+      - name: Terraform Destroy
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
+          terraform destroy -auto-approve
+        shell: pwsh
 
-        Write-Host "Removing resource group identified by `"$tagQuery`"..."
-        $resourceGroupIDs = $(az group list --query "$tagQuery" -o tsv)
-        if ($resourceGroupIDs) {
-          Write-Host "az resource delete --ids ${resourceGroupIDs}..."
-          az resource delete --ids $resourceGroupIDs --verbose
-        } else {
-          Write-Host "Nothing to remove"
-        }
-      shell: pwsh
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: terraform
+          path: "terraform"
+
+      - name: Clean Up
+        if: ${{ always() }}
+        run: |
+          $ErrorActionPreference = "Continue"
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
+
+          # Remove resource locks first
+          $resourceLocksJSON = $(terraform output -json resource_locks 2>$null)
+          if ($resourceLocksJSON -and ($resourceLocksJSON -match "^\[.*\]$")) {
+            $resourceLocks = ($resourceLocksJSON | ConvertFrom-JSON)
+            az resource lock delete --ids $resourceLocks --verbose
+          }
+
+          # Build JMESPath expression
+          $repository = ($env:GITHUB_REPOSITORY).Split("/")[-1]
+          $tagQuery = "[?tags.repository == '${repository}' && tags.workspace == '${env:TF_WORKSPACE}' && tags.runid == '${env:GITHUB_RUN_ID}' && properties.provisioningState != 'Deleting'].id"
+
+          Write-Host "Removing resource group identified by `"$tagQuery`"..."
+          $resourceGroupIDs = $(az group list --query "$tagQuery" -o tsv)
+          if ($resourceGroupIDs) {
+            Write-Host "az resource delete --ids ${resourceGroupIDs}..."
+            az resource delete --ids $resourceGroupIDs --verbose
+          } else {
+            Write-Host "Nothing to remove"
+          }
+        shell: pwsh

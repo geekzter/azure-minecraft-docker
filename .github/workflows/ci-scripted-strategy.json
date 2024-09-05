@@ -1,11 +1,6 @@
 {
-  "os": [
-    "ubuntu-latest"
-  ],
-  "compatible": [
-    "backward",
-    "forward"
-  ],
+  "os": ["ubuntu-latest"],
+  "compatible": ["backward", "forward"],
   "include": [
     {
       "compatible": "backward",

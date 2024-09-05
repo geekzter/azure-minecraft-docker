@@ -1,11 +1,6 @@
 {
-  "os": [
-    "ubuntu-latest"
-  ],
-  "use_latest_versions": [
-    false,
-    true
-  ],
+  "os": ["ubuntu-latest"],
+  "use_latest_versions": [false, true],
   "include": [
     {
       "use_latest_versions": false,

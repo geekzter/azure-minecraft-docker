@@ -1,47 +1,47 @@
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
-    - '**/README.md'
-    - '**/LICENSE'
-    - 'visuals/**'
+      - "**/README.md"
+      - "**/LICENSE"
+      - "visuals/**"
 
   schedule:
-  - cron:  '0 2 * * Thu,Sat'
+    - cron: "0 2 * * Thu,Sat"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
     inputs:
       upgrade_provider_versions:
-        description: 'Upgrade Terraform provider versions'
+        description: "Upgrade Terraform provider versions"
         required: false
         type: boolean
         default: false
       upgrade_terraform_version:
-        description: 'Upgrade Terraform version'
+        description: "Upgrade Terraform version"
         required: false
         type: boolean
         default: false
       upgrade_azure_cli:
-        description: 'Upgrade Azure CLI to latest version'
+        description: "Upgrade Azure CLI to latest version"
         required: false
         type: boolean
         default: false
       destroy:
-        description: 'Destroy Infrastucture'
+        description: "Destroy Infrastucture"
         required: false
         type: boolean
         default: true
       workspace:
         type: choice
         required: true
-        description: 'Terraform Workspace'
+        description: "Terraform Workspace"
         default: ci
-        options: 
-        - ci
-        - ci1
-        - ci2
-        - ci3
+        options:
+          - ci
+          - ci1
+          - ci2
+          - ci3
 env:
   ARM_SAS_TOKEN: ${{ secrets.ARM_SAS_TOKEN }}
   TF_IN_AUTOMATION: true
@@ -63,38 +63,38 @@ jobs:
         working-directory: scripts
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout source
-      uses: actions/checkout@v2
+      - name: Checkout source
+        uses: actions/checkout@v2
 
-    - name: Print environment variables
-      run: | 
-        Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,INPUT_*,TF_* | Sort-Object -Property Name
-      shell: pwsh
+      - name: Print environment variables
+        run: |
+          Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,INPUT_*,TF_* | Sort-Object -Property Name
+        shell: pwsh
 
-    - name: Create matrix
-      id: create-matrix
-      run: |
-        ConvertTo-SecureString -AsPlainText -String '${{ secrets.GITHUB_TOKEN }}' | Set-Variable gitHubToken
-        ./create_workflow_strategy.ps1 -GitHubToken $gitHubToken `
-                                       -DestroyInput "${{ github.event.inputs.destroy }}" `
-                                       -UseLatestAzureCLIVersionInput "${{ github.event.inputs.upgrade_azure_cli }}" `
-                                       -UseLatestTerraformProviderVersionsInput "${{ github.event.inputs.upgrade_provider_versions }}" `
-                                       -UseLatestTerraformVersionInput "${{ github.event.inputs.upgrade_terraform_version }}" 
-                                       
-      shell: pwsh
+      - name: Create matrix
+        id: create-matrix
+        run: |
+          ConvertTo-SecureString -AsPlainText -String '${{ secrets.GITHUB_TOKEN }}' | Set-Variable gitHubToken
+          ./create_workflow_strategy.ps1 -GitHubToken $gitHubToken `
+                                         -DestroyInput "${{ github.event.inputs.destroy }}" `
+                                         -UseLatestAzureCLIVersionInput "${{ github.event.inputs.upgrade_azure_cli }}" `
+                                         -UseLatestTerraformProviderVersionsInput "${{ github.event.inputs.upgrade_provider_versions }}" `
+                                         -UseLatestTerraformVersionInput "${{ github.event.inputs.upgrade_terraform_version }}"
 
-    - name: Install json2yaml
-      run: |
-        sudo npm install -g json2yaml
+        shell: pwsh
 
-    - name: Display matrix
-      run: |
-        $matrixJSON = '${{ steps.create-matrix.outputs.matrix }}'
-        $matrixJSON
-        $matrixJSON | jq
-        $matrixJSON | ConvertFrom-Json
-        $matrixJSON | json2yaml
-      shell: pwsh
+      - name: Install json2yaml
+        run: |
+          sudo npm install -g json2yaml
+
+      - name: Display matrix
+        run: |
+          $matrixJSON = '${{ steps.create-matrix.outputs.matrix }}'
+          $matrixJSON
+          $matrixJSON | jq
+          $matrixJSON | ConvertFrom-Json
+          $matrixJSON | json2yaml
+        shell: pwsh
 
     outputs:
       matrix: ${{ steps.create-matrix.outputs.matrix }}
@@ -115,188 +115,187 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - name: Checkout source
-      uses: actions/checkout@v2
+      - name: Checkout source
+        uses: actions/checkout@v2
 
-    - name: Dump strategy context
-      env:
-        MATRIX_CONTEXT: ${{ toJSON(matrix) }}
-        STRATEGY_CONTEXT: ${{ toJSON(strategy) }}
-      run: |
-        Write-Host "Strategy context:"
-        $env:STRATEGY_CONTEXT | ConvertFrom-Json | Format-List
-        Write-Host "Matrix context:"
-        $env:MATRIX_CONTEXT   | ConvertFrom-Json | Format-List
-      shell: pwsh
+      - name: Dump strategy context
+        env:
+          MATRIX_CONTEXT: ${{ toJSON(matrix) }}
+          STRATEGY_CONTEXT: ${{ toJSON(strategy) }}
+        run: |
+          Write-Host "Strategy context:"
+          $env:STRATEGY_CONTEXT | ConvertFrom-Json | Format-List
+          Write-Host "Matrix context:"
+          $env:MATRIX_CONTEXT   | ConvertFrom-Json | Format-List
+        shell: pwsh
 
-    - name: Upgrade Azure CLI
-      id: az-upgrade
-      if: ${{ matrix.upgrade_azure_cli }}
-      run: |
-        # sudo az upgrade -y # not reliable
+      - name: Upgrade Azure CLI
+        id: az-upgrade
+        if: ${{ matrix.upgrade_azure_cli }}
+        run: |
+          # sudo az upgrade -y # not reliable
 
-        curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
-        echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
-        sudo apt-get update
+          curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
+          echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
+          sudo apt-get update
 
-        $packageName = ($(apt-cache show azure-cli | Select-String 'Version: ${{ matrix.azure_cli_version }}.*$') -split ' ' | Select-Object -Last 1)
-        Write-Host "`nAzure CLI package: $packageName"
-        if ($packageName) {
-          sudo apt-get install --allow-downgrades azure-cli=$packageName
-        } else {
-          Write-Host "Azure CLI version ${{ matrix.azure_cli_version }} not found"
-        }
-
-        az -v
-      continue-on-error: true
-      shell: pwsh
-      
-    - name: Use Azure CLI
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-        enable-AzPSSession: false
-
-    - name: Show Azure CLI version
-      run: |
-        az -v
-      
-    - name: Use Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: ${{matrix.terraform_version}}
-        terraform_wrapper: false
-
-    - name: Show Terraform version
-      run: |
-        terraform -v
-      
-    - name: Unpin Terraform provider versions
-      id: terraform-version-check
-      if: ${{ !matrix.pin_provider_versions }}
-      run: | 
-        Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
-        (Get-Content ./provider.tf) -replace " = `" *= +",' = "~> ' | Out-File provider.tf
-        Get-Content ./provider.tf
-        if (Test-Path .terraform.lock.hcl) {
-          Remove-Item .terraform.lock.hcl -Force
-        }
-      shell: pwsh
-
-    - name: Prepare environment variables
-      env:
-        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-        ENVIRONMENT_VARIABLES: ${{ secrets.ENVIRONMENT_VARIABLES }}
-      run: | 
-        # Parse Azure secret into Terraform variables
-        $servicePrincipal = ($env:AZURE_CREDENTIALS | ConvertFrom-Json)
-        $env:ARM_CLIENT_ID = $servicePrincipal.clientId
-        $env:ARM_CLIENT_SECRET = $servicePrincipal.clientSecret
-        $env:ARM_SUBSCRIPTION_ID = $servicePrincipal.subscriptionId
-        $env:ARM_TENANT_ID = $servicePrincipal.tenantId
-
-        $env:TF_VAR_run_id=$env:GITHUB_RUN_ID
-        # We may not be able to create a Service Principal with a Service Principal, reuse Terraform SP for Logic App:
-        $env:TF_VAR_workflow_sp_application_id = $servicePrincipal.clientId
-        $env:TF_VAR_workflow_sp_application_secret = $servicePrincipal.clientSecret
-        $env:TF_VAR_workflow_sp_object_id = $servicePrincipal.objectId
-        
-        # Save environment variable setup for subsequent steps
-        Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
-      shell: pwsh
-
-    - name: Show environment variables
-      run: | 
-        Write-Host "Environment (sorted):"
-        Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,INPUT_*,TF_* | Sort-Object -Property Name
-        Write-Host "Environment (unsorted):"
-        Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,INPUT_*,TF_*
-      shell: pwsh
-
-    - name: Terraform Init & Plan
-      run: ./deploy.ps1 -Init -Plan
-      shell: pwsh
-        
-    - name: Use Node.js
-      if: ${{ matrix.terraform_apply }}
-      uses: actions/setup-node@v1
-    - name: Install Azure Functions Core Tools
-      if: ${{ matrix.terraform_apply }}
-      run: 
-        npm i -g azure-functions-core-tools@3 --unsafe-perm true
-        
-    - name: Terraform Apply
-      id: terraform-apply
-      if: ${{ matrix.terraform_apply }}
-      run: ./deploy.ps1 -Apply -Force -NoCode
-      shell: pwsh
-
-    - name: Deploy Azure Function
-      if: ${{ matrix.terraform_apply }}
-      run: ./deploy_functions.ps1
-      shell: pwsh
-
-    - name: Test connection to Minecraft Server
-      if: ${{ matrix.terraform_apply }}
-      run: | 
-        Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
-        $minecraftConfig  = (terraform output -json minecraft_java | ConvertFrom-Json -AsHashtable)
-        foreach ($minecraftConfigName in $minecraftConfig.Keys) {
-          Write-Host "Processing configuration '{$minecraftConfigName}''..."
-          $containerGroupID = $minecraftConfig[$minecraftConfigName].container_group_id
-          $serverFQDN       = $minecraftConfig[$minecraftConfigName].minecraft_server_fqdn
-          $serverPort       = $minecraftConfig[$minecraftConfigName].minecraft_server_port
-
-          # Wait for Minecraft socket to open
-          $connectionAttempts = 0
-          do {
-            Start-Sleep -Seconds 10
-            Write-Host "Pinging ${serverFQDN} on port ${serverPort}..."
-            try {
-              $connectionAttempts++
-              $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($serverFQDN, $serverPort) -ErrorAction SilentlyContinue
-            } catch [System.Management.Automation.MethodInvocationException] {
-              Write-Warning $_
-            }
-          } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
-          if ($mineCraftConnection.Connected) {
-              Write-Host "Connected to ${serverFQDN}:${serverPort}"
-              $mineCraftConnection.Close()
+          $packageName = ($(apt-cache show azure-cli | Select-String 'Version: ${{ matrix.azure_cli_version }}.*$') -split ' ' | Select-Object -Last 1)
+          Write-Host "`nAzure CLI package: $packageName"
+          if ($packageName) {
+            sudo apt-get install --allow-downgrades azure-cli=$packageName
           } else {
-              Write-Warning "Could not connect to ${serverFQDN}:${serverPort}!"
+            Write-Host "Azure CLI version ${{ matrix.azure_cli_version }} not found"
           }
-          
-          # BUG: https://github.com/Azure/azure-cli/issues/13352
-          #      No tty / ioctl device
-          # az container exec --ids $containerGroupID --exec-command "/health.sh" --container-name minecraft
-          script --return --quiet -c "az container exec --ids $containerGroupID --exec-command '/health.sh' --container-name minecraft" /dev/null
 
-          az container show --ids $containerGroupID --query instanceView
-          az container logs --ids $containerGroupID
-        }
-      shell: pwsh
+          az -v
+        continue-on-error: true
+        shell: pwsh
 
-    - name: Remove backup items & resource locks
-      if: ${{ matrix.destroy }}
-      run: | 
-        . (Join-Path $env:GITHUB_WORKSPACE scripts functions.ps1)
-        TearDown-Resources -Backups -Locks
-      shell: pwsh
+      - name: Use Azure CLI
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          enable-AzPSSession: false
 
-    - name: Terraform Destroy
-      if: ${{ matrix.destroy }}
-      run: ./deploy.ps1 -Destroy -Force
-      shell: pwsh
-      continue-on-error: ${{ matrix.ignore_destroy_failure }}
+      - name: Show Azure CLI version
+        run: |
+          az -v
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v2
-      if: ${{ matrix.terraform_apply }}
-      with:
-        name: terraform
-        path: 'terraform'
-      
-    - name: Teardown
-      if: ${{ matrix.destroy || failure() }}
-      run: ./deploy.ps1 -Init -Teardown
-      shell: pwsh
+      - name: Use Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: ${{matrix.terraform_version}}
+          terraform_wrapper: false
+
+      - name: Show Terraform version
+        run: |
+          terraform -v
+
+      - name: Unpin Terraform provider versions
+        id: terraform-version-check
+        if: ${{ !matrix.pin_provider_versions }}
+        run: |
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
+          (Get-Content ./provider.tf) -replace " = `" *= +",' = "~> ' | Out-File provider.tf
+          Get-Content ./provider.tf
+          if (Test-Path .terraform.lock.hcl) {
+            Remove-Item .terraform.lock.hcl -Force
+          }
+        shell: pwsh
+
+      - name: Prepare environment variables
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+          ENVIRONMENT_VARIABLES: ${{ secrets.ENVIRONMENT_VARIABLES }}
+        run: |
+          # Parse Azure secret into Terraform variables
+          $servicePrincipal = ($env:AZURE_CREDENTIALS | ConvertFrom-Json)
+          $env:ARM_CLIENT_ID = $servicePrincipal.clientId
+          $env:ARM_CLIENT_SECRET = $servicePrincipal.clientSecret
+          $env:ARM_SUBSCRIPTION_ID = $servicePrincipal.subscriptionId
+          $env:ARM_TENANT_ID = $servicePrincipal.tenantId
+
+          $env:TF_VAR_run_id=$env:GITHUB_RUN_ID
+          # We may not be able to create a Service Principal with a Service Principal, reuse Terraform SP for Logic App:
+          $env:TF_VAR_workflow_sp_application_id = $servicePrincipal.clientId
+          $env:TF_VAR_workflow_sp_application_secret = $servicePrincipal.clientSecret
+          $env:TF_VAR_workflow_sp_object_id = $servicePrincipal.objectId
+
+          # Save environment variable setup for subsequent steps
+          Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
+        shell: pwsh
+
+      - name: Show environment variables
+        run: |
+          Write-Host "Environment (sorted):"
+          Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,INPUT_*,TF_* | Sort-Object -Property Name
+          Write-Host "Environment (unsorted):"
+          Get-ChildItem -Path Env: -Recurse -Include ARM_*,AZURE_*,GITHUB_*,INPUT_*,TF_*
+        shell: pwsh
+
+      - name: Terraform Init & Plan
+        run: ./deploy.ps1 -Init -Plan
+        shell: pwsh
+
+      - name: Use Node.js
+        if: ${{ matrix.terraform_apply }}
+        uses: actions/setup-node@v1
+      - name: Install Azure Functions Core Tools
+        if: ${{ matrix.terraform_apply }}
+        run: npm i -g azure-functions-core-tools@3 --unsafe-perm true
+
+      - name: Terraform Apply
+        id: terraform-apply
+        if: ${{ matrix.terraform_apply }}
+        run: ./deploy.ps1 -Apply -Force -NoCode
+        shell: pwsh
+
+      - name: Deploy Azure Function
+        if: ${{ matrix.terraform_apply }}
+        run: ./deploy_functions.ps1
+        shell: pwsh
+
+      - name: Test connection to Minecraft Server
+        if: ${{ matrix.terraform_apply }}
+        run: |
+          Set-Location (Join-Path $env:GITHUB_WORKSPACE terraform) # Task does not support 'working-directory' property
+          $minecraftConfig  = (terraform output -json minecraft_java | ConvertFrom-Json -AsHashtable)
+          foreach ($minecraftConfigName in $minecraftConfig.Keys) {
+            Write-Host "Processing configuration '{$minecraftConfigName}''..."
+            $containerGroupID = $minecraftConfig[$minecraftConfigName].container_group_id
+            $serverFQDN       = $minecraftConfig[$minecraftConfigName].minecraft_server_fqdn
+            $serverPort       = $minecraftConfig[$minecraftConfigName].minecraft_server_port
+
+            # Wait for Minecraft socket to open
+            $connectionAttempts = 0
+            do {
+              Start-Sleep -Seconds 10
+              Write-Host "Pinging ${serverFQDN} on port ${serverPort}..."
+              try {
+                $connectionAttempts++
+                $mineCraftConnection = New-Object System.Net.Sockets.TcpClient($serverFQDN, $serverPort) -ErrorAction SilentlyContinue
+              } catch [System.Management.Automation.MethodInvocationException] {
+                Write-Warning $_
+              }
+            } while ((!$mineCraftConnection || !$mineCraftConnection.Connected) -and ($connectionAttempts -le 10))
+            if ($mineCraftConnection.Connected) {
+                Write-Host "Connected to ${serverFQDN}:${serverPort}"
+                $mineCraftConnection.Close()
+            } else {
+                Write-Warning "Could not connect to ${serverFQDN}:${serverPort}!"
+            }
+            
+            # BUG: https://github.com/Azure/azure-cli/issues/13352
+            #      No tty / ioctl device
+            # az container exec --ids $containerGroupID --exec-command "/health.sh" --container-name minecraft
+            script --return --quiet -c "az container exec --ids $containerGroupID --exec-command '/health.sh' --container-name minecraft" /dev/null
+
+            az container show --ids $containerGroupID --query instanceView
+            az container logs --ids $containerGroupID
+          }
+        shell: pwsh
+
+      - name: Remove backup items & resource locks
+        if: ${{ matrix.destroy }}
+        run: |
+          . (Join-Path $env:GITHUB_WORKSPACE scripts functions.ps1)
+          TearDown-Resources -Backups -Locks
+        shell: pwsh
+
+      - name: Terraform Destroy
+        if: ${{ matrix.destroy }}
+        run: ./deploy.ps1 -Destroy -Force
+        shell: pwsh
+        continue-on-error: ${{ matrix.ignore_destroy_failure }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        if: ${{ matrix.terraform_apply }}
+        with:
+          name: terraform
+          path: "terraform"
+
+      - name: Teardown
+        if: ${{ matrix.destroy || failure() }}
+        run: ./deploy.ps1 -Init -Teardown
+        shell: pwsh
