@@ -59,7 +59,7 @@ jobs:
         dotnet test --no-build --verbosity normal
         popd
     - name: Upload artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.FUNCTIONS_ARTIFACT_NAME }}
         path: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/bin/publish'
@@ -76,7 +76,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Download artifacts from previous job
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
         name: ${{ env.FUNCTIONS_ARTIFACT_NAME }}
         path: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/bin/publish'
