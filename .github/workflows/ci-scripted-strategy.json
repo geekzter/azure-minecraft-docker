@@ -8,6 +8,7 @@
   ],
   "include": [
     {
+      "name": "a",
       "compatible": "backward",
       "azure_cli_version": "latest",
       "destroy": true,
@@ -18,6 +19,7 @@
       "upgrade_azure_cli": false
     },
     {
+      "name": "b",
       "compatible": "forward",
       "azure_cli_version": "latest",
       "destroy": true,
