@@ -93,7 +93,7 @@ jobs:
         Write-Output "TERRAFORM_VERSION=${terraformVersion}" >> $env:GITHUB_OUTPUT
       shell: pwsh
     - name: Use Terraform
-      uses: hashicorp/setup-terraform@v3
+      uses: hashicorp/setup-terraform@v2
       with:
         terraform_version: ${{ steps.terraform-version-check.outputs.TERRAFORM_VERSION }}
         terraform_wrapper: false
