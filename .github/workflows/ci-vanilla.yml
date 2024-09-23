@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
@@ -73,7 +73,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout source
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Download artifacts from previous job
       uses: actions/download-artifact@v4
@@ -82,7 +82,7 @@ jobs:
         path: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/bin/publish'
     
     - name: Use Azure CLI
-      uses: azure/login@v1
+      uses: azure/login@v2
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
@@ -93,7 +93,7 @@ jobs:
         Write-Output "TERRAFORM_VERSION=${terraformVersion}" >> $env:GITHUB_OUTPUT
       shell: pwsh
     - name: Use Terraform
-      uses: hashicorp/setup-terraform@v1
+      uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: ${{ steps.terraform-version-check.outputs.TERRAFORM_VERSION }}
         terraform_wrapper: false
