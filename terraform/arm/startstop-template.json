@@ -1,59 +1,58 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-    },
-    "variables": {},
-    "resources": [
-        {
-            "type": "Microsoft.Logic/workflows",
-            "apiVersion": "2017-07-01",
-            "name": "${workflow_name}",
-            "location": "${location}",
-            "properties": {
-                "state": "Enabled",
-                "definition": {
-                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-                    "contentVersion": "1.0.0.0",
-                    "parameters": {
-                        "$connections": {
-                            "defaultValue": {},
-                            "type": "Object"
-                        }
-                    },
-                    "triggers": {},
-                    "actions": {
-                        "${operation}_minecraft": {
-                            "runAfter": {},
-                            "type": "ApiConnection",
-                            "inputs": {
-                                "host": {
-                                    "connection": {
-                                        "name": "@parameters('$connections')['${connection_name_json}']['connectionId']"
-                                    }
-                                },
-                                "method": "post",
-                                "path": "${container_group_id}/${operation}",
-                                "queries": {
-                                    "x-ms-api-version": "2019-12-01"
-                                }
-                            }
-                        }
-                    },
-                    "outputs": {}
-                },
-                "parameters": {
-                    "$connections": {
-                        "value": {
-                            "${connection_name_json}": {
-                                "connectionId": "${connection_id}",
-                                "connectionName": "${connection_name}",
-                                "id": "${api_id}"
-                            }
-                        }
-                    }
-                }
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2017-07-01",
+      "name": "${workflow_name}",
+      "location": "${location}",
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
             }
+          },
+          "triggers": {},
+          "actions": {
+            "${operation}_minecraft": {
+              "runAfter": {},
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['${connection_name_json}']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "path": "${container_group_id}/${operation}",
+                "queries": {
+                  "x-ms-api-version": "2019-12-01"
+                }
+              }
+            }
+          },
+          "outputs": {}
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "${connection_name_json}": {
+                "connectionId": "${connection_id}",
+                "connectionName": "${connection_name}",
+                "id": "${api_id}"
+              }
+            }
+          }
         }
-    ]
+      }
+    }
+  ]
 }
