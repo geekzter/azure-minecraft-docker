@@ -1,20 +1,20 @@
 {
-  // Install extensions
-  "extensions": [
-    "4ops.terraform",
-    "ms-azuretools.vscode-azurefunctions",
-    "ms-azuretools.vscode-azureterraform",
-    "ms-dotnettools.csharp",
-    "ms-vscode.azurecli",
-    "ms-vscode.PowerShell"
-  ],
-
-  // VSCode settings
-  "settings": {
-    // "terminal.integrated.cwd": "/home/codespace/workspace,
-    "terminal.integrated.shell.linux": "/usr/bin/pwsh"
+  "features": {
+    "ghcr.io/devcontainers/features/azure-cli:1": {},
+    "ghcr.io/jlaundry/devcontainer-features/azure-functions-core-tools:1": {},
+    "ghcr.io/devcontainers/features/dotnet:2": {},
+    "ghcr.io/devcontainers/features/powershell:1": {},
+    "ghcr.io/devcontainers/features/terraform:1": {}
   },
-
+  // Install extensions
+  "customizations": {
+    "vscode": {
+      "settings": {
+        // "terminal.integrated.cwd": "/home/codespace/workspace,
+        "terminal.integrated.shell.linux": "/usr/bin/pwsh"
+      }
+    }
+  },
   // Run bash script in .devcontainer directory
   "postCreateCommand": "/usr/bin/pwsh -nop -f ./.devcontainer/createorupdate.ps1 > ~/post-create.log"
 }

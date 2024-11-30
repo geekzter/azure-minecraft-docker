@@ -3,13 +3,13 @@
 # https://www.spigotmc.org/resources/console-spam-fix.18410
 
 Messages-To-Hide-Filter:
-# Chat messages from users
-- '<'
-- '>'
+  # Chat messages from users
+  - "<"
+  - ">"
 
 #Chat messages with color and format codes support.
-#Minecraft Color and Format Codes: http://minecraft.gamepedia.com/Formatting_codes    
+#Minecraft Color and Format Codes: http://minecraft.gamepedia.com/Formatting_codes
 ChatMessages:
-    NoPermission: '&4[System] &cYou don''t have permission!'
-    CmdHelp: '&4[System] &cAvailable commands:&6 /csf reload'
-    CmdReload: '&2[System] &aConfig reload complete!'
+  NoPermission: "&4[System] &cYou don't have permission!"
+  CmdHelp: "&4[System] &cAvailable commands:&6 /csf reload"
+  CmdReload: "&2[System] &aConfig reload complete!"
