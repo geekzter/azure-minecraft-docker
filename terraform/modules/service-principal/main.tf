@@ -15,7 +15,7 @@ resource azuread_application app {
 }
 
 resource azuread_service_principal spn {
-  application_id               = azuread_application.app.application_id
+  application_id               = azuread_application.app.client_id
   owners                       = [data.azuread_client_config.current.object_id]
 }
 
