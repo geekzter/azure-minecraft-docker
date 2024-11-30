@@ -49,7 +49,7 @@ module minecraft {
 
   resource_group_id            = azurerm_resource_group.minecraft.id
   resource_group_name          = azurerm_resource_group.minecraft.name
-  storage_account_name         = azurerm_storage_account.minecraft.name
+  storage_account_id           = azurerm_storage_account.minecraft.id
   storage_account_key          = azurerm_storage_account.minecraft.primary_access_key
   tags                         = merge(
     azurerm_resource_group.minecraft.tags,
