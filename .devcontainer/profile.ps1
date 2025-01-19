@@ -8,7 +8,7 @@ $scriptDirectory = (Join-Path $repoDirectory "scripts")
 [System.Collections.ArrayList]$pathList = $env:PATH.Split(":")
 # Insert script path into PATH, so scripts can be called from anywhere
 if (!$pathList.Contains($scriptDirectory)) {
-    $pathList.Insert(1,$scriptDirectory)
+    $pathList.Insert(1, $scriptDirectory)
 }
 $env:PATH = $pathList -Join ":"
 
