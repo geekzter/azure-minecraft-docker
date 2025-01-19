@@ -23,6 +23,7 @@ locals {
   # https://github.com/itzg/docker-minecraft-server
   container_image              = var.container_image_tag != null && var.container_image_tag != "" ? "${var.container_image}:${var.container_image_tag}" : var.container_image
   minecraft_server_fqdn        = var.vanity_dns_zone_id != "" ? replace(try(azurerm_dns_cname_record.vanity_hostname.0.fqdn,""),"/\\W*$/","") : azurerm_container_group.minecraft_server.fqdn
+  storage_account_name         = split("/",var.storage_account_id)[8]
 
   tags                         = merge(
     var.tags,
@@ -71,7 +72,7 @@ resource azurerm_container_group minecraft_server {
       name                     = "azurefile"
       read_only                = false
       share_name               = azurerm_storage_share.minecraft_share.name
-      storage_account_name     = var.storage_account_name
+      storage_account_name     = local.storage_account_name
       storage_account_key      = var.storage_account_key
     }
     volume {
@@ -79,7 +80,7 @@ resource azurerm_container_group minecraft_server {
       name                     = "modpacks"
       read_only                = false
       share_name               = azurerm_storage_share.minecraft_modpacks.name
-      storage_account_name     = var.storage_account_name
+      storage_account_name     = local.storage_account_name
       storage_account_key      = var.storage_account_key
     }
   }

@@ -109,6 +109,7 @@ output storage_key {
   value       = azurerm_storage_account.minecraft.primary_access_key
 }
 output workflow_sp_application_id {
+  sensitive   = true
   value       = local.workflow_sp_application_id
 }
 output workflow_sp_application_secret {

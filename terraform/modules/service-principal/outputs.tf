@@ -1,5 +1,5 @@
 output application_id {
-  value       = azuread_application.app.application_id
+  value       = azuread_application.app.client_id
 }
 output object_id {
   value       = azuread_service_principal.spn.object_id

@@ -21,7 +21,7 @@ resource azurerm_storage_account minecraft {
 
 resource azurerm_storage_container configuration {
   name                         = "configuration"
-  storage_account_name         = azurerm_storage_account.minecraft.name
+  storage_account_id           = azurerm_storage_account.minecraft.id
   container_access_type        = "private"
 }
 
