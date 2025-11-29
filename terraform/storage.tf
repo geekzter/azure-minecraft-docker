@@ -85,7 +85,7 @@ resource azurerm_recovery_services_vault backup {
   location                     = azurerm_resource_group.minecraft.location
   sku                          = "Standard"
   immutability                 = "Unlocked"
-  soft_delete_enabled          = true
+  soft_delete_enabled          = false
 
   tags                         = local.tags
 
