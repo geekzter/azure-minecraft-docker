@@ -54,7 +54,7 @@ resource azurerm_monitor_diagnostic_setting function_logs {
   enabled_log {
     category                   = "FunctionAppLogs"
   }
-  metric {
+  enabled_metric {
     category                   = "AllMetrics"
   }
 }

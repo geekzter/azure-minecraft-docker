@@ -282,6 +282,7 @@ jobs:
         . (Join-Path $env:GITHUB_WORKSPACE scripts functions.ps1)
         TearDown-Resources -Backups -Locks
       shell: pwsh
+      continue-on-error: ${{ matrix.ignore_destroy_failure }}
 
     - name: Terraform Destroy
       if: ${{ matrix.destroy }}

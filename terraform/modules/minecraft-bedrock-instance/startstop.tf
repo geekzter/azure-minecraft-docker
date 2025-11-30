@@ -41,7 +41,7 @@ resource azurerm_monitor_diagnostic_setting start_workflow {
   enabled_log {
     category                   = "WorkflowRuntime"
   }
-  metric {
+  enabled_metric {
     category                   = "AllMetrics"
   }
   count                        = var.enable_auto_startstop && var.start_time != null && var.start_time != "" ? 1 : 0
@@ -123,7 +123,7 @@ resource azurerm_monitor_diagnostic_setting stop_workflow {
   enabled_log {
     category                   = "WorkflowRuntime"
   }
-  metric {
+  enabled_metric {
     category                   = "AllMetrics"
   }
 
